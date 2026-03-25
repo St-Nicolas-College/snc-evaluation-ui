@@ -7,9 +7,12 @@
         </template>
         <template #title>
           <div class="flex flex-col">
-            <span class="font-semibold uppercase text-green-400 text-lg">St. Nicolas College</span>
             <span class="text-sm text-gray-500 uppercase">Evaluation System</span>
           </div>
+        </template>
+        <template #right>
+          <UColorModeSwitch />
+
         </template>
       </UDashboardNavbar>
     </template>

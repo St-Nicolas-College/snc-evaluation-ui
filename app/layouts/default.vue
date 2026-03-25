@@ -5,15 +5,22 @@
       footer: 'border-t border-default'
     }">
 
-      <template #header>
-
+      <template #header="{ collapsed }">
+        <div class="flex items-center gap-3">
+          <!-- <img src="/SNC-Logo.png" alt="Logo" class="w-10 h-10 rounded-lg"> -->
+          <UAvatar src="/logo.png" class="rounded-lg" />
+          <div v-if="!collapsed" class="flex flex-col leading-tight">
+            <span class="font-semibold uppercase text-sm">St. Nicolas College</span>
+            <span class="text-xs text-gray-500">of Business and Technology</span>
+          </div>
+        </div>
       </template>
       <template #default="{ collapsed }">
         <UNavigationMenu :collapsed="collapsed" :items="items[0]" orientation="vertical" />
         <!-- <UNavigationMenu :collapsed="collapsed" :items="items[1]" orientation="vertical" class="mt-auto" /> -->
       </template>
 
-      <template #footer="{ collapsed }">
+      <template #footer>
         <!-- <UserMenu :collapsed="collapsed" class="w-full" /> -->
       </template>
     </UDashboardSidebar>
