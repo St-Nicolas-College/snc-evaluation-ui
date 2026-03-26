@@ -7,7 +7,7 @@
           <UDashboardSidebarCollapse />
         </template>
         <template #title>
-          <span>Faculty Evaluation</span>
+          <span class="text-sm text-gray-500 uppercase">Faculty Evaluation</span>
         </template>
       </UDashboardNavbar>
     </template>
@@ -19,7 +19,11 @@
 </template>
 
 <script lang="ts" setup>
-
+//@ts-nocheck
+definePageMeta({
+  middleware: ['auth', 'role'],
+  role: ['Admin', 'Faculty']
+})
 </script>
 
 <style>

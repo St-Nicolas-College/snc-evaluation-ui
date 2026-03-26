@@ -1,12 +1,12 @@
 <template>
- <UDashboardPanel>
+  <UDashboardPanel>
     <template #header>
       <UDashboardNavbar>
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
         <template #title>
-          <span class="text-sm text-gray-500 uppercase">Student Evaluation</span>
+          <span>Settings</span>
         </template>
       </UDashboardNavbar>
     </template>
@@ -20,7 +20,7 @@
 //@ts-nocheck
 definePageMeta({
   middleware: ['auth', 'role'],
-  role: ['Admin', 'Student']
+  role: ['Admin']
 })
 </script>
 

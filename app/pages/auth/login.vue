@@ -86,8 +86,9 @@ import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 definePageMeta({
   layout: "auth",
+  middleware: 'guest'
 });
-
+const { login } = useAuth();
 const toast = useToast();
 const loading = ref(false);
 const email = ref("admin@gmail.com");
@@ -111,10 +112,7 @@ const schema = z.object({
 const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
   loading.value = true;
   try {
-    if (
-      email.value === payload.data.email &&
-      password.value === payload.data.password
-    ) {
+      await login(payload.data.email, payload.data.password)
       await new Promise((r) => setTimeout(r, 1500));
       toast.add({
         title: "Login",
@@ -122,15 +120,7 @@ const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
         icon: "i-lucide-info",
       });
       navigateTo("/");
-    } else {
-      toast.add({
-        title: "Error Login",
-        description: "Invalid email or password!",
-        icon: "i-lucide-triangle-alert",
-        color: "error",
-      });
-      loading.value = false;
-    }
+    
   } catch (err) {
     toast.add({
       title: "Error Login",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // @ts-nocheck
+import type { avatar } from '#build/ui';
 import type { DropdownMenuItem } from '@nuxt/ui'
 const { user, logout } = useAuth()
 defineProps<{
@@ -37,7 +38,15 @@ const handleLogout = async () => {
 const items = computed<DropdownMenuItem[][]>(() => ([[{
   type: 'label',
   label: userDetails.value.name,
-  avatar: userDetails.value.avatar
+  //avatar: userDetails.value.avatar
+  avatar: {
+    text: userDetails.value.name
+      .split(' ')
+      .map(n => n[0])
+      .join(''),
+    class: '[&>span]:!text-white !bg-green-500',
+    size: 'md'
+  },
 }], [{
   label: 'Profile',
   icon: 'i-lucide-user'
@@ -131,11 +140,20 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
     <UDropdownMenu :items="items" :content="{ align: 'center', collisionPadding: 12 }"
       :ui="{ content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)' }">
       <UButton v-bind="{
-        ...userDetails,
+        ...(userDetails || {}),
+        avatar: {
+          ...(userDetails?.avatar || {}),
+          class: '[&>span]:!text-white !bg-green-500',
+          size: 'lg'
+        },
         label: collapsed ? undefined : userDetails?.name,
+        // avatar: {
+        //   name: userDetails?.name,
+        //   class: 'bg-white text-white'
+        // },
         trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
       }" color="neutral" variant="ghost" block :square="collapsed" class="data-[state=open]:bg-elevated" :ui="{
-        trailingIcon: 'text-dimmed'
+        trailingIcon: 'text-dimmed',
       }" />
 
       <template #chip-leading="{ item }">
@@ -149,52 +167,34 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
     </UDropdownMenu>
 
 
-   <UModal 
-  v-model:open="showLogoutModal" 
-  :ui="{ 
-    content: 'sm:max-w-sm', 
-    overlay: 'backdrop-blur-sm' 
-  }"
->
-  <template #content>
-    <div class="p-6">
-      <div class="flex flex-col items-center text-center">
-        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30">
-          <UIcon 
-            name="i-lucide-log-out" 
-            class="h-6 w-6 text-red-600 dark:text-red-400" 
-          />
-        </div>
-        
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          Sign out of your account?
-        </h3>
-        
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          You will need to enter your credentials again to access your dashboard.
-        </p>
-      </div>
+    <UModal v-model:open="showLogoutModal" :ui="{
+      content: 'sm:max-w-sm',
+      overlay: 'backdrop-blur-sm'
+    }">
+      <template #content>
+        <div class="p-6">
+          <div class="flex flex-col items-center text-center">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30">
+              <UIcon name="i-lucide-log-out" class="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
 
-      <div class="mt-8 flex flex-col gap-3">
-        <UButton
-          :label="loading ? 'Signing Out...' : 'Yes, Sign out'"
-          color="error"
-          block
-          size="lg"
-          :loading="loading"
-          @click="handleLogout"
-        />
-        <UButton
-          label="Stay logged in"
-          variant="ghost"
-          color="neutral"
-          block
-          size="lg"
-          @click="showLogoutModal = false"
-        />
-      </div>
-    </div>
-  </template>
-</UModal>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Sign out of your account?
+            </h3>
+
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              You will need to enter your credentials again to access your dashboard.
+            </p>
+          </div>
+
+          <div class="mt-8 flex flex-col gap-3">
+            <UButton :label="loading ? 'Signing Out...' : 'Yes, Sign out'" color="error" block size="lg"
+              :loading="loading" @click="handleLogout" />
+            <UButton label="Stay logged in" variant="ghost" color="neutral" block size="lg"
+              @click="showLogoutModal = false" />
+          </div>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>

@@ -28,7 +28,11 @@
 </template>
 
 <script lang="ts" setup>
-
+//@ts-nocheck
+definePageMeta({
+  middleware: ['auth', 'role'],
+  role: ['Admin', 'Faculty', 'Student']
+})
 </script>
 
 <style></style>
