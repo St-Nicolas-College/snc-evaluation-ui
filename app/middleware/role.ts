@@ -9,6 +9,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
   if (!requiredRoles) return;
   //@ts-ignore
   const userRole = user.value?.role;
+  console.log("User Role: ", userRole)
 
   //@ts-ignore
   if (!requiredRoles.includes(userRole)) {

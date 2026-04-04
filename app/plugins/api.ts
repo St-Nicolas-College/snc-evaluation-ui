@@ -1,5 +1,6 @@
 export default defineNuxtPlugin((nuxtApp) => {
-  const token = useState("token");
+  // const token = useState("token");
+    const token = useState<any>("token");
   const strapiBaseUrl = useRuntimeConfig().public.strapiUrl;
   const api = $fetch.create({
     baseURL: `${strapiBaseUrl}/api`,

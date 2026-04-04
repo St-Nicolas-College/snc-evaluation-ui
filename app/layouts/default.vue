@@ -1,5 +1,5 @@
 <template>
-  <UDashboardGroup unit="rem">
+  <UDashboardGroup>
     <UDashboardSidebar :key="sidebarKey" v-model:collapsed="collapsed" collapsible resizable :storage="false" class="bg-elevated/25" :ui="{
       header: 'border-b border-default',
       footer: 'border-t border-default'
@@ -8,7 +8,7 @@
       <template #header="{ collapsed }">
         <div class="flex items-center gap-3">
           <!-- <img src="/SNC-Logo.png" alt="Logo" class="w-10 h-10 rounded-lg"> -->
-          <UAvatar src="/logo.png" class="rounded-lg" />
+          <UAvatar src="/logo.png" />
           <div v-if="!collapsed" class="flex flex-col leading-tight">
             <span class="font-semibold uppercase text-sm">St. Nicolas College</span>
             <span class="text-xs text-gray-500">of Business and Technology </span>
@@ -39,20 +39,23 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
   Admin: [
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
-      { label: 'Student', icon: 'i-lucide-user-round', to: '/student' },
-      { label: 'Faculty', icon: 'i-lucide-circle-user-round', to: '/faculty' }
+      { label: 'Faculty', icon: 'i-lucide-user-round', to: '/admin/faculty' },
+      { label: 'Evaluation', icon: 'i-lucide-circle-user-round', to: '/admin/evaluation' }
     ],
   ],
   Student: [
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
-      { label: 'Student', icon: 'i-lucide-user-round', to: '/student' }
+      // { label: 'Student', icon: 'i-lucide-user-round', to: '/student' },
+      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check', to: '/evaluate' },
+      { label: 'My Evaluations', icon: 'i-heroicons-user-circle', to: '/my-evaluations' }
     ]
   ],
   Faculty: [
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
-      { label: 'Faculty', icon: 'i-lucide-circle-user-round', to: '/faculty' }
+      { label: 'Results', icon: 'i-lucide-circle-user-round', to: '/faculty/results' },
+      { label: 'Rank', icon: 'i-lucide-circle-user-round', to: '/faculty/rank' }
     ]
   ]
 }
