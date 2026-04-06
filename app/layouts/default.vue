@@ -1,9 +1,10 @@
 <template>
   <UDashboardGroup>
-    <UDashboardSidebar :key="sidebarKey" v-model:collapsed="collapsed" collapsible resizable :storage="false" class="bg-elevated/25" :ui="{
-      header: 'border-b border-default',
-      footer: 'border-t border-default'
-    }">
+    <UDashboardSidebar :key="sidebarKey" v-model:collapsed="collapsed" collapsible resizable :storage="false"
+      class="bg-elevated/25" :ui="{
+        header: 'border-b border-default',
+        footer: 'border-t border-default'
+      }">
 
       <template #header="{ collapsed }">
         <div class="flex items-center gap-3">
@@ -33,14 +34,58 @@
 //@ts-nocheck
 const { user, logout } = useAuth()
 const collapsed = ref(true)
-const sidebarKey = ref(0)             // key to force remount
+const sidebarKey = ref(0)       
+const open = ref(false)      // key to force remount
 
 const roleMenus: Record<string, NavigationMenuItem[][]> = {
   Admin: [
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
       { label: 'Faculty', icon: 'i-lucide-user-round', to: '/admin/faculty' },
-      { label: 'Evaluation', icon: 'i-lucide-circle-user-round', to: '/admin/evaluation' }
+      // { label: 'Evaluation', icon: 'i-lucide-circle-user-round', to: '/admin/evaluation' },
+      {
+        label: 'Evaluation', 
+        icon: 'i-lucide-circle-user-round', 
+        to: '/admin/evaluation',
+        defaultOpen: true,
+        type: 'trigger',
+        children: [{
+          label: 'Faculty Evaluation',
+          to: '/admin/evaluation',
+          exact: true,
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Evaluation Criteria',
+          to: '/admin/evaluation/criteria',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Scale Options',
+          to: '/admin/evaluation/scale-options',
+          onSelect: () => {
+            open.value = false
+          }
+        }
+        ]
+      },
+      { label: 'Feedback', icon: 'i-lucide-circle-user-round', to: '/admin/feedback' },
+      {
+        label: 'Settings',
+        icon: 'i-lucide-settings',
+        defaultOpen: true,
+        children: [{
+          label: 'General'
+        }, {
+          label: 'Members'
+        }, {
+          label: 'Notifications'
+        }]
+      }
     ],
   ],
   Student: [
