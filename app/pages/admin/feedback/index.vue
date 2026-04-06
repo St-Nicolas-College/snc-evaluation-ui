@@ -42,14 +42,11 @@
               <UBadge label="NEW" color="primary" variant="soft" />
             </div>
           </template>
-          <template #description>
-            <div v-if="loading === true" class="rounded-xl lg:col-span-2 p-4 space-y-3">
-              <USkeleton class="h-5 w-32" />
-              <USkeleton class="h-4 w-full" />
-              <USkeleton class="h-4 w-3/4" />
-              <!-- <USkeleton class="h-40 w-full rounded-lg" /> -->
+          
+            <div v-if="loading"  class="flex items-center justify-center py-10">
+              <UIcon name="i-lucide-loader-2" class="w-10 h-10 animate-spin text-primary" />
             </div>
-            <div class="pt-2 space-y-3" v-else>
+            <template v-else>
               <div class="flex gap-2">
                 Sentiment: {{ ai_response.sentiment }}
               </div>
@@ -58,8 +55,10 @@
                 {{ ai_response.suggestion }}
 
               </div>
-            </div>
-          </template>
+            </template>
+
+           
+        
         </UPageCard>
       </UPageGrid>
 
@@ -96,7 +95,7 @@ const onSubmitFeedback = async (payload: FormSubmitEvent<Schema>) => {
     toast.add({
       title: 'Success',
       description: 'Feedback analyzed successfully',
-      color: 'green'
+      color: 'success'
     })
     console.log(JSON.parse(res.output[0].content[0].text));
   } catch (err) {
@@ -104,7 +103,7 @@ const onSubmitFeedback = async (payload: FormSubmitEvent<Schema>) => {
     toast.add({
       title: 'Error',
       description: 'Failed to analyze feedback',
-      color: 'red'
+      color: 'error'
     })
     loading.value = false
   } finally {
