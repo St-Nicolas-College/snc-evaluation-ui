@@ -47,7 +47,7 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
         label: 'Evaluation', 
         icon: 'i-lucide-circle-user-round', 
         to: '/admin/evaluation',
-        defaultOpen: true,
+        defaultOpen: open,
         type: 'trigger',
         children: [{
           label: 'Faculty Evaluation',
@@ -77,7 +77,7 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
       {
         label: 'Settings',
         icon: 'i-lucide-settings',
-        defaultOpen: true,
+        defaultOpen: false,
         children: [{
           label: 'General'
         }, {

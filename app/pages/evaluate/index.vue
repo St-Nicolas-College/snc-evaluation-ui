@@ -195,7 +195,7 @@ const getTeachers = async () => {
 const getEvaluationCriteria = async () => {
   try {
     const res = await $api("/evaluation-criterias");
-    criteria.value = res.data;
+    criteria.value = res.data.sort((a, b) => a.id - b.id);
   } catch (err) {
     console.log(err);
   }
