@@ -170,12 +170,13 @@
               <table class="w-full border-collapse border border-gray-500 text-sm">
                 <thead>
                   <tr>
-                    <th colspan="6" class="border border-gray-500 bg-gray-100 px-3 py-2 text-left text-base font-bold">
+                    <th colspan="7" class="border border-gray-500 bg-gray-100 px-3 py-2 text-left text-base font-bold">
                       {{ section.title }}
                     </th>
                   </tr>
                   <tr class="bg-gray-50">
-                    <th class="border border-gray-500 px-3 py-2 text-left">Criteria</th>
+                    <!-- <th>#</th> -->
+                    <th colspan="2" class="border border-gray-500 px-3 py-2 text-left">Criteria</th>
                     <th class="border border-gray-500 px-2 py-2 text-center w-12">5</th>
                     <th class="border border-gray-500 px-2 py-2 text-center w-12">4</th>
                     <th class="border border-gray-500 px-2 py-2 text-center w-12">3</th>
@@ -189,8 +190,12 @@
                     v-for="criterion in section.evaluation_criteria"
                     :key="criterion.id"
                   >
+                  <td class="border px-3 py-2 text-left">
+                    {{ criterion.order }}
+                  </td>
                     <td class="border border-gray-500 px-3 py-2">
-                      {{ criterion.order }}. {{ criterion.statement }}
+                      <!-- {{ criterion.order }}. {{ criterion.statement }} -->
+                      {{ criterion.statement }}
                     </td>
 
                     <td
@@ -201,7 +206,7 @@
                       <input
                         v-model="evaluation.responses[criterion.id]"
                         :value="score"
-                        :name="`teacher-${evaluation.teacherId}-criterion-${criterion.id}`"
+                        
                         type="radio"
                         class="h-4 w-4"
                       >
@@ -295,6 +300,11 @@
 </template>
 
 <script setup lang="ts">
+//@ts-nocheck
+definePageMeta({
+  middleware: ['auth', 'role'],
+  role: ['Student']
+})
 //@ts-nocheck
 const { $api } = useNuxtApp();
 const toast = useToast();
@@ -584,6 +594,8 @@ const submitEvaluation = async () => {
     return
   }
 
+  console.log("Form data: ", form.evaluations)
+
   try {
     submitLoading.value = true
 
@@ -593,6 +605,8 @@ const submitEvaluation = async () => {
       comment: evaluation.comment,
       responses: evaluation.responses
     }))
+
+    console.log("Form Evaluation Data: ", evaluations)
 
     // const responses = Object.entries(form.responses).map(
     //   ([criterionId, score]) => ({

@@ -31,7 +31,7 @@
           </UModal>
         </div>
       </div>
-      <UTable ref="table" v-model:row-selection="rowSelection" v-model:global-filter="globalFilter"
+      <!-- <UTable ref="table" v-model:row-selection="rowSelection" v-model:global-filter="globalFilter"
         :data="paginatedData" :loading="loading" loading-color="primary" loading-animation="carousel" :columns="columns"
         class="shrink-0" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
@@ -47,7 +47,61 @@
             <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" aria-label="Actions" />
           </UDropdownMenu>
         </template>
-      </UTable>
+      </UTable> -->
+
+      <!-- <UTable :data="tableRows" :columns="columns" :loading="loading">
+        <template #order-cell="{ row }">
+          <div v-if="row.original?.type === 'section'" class="font-bold text-transparent select-none">
+            -
+          </div>
+          <div v-else>
+            {{ row.original?.order }}
+          </div>
+        </template>
+        <template #statement-cell="{ row }">
+          <div v-if="row.original?.type === 'section'" class="font-bold bg-gray-100 px-2 py-2 rounded">
+            {{ row.original?.title }}
+          </div>
+
+          <div v-else>
+            {{ row.original?.statement }}
+          </div>
+        </template>
+      </UTable> -->
+
+      <div class="overflow-x-auto">
+  <table class="w-full border-collapse border border-gray-300">
+    <tbody>
+      <template v-for="row in tableRows" :key="row.id">
+        <!-- spacer -->
+        <tr v-if="row.type === 'spacer'">
+          <td colspan="2" class="h-4 border-0 bg-transparent"></td>
+        </tr>
+
+        <!-- section header -->
+        <tr v-else-if="row.type === 'section'">
+          <td
+            colspan="2"
+            class="bg-gray-100 px-4 py-3 font-bold text-gray-700 border border-gray-300"
+          >
+            {{ row.title }}
+          </td>
+        </tr>
+
+        <!-- criterion row -->
+        <tr v-else>
+          <td class="w-12 border border-gray-300 px-4 py-3 text-center align-top">
+            {{ row.order }}
+          </td>
+          <td class="border border-gray-300 px-4 py-3 align-top">
+            {{ row.statement }}
+          </td>
+        </tr>
+      </template>
+    </tbody>
+  </table>
+</div>
+
       <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
         <div class="text-sm text-muted">
           {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }}
@@ -122,46 +176,57 @@ const state = reactive<Partial<Schema>>({
 });
 
 
+// const columns = [
+//   {
+//     id: 'select',
+//     header: ({ table }) =>
+//       h(UCheckbox, {
+//         modelValue: table.getIsAllRowsSelected(),
+//         'onUpdate:modelValue': (value: boolean) =>
+//           table.toggleAllRowsSelected(!!value)
+//       }),
+//     cell: ({ row }) =>
+//       h(UCheckbox, {
+//         modelValue: row.getIsSelected(),
+//         'onUpdate:modelValue': (value: boolean) =>
+//           row.toggleSelected(!!value)
+//       })
+//   },
+//   {
+//     id: 'id',
+//     header: 'ID',
+//     cell: ({ row }) => (page.value - 1) * itemsPerPage + row.index + 1
+//   },
+//   { accessorKey: 'statement', header: 'Statement' },
+//   { accessorKey: 'order', header: 'Order' },
+//   // { accessorKey: 'maxScore', header: 'Max Score' },
+//   {
+//     accessorKey: 'createdAt', header: 'Created At',
+//     cell: ({ row }) => {
+//       return new Date(row.getValue('createdAt')).toLocaleString('en-US', {
+//         day: 'numeric',
+//         month: 'short',
+//         year: 'numeric',
+//         hour: '2-digit',
+//         minute: '2-digit',
+//         hour12: true
+//       })
+//     }
+//   },
+//   {
+//     id: 'action'
+//   },
+// ]
+
 const columns = [
   {
-    id: 'select',
-    header: ({ table }) =>
-      h(UCheckbox, {
-        modelValue: table.getIsAllRowsSelected(),
-        'onUpdate:modelValue': (value: boolean) =>
-          table.toggleAllRowsSelected(!!value)
-      }),
-    cell: ({ row }) =>
-      h(UCheckbox, {
-        modelValue: row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean) =>
-          row.toggleSelected(!!value)
-      })
+    accessorKey: "order",
+    header: "#"
   },
   {
-    id: 'id',
-    header: 'ID',
-    cell: ({ row }) => (page.value - 1) * itemsPerPage + row.index + 1
-  },
-  { accessorKey: 'key', header: 'Key' },
-  { accessorKey: 'label', header: 'Label' },
-  { accessorKey: 'maxScore', header: 'Max Score' },
-  {
-    accessorKey: 'createdAt', header: 'Created At',
-    cell: ({ row }) => {
-      return new Date(row.getValue('createdAt')).toLocaleString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      })
-    }
-  },
-  {
-    id: 'action'
-  },
+    accessorKey: "statement",
+    header: "Evaluation Criteria"
+  }
 ]
 
 function getDropdownActions(user: User): DropdownMenuItem[][] {
@@ -208,13 +273,80 @@ const selectedCount = computed(() =>
   table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
 )
 
+// Grouped criteria
+const groupedCriteria = computed(() => {
+  const grouped = criteria.value.reduce((acc: any, item: any) => {
+    const sectionId = item.section?.id;
+
+    if (!sectionId) return acc;
+
+    if (!acc[sectionId]) {
+      acc[sectionId] = {
+        id: item.section.id,
+        title: item.section.title,
+        order: item.section.order,
+        evaluation_criteria: []
+      };
+    }
+
+    acc[sectionId].evaluation_criteria.push(item);
+    return acc;
+  }, {});
+
+  return Object.values(grouped)
+    .sort((a: any, b: any) => a.order - b.order)
+    .map((section: any) => ({
+      ...section,
+      evaluation_criteria: section.evaluation_criteria.sort(
+        (a: any, b: any) => a.order - b.order
+      )
+    }));
+})
+
+const tableRows = computed(() => {
+  const rows: any[] = []
+
+  groupedCriteria.value.forEach((section: any) => {
+    rows.push({
+      type: 'section',
+      id: `section-${section.id}`,
+      title: section.title
+    })
+
+    section.evaluation_criteria.forEach((criterion: any) => {
+      rows.push({
+        type: "criterion",
+        id: criterion.id,
+        order: criterion.order,
+        statement: criterion.statement,
+        sectionTitle: section.title
+      })
+    });
+  })
+
+  return rows
+})
+
+watch(tableRows, (val) => {
+  console.log("tableRows:", val)
+})
+
 // -------------------- API Fetch  / Functions --------------------
 
 // fetch evaluation criteria
 const getEvaluationCriteria = async () => {
   try {
-    const res = await $api("/evaluation-criterias");
-    criteria.value = res.data.sort((a, b) => a.id - b.id);
+    const res = await $api("/evaluation-criterias", {
+      query: {
+        populate: "section",
+        pagination: {
+          pageSize: 100
+        }
+      }
+    });
+    //criteria.value = res.data.sort((a, b) => a.id - b.id);
+    criteria.value = res.data
+    console.log("List of criteria: ", criteria.value)
     loading.value = false
     //console.log(criteria.value)
   } catch (err) {

@@ -20,7 +20,7 @@
 //@ts-nocheck
 definePageMeta({
   middleware: ['auth', 'role'],
-  role: ['Admin', 'Student']
+  role: ['Student']
 })
 </script>
 
