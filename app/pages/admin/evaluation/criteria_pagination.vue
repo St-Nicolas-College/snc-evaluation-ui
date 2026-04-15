@@ -95,7 +95,7 @@
         <table class="w-full border-collapse border border-gray-300">
           <tbody>
             <template
-             v-for="(row, index) in tableRows"
+              v-for="(row, index) in paginatedTableRows"
               :key="`${row.type}-${row.id}-${index}`"
             >
               <tr v-if="row.type === 'spacer'">
@@ -148,13 +148,13 @@
           {{ selectedCount }} of {{ filteredCriteriaRows.length }} row(s) selected.
         </div>
 
-        <!-- <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5">
           <UPagination
             v-model:page="page"
             :total="filteredCriteriaRows.length"
             :items-per-page="itemsPerPage"
           />
-        </div> -->
+        </div>
       </div>
 
       <UModal v-model:open="editModal">
@@ -227,6 +227,9 @@ const loadingUpdate = ref(false)
 
 const modal = ref(false)
 const editModal = ref(false)
+
+const page = ref(1)
+const itemsPerPage = 20
 
 const criteria = ref([])
 const sections = ref([])
@@ -306,11 +309,20 @@ const filteredCriteriaRows = computed(() =>
   )
 )
 
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredCriteriaRows.value.length / itemsPerPage))
+)
 
-const tableRows = computed(() => {
-  if (!filteredCriteriaRows.value.length) return []
+const paginatedCriteriaRows = computed(() => {
+  const start = (page.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredCriteriaRows.value.slice(start, end)
+})
 
-  const grouped = filteredCriteriaRows.value.reduce((acc: any, item: any) => {
+const paginatedTableRows = computed(() => {
+  if (!paginatedCriteriaRows.value.length) return []
+
+  const grouped = paginatedCriteriaRows.value.reduce((acc: any, item: any) => {
     const sectionId = item.section?.id
     if (!sectionId) return acc
 
@@ -365,6 +377,16 @@ const tableRows = computed(() => {
 const selectedCount = computed(() =>
   Object.values(selectedRows.value).filter(Boolean).length
 )
+
+watch(globalFilter, () => {
+  page.value = 1
+})
+
+watch(page, () => {
+  if (page.value > totalPages.value) {
+    page.value = totalPages.value
+  }
+})
 
 function resetForm() {
   state.statement = undefined

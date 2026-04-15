@@ -15,286 +15,246 @@
     <!-- Body -->
     <template #body>
 
-      <div class="mx-auto max-w-6xl bg-white p-6 shadow">
-      <div class="mb-6 text-center">
-        <h2 class="text-xl font-bold uppercase">St. Nicolas College of Business and Technology</h2>
-        <p class="text-sm">MEL-VI Bldg., Jose Abad Santos Avenue, City of San Fernando Pampanga</p>
-        <p class="text-sm">Tel. No.: (045) 455-0958</p>
-        <h1 class="mt-3 text-2xl font-extrabold uppercase">Performance Evaluation Form</h1>
-        <p class="font-medium">Student - Faculty</p>
-      </div>
-
-      <div class="mb-4 border border-gray-400 p-4">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <UFormField label="Semester">
-            <UInput v-model="form.semester" />
-          </UFormField>
-
-          <UFormField label="School Year">
-            <UInput v-model="form.schoolYear" />
-          </UFormField>
-
-          <UFormField label="Date">
-            <UInput v-model="form.date" type="date" />
-          </UFormField>
-
-          <UFormField label="Course & Year Level" class="md:col-span-2">
-            <UInput v-model="form.courseYearLevel" />
-          </UFormField>
-
-          <UFormField label="Days & Time">
-            <UInput v-model="form.daysTime" />
-          </UFormField>
+      <div class="mx-auto w-full ">
+        <div class="mb-6 text-center">
+          <h2 class="text-xl font-bold uppercase">St. Nicolas College of Business and Technology</h2>
+          <p class="text-sm">MEL-VI Bldg., Jose Abad Santos Avenue, City of San Fernando Pampanga</p>
+          <p class="text-sm">Tel. No.: (045) 455-0958</p>
+          <h1 class="mt-3 text-2xl font-extrabold uppercase">Performance Evaluation Form</h1>
+          <p class="font-medium">Student - Faculty</p>
         </div>
-      </div>
 
-      <div class="mb-6 border border-gray-400 p-4">
-        <div class="mb-3 flex items-center justify-between">
-          <div class="font-bold">Select Teacher(s)</div>
-          <div class="text-sm text-gray-500">
-            {{ selectedTeacherIds.length }} selected
+
+
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- LEFT SIDE -->
+        <div class="lg:col-span-1 border border-gray-300 p-4 h-fit rounded-lg">
+          <div class="mb-3 flex items-center justify-between">
+            <div class="font-bold">Select Teacher(s)</div>
+            <div class="text-sm text-gray-500">
+              {{ selectedTeacherIds.length }} selected
+            </div>
           </div>
-        </div>
 
-        <div v-if="pending" class="py-6 text-center">
-          Loading teachers...
-        </div>
+          <div v-if="pending" class="py-6 text-center">
+            Loading teachers...
+          </div>
 
-        <div v-else>
-          <UCheckboxGroup
-            v-model="selectedTeacherIds"
-            value-key="value"
-            :items="teacherCheckboxItems"
-            :ui="{
+          <div v-else>
+            <UCheckboxGroup v-model="selectedTeacherIds" value-key="value" :items="teacherCheckboxItems" :ui="{
               fieldset: 'grid grid-cols-1 gap-3 md:grid-cols-2',
               item: 'rounded-lg border border-gray-300 p-4 hover:border-primary-500 transition'
-            }"
-          >
-            <template #label="{ item }">
-              <div class="flex flex-col">
-                <span class="font-medium">{{ item.label }}</span>
-                <!-- <span v-if="item.description" class="text-xs text-gray-500">
+            }">
+              <template #label="{ item }">
+                <div class="flex flex-col">
+                  <span class="font-medium">{{ item.label }}</span>
+                  <!-- <span v-if="item.description" class="text-xs text-gray-500">
                   {{ item.description }}
                 </span> -->
-              </div>
-            </template>
-          </UCheckboxGroup>
-        </div>
-      </div>
-
-      <div v-if="!pending && selectedTeacherIds.length" class="mb-4 flex items-center justify-between">
-        <div class="font-semibold">
-          Selected Teachers: {{ selectedTeacherIds.length }}
-        </div>
-
-        <div class="flex items-center gap-2">
-          <UButton
-            color="neutral"
-            variant="outline"
-            :disabled="currentPage === 1"
-            @click="prevPage"
-          >
-            Previous
-          </UButton>
-
-          <span class="text-sm font-medium">
-            Page {{ currentPage }} of {{ totalPages }}
-          </span>
-
-          <UButton
-            color="neutral"
-            variant="outline"
-            :disabled="currentPage === totalPages"
-            @click="nextPage"
-          >
-            Next
-          </UButton>
-        </div>
-      </div>
-
-      <div v-if="error" class="py-10 text-center text-red-500">
-        Failed to load form data.
-      </div>
-
-      <div v-else-if="!pending && !selectedTeacherIds.length" class="py-10 text-center text-gray-500">
-        Please select at least one teacher to start evaluation.
-      </div>
-
-      <div v-else-if="!pending" class="space-y-8">
-        <div
-          v-for="evaluation in paginatedEvaluations"
-          :key="evaluation.teacherId"
-          class="border border-gray-400 p-4"
-        >
-          <div class="mb-4">
-            <h3 class="text-lg font-bold">Teacher Evaluation</h3>
-            <p class="text-sm text-gray-600">
-              {{ teacherMap[evaluation.teacherId]?.name || 'Unknown Teacher' }}
-            </p>
-          </div>
-
-          <div class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <UFormField label="Teacher">
-              <UInput :model-value="teacherMap[evaluation.teacherId]?.name || ''" disabled />
-            </UFormField>
-
-            <UFormField label="Subject">
-              <USelectMenu
-                v-model="evaluation.subjectId"
-                value-key="value"
-                :items="subjectOptions"
-                placeholder="Select subject"
-              />
-            </UFormField>
-          </div>
-
-          <div class="mb-4 text-center">
-            <p class="font-semibold">
-              Please rate the teacher on each of the items listed below.
-            </p>
-            <div class="mt-2 flex flex-wrap justify-center gap-6 text-sm font-bold">
-              <span>5. Outstanding</span>
-              <span>4. Excellent</span>
-              <span>3. Satisfactory</span>
-              <span>2. Fair</span>
-              <span>1. Poor</span>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <div
-              v-for="section in sections"
-              :key="section.id"
-              class="overflow-x-auto"
-            >
-              <table class="w-full border-collapse border border-gray-500 text-sm">
-                <thead>
-                  <tr>
-                    <th colspan="7" class="border border-gray-500 bg-gray-100 px-3 py-2 text-left text-base font-bold">
-                      {{ section.title }}
-                    </th>
-                  </tr>
-                  <tr class="bg-gray-50">
-                    <!-- <th>#</th> -->
-                    <th colspan="2" class="border border-gray-500 px-3 py-2 text-left">Criteria</th>
-                    <th class="border border-gray-500 px-2 py-2 text-center w-12">5</th>
-                    <th class="border border-gray-500 px-2 py-2 text-center w-12">4</th>
-                    <th class="border border-gray-500 px-2 py-2 text-center w-12">3</th>
-                    <th class="border border-gray-500 px-2 py-2 text-center w-12">2</th>
-                    <th class="border border-gray-500 px-2 py-2 text-center w-12">1</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr
-                    v-for="criterion in section.evaluation_criteria"
-                    :key="criterion.id"
-                  >
-                  <td class="border px-3 py-2 text-left">
-                    {{ criterion.order }}
-                  </td>
-                    <td class="border border-gray-500 px-3 py-2">
-                      <!-- {{ criterion.order }}. {{ criterion.statement }} -->
-                      {{ criterion.statement }}
-                    </td>
-
-                    <td
-                      v-for="score in [5, 4, 3, 2, 1]"
-                      :key="score"
-                      class="border border-gray-500 text-center"
-                    >
-                      <input
-                        v-model="evaluation.responses[criterion.id]"
-                        :value="score"
-                        
-                        type="radio"
-                        class="h-4 w-4"
-                      >
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="border border-gray-500">
-              <div class="border-b border-gray-500 bg-gray-100 px-3 py-2 font-bold">
-                Strongest and Weakest points of the teacher:
-              </div>
-              <div class="p-3">
-                <UTextarea
-                  v-model="evaluation.comment"
-                  :rows="6"
-                  class="w-full"
-                />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <div class="border border-gray-500 p-3">
-                <div class="text-sm font-semibold">Answered Items</div>
-                <div class="text-lg font-bold">{{ getAnsweredCount(evaluation) }}</div>
-              </div>
-
-              <div class="border border-gray-500 p-3">
-                <div class="text-sm font-semibold">Total Score</div>
-                <div class="text-lg font-bold">{{ getTotalScore(evaluation) }}</div>
-              </div>
-
-              <div class="border border-gray-500 p-3">
-                <div class="text-sm font-semibold">Average Score</div>
-                <div class="text-lg font-bold">{{ getAverageScore(evaluation) }}</div>
-              </div>
-            </div>
+                </div>
+              </template>
+            </UCheckboxGroup>
           </div>
         </div>
 
-        <div v-if="selectedTeacherIds.length > 2" class="flex items-center justify-center gap-2">
-          <UButton
-            color="neutral"
-            variant="outline"
-            :disabled="currentPage === 1"
-            @click="prevPage"
-          >
-            Previous
-          </UButton>
+        <!-- RIGHT SIDE -->
+        <div class="lg:col-span-3 space-y-8">
 
-          <span class="text-sm font-medium">
-            Page {{ currentPage }} of {{ totalPages }}
-          </span>
+          <div class="mb-4 border border-gray-300 p-4 rounded-lg">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <UFormField label="Semester">
+                <UInput v-model="form.semester" class="w-full"/>
+              </UFormField>
 
-          <UButton
-            color="neutral"
-            variant="outline"
-            :disabled="currentPage === totalPages"
-            @click="nextPage"
-          >
-            Next
-          </UButton>
+              <UFormField label="School Year">
+                <UInput v-model="form.schoolYear" class="w-full" />
+              </UFormField>
+
+              <!-- <UFormField label="Date">
+                <UInput v-model="form.date" type="date" />
+              </UFormField> -->
+
+              <UFormField label="Course & Year Level" >
+                <UInput v-model="form.courseYearLevel" class="w-full"/>
+              </UFormField>
+<!-- 
+              <UFormField label="Days & Time">
+                <UInput v-model="form.daysTime" />
+              </UFormField> -->
+            </div>
+          </div>
+
+          <div v-if="!pending && selectedTeacherIds.length"
+            class="mb-4 flex items-center justify-between border border-gray-300 p-4 rounded-lg">
+            <div class="font-semibold">
+              Selected Teachers: {{ selectedTeacherIds.length }}
+            </div>
+
+            <div class="flex items-center gap-2">
+              <UButton color="neutral" variant="outline" :disabled="currentPage === 1" @click="prevPage">
+                Previous
+              </UButton>
+
+              <span class="text-sm font-medium">
+                Page {{ currentPage }} of {{ totalPages }}
+              </span>
+
+              <UButton color="neutral" variant="outline" :disabled="currentPage === totalPages" @click="nextPage">
+                Next
+              </UButton>
+            </div>
+          </div>
+
+          <div v-if="error" class="py-10 text-center text-red-500">
+            Failed to load form data.
+          </div>
+
+          <div v-else-if="!pending && !selectedTeacherIds.length"
+            class="py-10 text-center text-gray-300 border border-gray-300 p-4 rounded-lg">
+            Please select at least one teacher to start evaluation.
+          </div>
+
+          <div v-else-if="!pending" class="space-y-8">
+            <div v-for="evaluation in paginatedEvaluations" :key="evaluation.teacherId"
+              class="border border-gray-300 p-10 px-10 rounded-xl">
+              <div class="mb-4">
+                <h3 class="text-lg font-bold">Teacher Evaluation</h3>
+                <p class="text-sm text-gray-600">
+                  {{ teacherMap[evaluation.teacherId]?.name || 'Unknown Teacher' }}
+                </p>
+              </div>
+
+              <div class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <UFormField label="Teacher">
+                  <UInput :model-value="teacherMap[evaluation.teacherId]?.name || ''" disabled  class="w-full"/>
+                </UFormField>
+
+                <UFormField label="Subject">
+                  <USelectMenu v-model="evaluation.subjectId" value-key="value" :items="subjectOptions"
+                    placeholder="Select subject" class="w-full"/>
+                </UFormField>
+              </div>
+
+              <div class="mb-4 text-center">
+                <p class="font-semibold">
+                  Please rate the teacher on each of the items listed below.
+                </p>
+                <div class="mt-2 flex flex-wrap justify-center gap-6 text-sm font-bold">
+                  <span>5. Outstanding</span>
+                  <span>4. Excellent</span>
+                  <span>3. Satisfactory</span>
+                  <span>2. Fair</span>
+                  <span>1. Poor</span>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div v-for="section in sections" :key="section.id" class="overflow-x-auto">
+                  <table class="w-full border-collapse border border-gray-500 text-sm">
+                    <thead>
+                      <tr>
+                        <th colspan="7"
+                          class="border border-gray-500 bg-gray-100 px-3 py-2 text-left text-base font-bold">
+                          {{ section.title }}
+                        </th>
+                      </tr>
+                      <tr class="bg-gray-50">
+                        <!-- <th>#</th> -->
+                        <th colspan="2" class="border border-gray-500 px-3 py-2 text-left">Criteria</th>
+                        <th class="border border-gray-500 px-2 py-2 text-center w-12">5</th>
+                        <th class="border border-gray-500 px-2 py-2 text-center w-12">4</th>
+                        <th class="border border-gray-500 px-2 py-2 text-center w-12">3</th>
+                        <th class="border border-gray-500 px-2 py-2 text-center w-12">2</th>
+                        <th class="border border-gray-500 px-2 py-2 text-center w-12">1</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr v-for="criterion in section.evaluation_criteria" :key="criterion.id">
+                        <td class="border px-3 py-2 text-left">
+                          {{ criterion.order }}
+                        </td>
+                        <td class="border border-gray-500 px-3 py-2">
+                          <!-- {{ criterion.order }}. {{ criterion.statement }} -->
+                          {{ criterion.statement }}
+                        </td>
+
+                        <td v-for="score in [5, 4, 3, 2, 1]" :key="score" class="border border-gray-500 text-center">
+                          <input v-model="evaluation.responses[criterion.id]" :value="score" type="radio"
+                            class="h-4 w-4">
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="border border-gray-500">
+                  <div class="border-b border-gray-500 bg-gray-100 px-3 py-2 font-bold">
+                    Strongest and Weakest points of the teacher:
+                  </div>
+                  <div class="p-3">
+                    <UTextarea v-model="evaluation.comment" :rows="6" class="w-full" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div class="border border-gray-500 p-3">
+                    <div class="text-sm font-semibold">Answered Items</div>
+                    <div class="text-lg font-bold">{{ getAnsweredCount(evaluation) }}</div>
+                  </div>
+
+                  <div class="border border-gray-500 p-3">
+                    <div class="text-sm font-semibold">Total Score</div>
+                    <div class="text-lg font-bold">{{ getTotalScore(evaluation) }}</div>
+                  </div>
+
+                  <div class="border border-gray-500 p-3">
+                    <div class="text-sm font-semibold">Average Score</div>
+                    <div class="text-lg font-bold">{{ getAverageScore(evaluation) }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="selectedTeacherIds.length > 2" class="flex items-center justify-center gap-2">
+              <UButton color="neutral" variant="outline" :disabled="currentPage === 1" @click="prevPage">
+                Previous
+              </UButton>
+
+              <span class="text-sm font-medium">
+                Page {{ currentPage }} of {{ totalPages }}
+              </span>
+
+              <UButton color="neutral" variant="outline" :disabled="currentPage === totalPages" @click="nextPage">
+                Next
+              </UButton>
+            </div>
+
+            <div v-if="submitError" class="text-sm font-medium text-red-600">
+              {{ submitError }}
+            </div>
+
+            <div v-if="submitSuccess" class="text-sm font-medium text-green-600">
+              {{ submitSuccess }}
+            </div>
+
+            <div class="flex justify-end gap-2">
+              <UButton color="neutral" variant="outline" @click="resetForm">
+                Reset
+              </UButton>
+
+              <UButton :loading="submitLoading" :disabled="!isFormValid" @click="submitEvaluation">
+                Submit All Evaluations
+              </UButton>
+            </div>
+          </div>
         </div>
 
-        <div v-if="submitError" class="text-sm font-medium text-red-600">
-          {{ submitError }}
-        </div>
-
-        <div v-if="submitSuccess" class="text-sm font-medium text-green-600">
-          {{ submitSuccess }}
-        </div>
-
-        <div class="flex justify-end gap-2">
-          <UButton color="neutral" variant="outline" @click="resetForm">
-            Reset
-          </UButton>
-
-          <UButton
-            :loading="submitLoading"
-            :disabled="!isFormValid"
-            @click="submitEvaluation"
-          >
-            Submit All Evaluations
-          </UButton>
-        </div>
       </div>
-    </div>
+
+
     </template>
   </UDashboardPanel>
 </template>

@@ -1,7 +1,7 @@
 <template>
   <UDashboardGroup>
-    <UDashboardSidebar :key="sidebarKey" v-model:collapsed="collapsed" collapsible resizable :storage="false"
-      class="bg-elevated/25" :ui="{
+    <UDashboardSidebar v-model:collapsed="collapsed" collapsible resizable
+      :storage="false" class="bg-elevated/25" :ui="{
         header: 'border-b border-default',
         footer: 'border-t border-default'
       }">
@@ -33,8 +33,8 @@
 
 //@ts-nocheck
 const { user, logout } = useAuth()
-const collapsed = ref(true)
-const sidebarKey = ref(0)       
+const collapsed = ref(false)
+const sidebarKey = ref(0)
 const open = ref(false)      // key to force remount
 
 const roleMenus: Record<string, NavigationMenuItem[][]> = {
@@ -44,8 +44,8 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
       { label: 'Faculty', icon: 'i-lucide-user-round', to: '/admin/faculty' },
       // { label: 'Evaluation', icon: 'i-lucide-circle-user-round', to: '/admin/evaluation' },
       {
-        label: 'Evaluation', 
-        icon: 'i-lucide-circle-user-round', 
+        label: 'Evaluation',
+        icon: 'i-lucide-circle-user-round',
         to: '/admin/evaluation',
         defaultOpen: open,
         type: 'trigger',
@@ -58,7 +58,14 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
           }
         },
         {
-          label: 'Evaluation Criteria',
+          label: 'Section',
+          to: '/admin/evaluation/section',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Criteria',
           to: '/admin/evaluation/criteria',
           onSelect: () => {
             open.value = false
@@ -137,20 +144,25 @@ const items = computed(() => {
 // }]]
 
 
-const resetSidebar = () => {
-  if (process.client) {
-    // Clear the Nuxt UI stored cookie
-    document.cookie = 'nuxt-ui:sidebar-collapsed=; Max-Age=0; path=/'
+// const resetSidebar = () => {
+//   if (process.client) {
+//     // Clear the Nuxt UI stored cookie
+//     document.cookie = 'nuxt-ui:sidebar-collapsed=; Max-Age=0; path=/'
 
-    // Force sidebar to remount
-    sidebarKey.value++
-  }
+//     // Force sidebar to remount
+//     sidebarKey.value++
+//   }
 
-  // Set your default collapsed state
-  collapsed.value = true
-}
+//   // Set your default collapsed state
+//   collapsed.value = true
+// }
+
+
+
 onMounted(() => {
-  resetSidebar()
+  //resetSidebar()
+  collapsed.value = false
+  
 })
 </script>
 
