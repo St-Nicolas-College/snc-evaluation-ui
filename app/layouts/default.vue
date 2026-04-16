@@ -71,13 +71,13 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
             open.value = false
           }
         },
-        {
-          label: 'Scale Options',
-          to: '/admin/evaluation/scale-options',
-          onSelect: () => {
-            open.value = false
-          }
-        }
+        // {
+        //   label: 'Scale Options',
+        //   to: '/admin/evaluation/scale-options',
+        //   onSelect: () => {
+        //     open.value = false
+        //   }
+        // }
         ]
       },
       { label: 'Feedback', icon: 'i-lucide-circle-user-round', to: '/admin/feedback' },

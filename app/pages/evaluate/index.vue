@@ -450,9 +450,9 @@ const isFormValid = computed(() => {
   if (
     !form.semester ||
     !form.schoolYear ||
-    !form.date ||
-    !form.courseYearLevel ||
-    !form.daysTime
+   // !form.date ||
+    !form.courseYearLevel
+    //!form.daysTime
   ) return false
 
   if (!form.evaluations.length) return false
@@ -533,12 +533,12 @@ const submitEvaluation = async () => {
   submitError.value = ""
   submitSuccess.value = ""
 
-  if (!form.semester || !form.schoolYear || !form.date) {
+  if (!form.semester || !form.schoolYear) {
     submitError.value = "Please complete semester, school year, and date."
     return
   }
 
-  if (!form.courseYearLevel || !form.daysTime) {
+  if (!form.courseYearLevel) {
     submitError.value = "Please complete course/year level and days/time."
     return
   }
@@ -580,9 +580,9 @@ const submitEvaluation = async () => {
       body: {
         semester: form.semester,
         school_year: form.schoolYear,
-        date: form.date,
+        //date: form.date,
         course: form.courseYearLevel,
-        days_time: form.daysTime,
+        //days_time: form.daysTime,
         evaluations
       }
     })
