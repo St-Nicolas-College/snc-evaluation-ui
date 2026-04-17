@@ -6,10 +6,10 @@ export const useAuth = () => {
   const authReady = useState("authReady", () => false);
 
   // LOGIN
-   const login = async (email: string, password: string) => {
+   const login = async (username: string, password: string) => {
     const res: any = await $fetch("/api/login", {
       method: "POST",
-      body: { email, password },
+      body: { username, password },
     });
 
     token.value = res.jwt;

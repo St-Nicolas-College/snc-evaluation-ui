@@ -1,12 +1,12 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const config = useRuntimeConfig();
-
+ 
   const res: any = await $fetch("/api/auth/login", {
     baseURL: config.public.strapiUrl,
     method: "POST",
     body: {
-      identifier: body.email,
+      identifier: body.username,
       password: body.password,
     },
   });

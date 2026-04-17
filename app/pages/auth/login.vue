@@ -17,11 +17,11 @@
         class="space-y-4"
         @submit="onSubmit"
       >
-        <UFormField label="Email" name="email">
+        <UFormField label="Username" name="username">
           <UInput
-            v-model="state.email"
-            icon="i-lucide-mail"
-            placeholder="Enter your email"
+            v-model="state.username"
+            icon="i-lucide-user"
+            placeholder="Enter your username"
             class="w-full"
             size="xl"
           />
@@ -91,18 +91,19 @@ definePageMeta({
 const { login } = useAuth();
 const toast = useToast();
 const loading = ref(false);
-const email = ref("admin@gmail.com");
-const password = ref("admin123");
+// const email = ref("admin@gmail.com");
+// const password = ref("admin123");
 const show = ref(false)
 
 type Schema = z.output<typeof schema>;
 const state = reactive<Partial<Schema>>({
-  email: undefined,
+  username: undefined,
   password: undefined,
 });
 
 const schema = z.object({
-  email: z.email("Invalid email"),
+  //email: z.email("Invalid email"),
+  username: z.string("Username is required"),
   password: z
     .string("Password is required")
     .min(8, "Must be at least 8 characters"),
@@ -112,7 +113,7 @@ const schema = z.object({
 const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
   loading.value = true;
   try {
-      await login(payload.data.email, payload.data.password)
+      await login(payload.data.username, payload.data.password)
       await new Promise((r) => setTimeout(r, 1500));
       toast.add({
         title: "Login",
@@ -124,7 +125,7 @@ const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
   } catch (err) {
     toast.add({
       title: "Error Login",
-      description: "Invalid email or password!",
+      description: "Invalid username or password!",
       icon: "i-lucide-triangle-alert",
       color: "error",
     });
