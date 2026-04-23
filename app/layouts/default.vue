@@ -106,6 +106,7 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
   Faculty: [
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
+      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check', to: '/faculty/evaluation' },
       { label: 'Results', icon: 'i-lucide-circle-user-round', to: '/faculty/results' },
       { label: 'Rank', icon: 'i-lucide-circle-user-round', to: '/faculty/rank' }
     ]
