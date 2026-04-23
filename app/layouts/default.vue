@@ -42,6 +42,7 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
       { label: 'Faculty', icon: 'i-lucide-user-round', to: '/admin/faculty' },
+      { label: 'Student', icon: 'i-lucide-user-round', to: '/admin/student' },
       // { label: 'Evaluation', icon: 'i-lucide-circle-user-round', to: '/admin/evaluation' },
       {
         label: 'Evaluation',
@@ -94,6 +95,15 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
         }]
       }
     ],
+  ],
+  Dean: [
+    [
+      { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
+      // { label: 'Student', icon: 'i-lucide-user-round', to: '/student' },
+      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check',},
+      { label: 'My Evaluations', icon: 'i-heroicons-user-circle', },
+      { label: 'Faculty', icon: 'i-heroicons-user-circle', }
+    ]
   ],
   Student: [
     [

@@ -6,39 +6,24 @@
           <UDashboardSidebarCollapse />
         </template>
         <template #title>
-          <span class="text-sm text-gray-500 uppercase">Teacher Management</span>
+          <span class="text-sm text-gray-500 uppercase">Student Management</span>
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <UInput
-          v-model="globalFilter"
-          icon="i-lucide-search"
-          placeholder="Search teacher..."
-          class="max-w-sm"
-        />
+        <UInput v-model="globalFilter" icon="i-lucide-search" placeholder="Search student..." class="max-w-sm" />
 
         <div class="flex items-center gap-2">
-          <UButton
-            v-if="selectedCount > 0"
-            label="Delete"
-            color="error"
-            variant="subtle"
-            icon="i-lucide-trash"
-            @click="deleteSelected"
-          >
+          <UButton v-if="selectedCount > 0" label="Delete" color="error" variant="subtle" icon="i-lucide-trash"
+            @click="deleteSelected">
             <template #trailing>
               <UKbd>{{ selectedCount }}</UKbd>
             </template>
           </UButton>
 
-          <UButton
-            label="New Teacher"
-            icon="i-lucide-plus"
-            @click="openCreateModal"
-          />
+          <UButton label="New Student" icon="i-lucide-plus" @click="openCreateModal" />
         </div>
       </div>
 
@@ -47,10 +32,11 @@
           <thead>
             <tr class="bg-gray-100">
               <th class="w-12 border border-gray-300 px-3 py-3 text-center"></th>
-              <th class="border border-gray-300 px-4 py-3 text-left">Employee No.</th>
+              <th class="border border-gray-300 px-4 py-3 text-left">Student ID</th>
               <th class="border border-gray-300 px-4 py-3 text-left">Name</th>
-              <th class="border border-gray-300 px-4 py-3 text-left">Department</th>
-              <th class="border border-gray-300 px-4 py-3 text-left">Role</th>
+              <th class="border border-gray-300 px-4 py-3 text-left">Course</th>
+              <th class="border border-gray-300 px-4 py-3 text-left">Year Level</th>
+              <th class="border border-gray-300 px-4 py-3 text-left">Section</th>
               <th class="border border-gray-300 px-4 py-3 text-left">Email</th>
               <th class="w-20 border border-gray-300 px-4 py-3 text-center">Action</th>
             </tr>
@@ -58,52 +44,50 @@
 
           <tbody>
             <tr v-if="loading">
-              <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                Loading teachers...
+              <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                Loading students...
               </td>
             </tr>
 
-            <tr v-else-if="paginatedTeachers.length === 0">
-              <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                No teachers found.
+            <tr v-else-if="paginatedStudents.length === 0">
+              <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                No students found.
               </td>
             </tr>
 
-            <tr v-for="teacher in paginatedTeachers" :key="teacher.documentId || teacher.id">
+            <tr v-for="student in paginatedStudents" :key="student.documentId || student.id">
               <td class="border border-gray-300 px-3 py-3 text-center">
-                <UCheckbox
-                  :model-value="isRowSelected(teacher)"
-                  @update:model-value="toggleRowSelection(teacher, !!$event)"
-                />
+                <UCheckbox :model-value="isRowSelected(student)"
+                  @update:model-value="toggleRowSelection(student, !!$event)" />
               </td>
 
               <td class="border border-gray-300 px-4 py-3">
-                {{ teacher.employee_no || '-' }}
+                {{ student.student_id }}
               </td>
 
               <td class="border border-gray-300 px-4 py-3">
-                {{ teacher.name }}
+                {{ student.name }}
               </td>
 
               <td class="border border-gray-300 px-4 py-3">
-                {{ teacher.department || '-' }}
+                {{ student.course || '-' }}
               </td>
 
               <td class="border border-gray-300 px-4 py-3">
-                {{ teacher.user?.role?.name || '-' }}
+                {{ student.year_level || '-' }}
               </td>
 
               <td class="border border-gray-300 px-4 py-3">
-                {{ teacher.user?.email || '-' }}
+                {{ student.section || '-' }}
+              </td>
+
+              <td class="border border-gray-300 px-4 py-3">
+                {{ student.email || '-' }}
               </td>
 
               <td class="border border-gray-300 px-4 py-3 text-center">
-                <UDropdownMenu :items="getDropdownActions(teacher)">
-                  <UButton
-                    icon="i-lucide-ellipsis-vertical"
-                    color="neutral"
-                    variant="ghost"
-                  />
+                <UDropdownMenu :items="getDropdownActions(student)">
+                  <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
                 </UDropdownMenu>
               </td>
             </tr>
@@ -113,45 +97,39 @@
 
       <div class="mt-4 flex items-center justify-between gap-3 border-t border-default pt-4">
         <div class="text-sm text-muted">
-          {{ selectedCount }} of {{ filteredTeachers.length }} row(s) selected.
+          {{ selectedCount }} of {{ filteredStudents.length }} row(s) selected.
         </div>
 
-        <UPagination
-          v-model:page="page"
-          :total="filteredTeachers.length"
-          :items-per-page="itemsPerPage"
-        />
+        <UPagination v-model:page="page" :total="filteredStudents.length" :items-per-page="itemsPerPage" />
       </div>
 
       <!-- CREATE MODAL -->
       <UModal v-model:open="createModal">
         <template #title>
-          Register Teacher
+          Register Student
         </template>
 
         <template #body>
-          <UForm :state="createForm" class="space-y-4" @submit="createTeacher">
+          <UForm :state="createForm" class="space-y-4" @submit="createStudent">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <UFormField label="Employee No." name="employee_no">
-                <UInput v-model="createForm.employee_no" class="w-full" />
+              <UFormField label="Student ID" name="student_id">
+                <UInput v-model="createForm.student_id" class="w-full" />
               </UFormField>
 
               <UFormField label="Full Name" name="name">
                 <UInput v-model="createForm.name" class="w-full" />
               </UFormField>
 
-              <UFormField label="Department" name="department">
-                <UInput v-model="createForm.department" class="w-full" />
+              <UFormField label="Course" name="course">
+                <UInput v-model="createForm.course" class="w-full" />
               </UFormField>
 
-              <UFormField label="Role" name="roleName">
-                <USelectMenu
-                  v-model="createForm.roleName"
-                  :items="roleOptions"
-                  value-key="value"
-                  class="w-full"
-                  placeholder="Select role"
-                />
+              <UFormField label="Year Level" name="year_level">
+                <UInput v-model="createForm.year_level" class="w-full" />
+              </UFormField>
+
+              <UFormField label="Section" name="section">
+                <UInput v-model="createForm.section" class="w-full" />
               </UFormField>
 
               <UFormField label="Username" name="username">
@@ -167,14 +145,8 @@
               </UFormField>
             </div>
 
-            <UButton
-              :label="loadingCreate ? 'Saving...' : 'Save'"
-              :disabled="loadingCreate"
-              type="submit"
-              class="mt-3"
-              size="lg"
-              block
-            />
+            <UButton :label="loadingCreate ? 'Saving...' : 'Save'" :disabled="loadingCreate" type="submit" class="mt-3"
+              size="lg" block />
           </UForm>
         </template>
       </UModal>
@@ -182,32 +154,30 @@
       <!-- EDIT MODAL -->
       <UModal v-model:open="editModal">
         <template #title>
-          Edit Teacher
+          Edit Student
         </template>
 
         <template #body>
-          <UForm :state="editForm" class="space-y-4" @submit="updateTeacher">
+          <UForm :state="editForm" class="space-y-4" @submit="updateStudent">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <UFormField label="Employee No." name="employee_no">
-                <UInput v-model="editForm.employee_no" class="w-full" />
+              <UFormField label="Student ID" name="student_id">
+                <UInput v-model="editForm.student_id" class="w-full" />
               </UFormField>
 
               <UFormField label="Full Name" name="name">
                 <UInput v-model="editForm.name" class="w-full" />
               </UFormField>
 
-              <UFormField label="Department" name="department">
-                <UInput v-model="editForm.department" class="w-full" />
+              <UFormField label="Course" name="course">
+                <UInput v-model="editForm.course" class="w-full" />
               </UFormField>
 
-              <UFormField label="Role" name="roleName">
-                <USelectMenu
-                  v-model="editForm.roleName"
-                  :items="roleOptions"
-                  value-key="value"
-                  class="w-full"
-                  placeholder="Select role"
-                />
+              <UFormField label="Year Level" name="year_level">
+                <UInput v-model="editForm.year_level" class="w-full" />
+              </UFormField>
+
+              <UFormField label="Section" name="section">
+                <UInput v-model="editForm.section" class="w-full" />
               </UFormField>
 
               <UFormField label="Email" name="email">
@@ -215,14 +185,8 @@
               </UFormField>
             </div>
 
-            <UButton
-              :label="loadingUpdate ? 'Updating...' : 'Update'"
-              :disabled="loadingUpdate"
-              type="submit"
-              class="mt-3"
-              size="lg"
-              block
-            />
+            <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
+              class="mt-3" size="lg" block />
           </UForm>
         </template>
       </UModal>
@@ -253,51 +217,49 @@ const page = ref(1)
 const itemsPerPage = 10
 const globalFilter = ref('')
 
-const teachers = ref([])
+const students = ref([])
 const selectedId = ref(null)
 const selectedUserId = ref(null)
 const selectedRows = ref<Record<string | number, boolean>>({})
 
-const roleOptions = [
-  { label: 'Faculty', value: 'Faculty' },
-  { label: 'Dean', value: 'Dean' },
-]
-
 const createForm = reactive({
-  employee_no: '',
+  student_id: '',
   name: '',
-  department: '',
-  roleName: '',
+  course: '',
+  year_level: '',
+  section: '',
   username: '',
   email: '',
   password: ''
 })
 
 const editForm = reactive({
-  employee_no: '',
+  student_id: '',
   name: '',
-  department: '',
-  roleName: '',
+  course: '',
+  year_level: '',
+  section: '',
   email: ''
 })
 
-const filteredTeachers = computed(() => {
+const filteredStudents = computed(() => {
   const keyword = globalFilter.value?.toLowerCase()?.trim()
-  if (!keyword) return teachers.value
+  if (!keyword) return students.value
 
-  return teachers.value.filter((item: any) =>
-    item.employee_no?.toLowerCase().includes(keyword) ||
+  return students.value.filter((item: any) =>
+    item.student_id?.toLowerCase().includes(keyword) ||
     item.name?.toLowerCase().includes(keyword) ||
-    item.department?.toLowerCase().includes(keyword) ||
-    item.user?.email?.toLowerCase().includes(keyword) ||
-    item.user?.role?.name?.toLowerCase().includes(keyword)
+    item.course?.toLowerCase().includes(keyword) ||
+    item.year_level?.toLowerCase().includes(keyword) ||
+    item.section?.toLowerCase().includes(keyword) ||
+    item.user?.email?.toLowerCase().includes(keyword)
   )
 })
 
-const paginatedTeachers = computed(() => {
+const paginatedStudents = computed(() => {
   const start = (page.value - 1) * itemsPerPage
   const end = start + itemsPerPage
-  return filteredTeachers.value.slice(start, end)
+  return filteredStudents.value.slice(start, end)
 })
 
 const selectedCount = computed(() =>
@@ -309,20 +271,22 @@ watch(globalFilter, () => {
 })
 
 function resetCreateForm() {
-  createForm.employee_no = ''
+  createForm.student_id = ''
   createForm.name = ''
-  createForm.department = ''
-  createForm.roleName = ''
+  createForm.course = ''
+  createForm.year_level = ''
+  createForm.section = ''
   createForm.username = ''
   createForm.email = ''
   createForm.password = ''
 }
 
 function resetEditForm() {
-  editForm.employee_no = ''
+  editForm.student_id = ''
   editForm.name = ''
-  editForm.department = ''
-  editForm.roleName = ''
+  editForm.course = ''
+  editForm.year_level = ''
+  editForm.section = ''
   editForm.email = ''
 }
 
@@ -354,13 +318,14 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
       label: 'Edit',
       icon: 'i-lucide-edit',
       onSelect() {
-        selectedId.value = row.documentId || row.id
+        selectedId.value = row.id
         selectedUserId.value = row.user?.id || null
 
-        editForm.employee_no = row.employee_no || ''
+        editForm.student_id = row.student_id || ''
         editForm.name = row.name || ''
-        editForm.department = row.department || ''
-        editForm.roleName = row.user?.role?.name || ''
+        editForm.course = row.course || ''
+        editForm.year_level = row.year_level || ''
+        editForm.section = row.section || ''
         editForm.email = row.user?.email || ''
 
         editModal.value = true
@@ -377,19 +342,19 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
   ]]
 }
 
-const getTeachers = async () => {
+const getStudents = async () => {
   try {
     loading.value = true
 
-    const res = await $api('/teachers', {
+    const res = await $api('/students', {
       query: {
-        'populate[user][populate]': 'role',
+        'populate[user]': true,
         'sort[0]': 'name:asc',
         'pagination[pageSize]': 200
       }
     })
 
-    teachers.value = res.data || []
+    students.value = res.data || []
   } catch (err) {
     console.log(err)
   } finally {
@@ -397,17 +362,18 @@ const getTeachers = async () => {
   }
 }
 
-const createTeacher = async () => {
+const createStudent = async () => {
   try {
     loadingCreate.value = true
 
-    await $api('/teachers/register', {
+    await $api('/students/register', {
       method: 'POST',
       body: {
-        employee_no: createForm.employee_no,
+        student_id: createForm.student_id,
         name: createForm.name,
-        department: createForm.department,
-        roleName: createForm.roleName,
+        course: createForm.course,
+        year_level: createForm.year_level,
+        section: createForm.section,
         username: createForm.username,
         email: createForm.email,
         password: createForm.password
@@ -416,18 +382,18 @@ const createTeacher = async () => {
 
     toast.add({
       title: 'Success',
-      description: 'Teacher account created successfully.',
+      description: 'Student account created successfully.',
       color: 'success'
     })
 
     createModal.value = false
     resetCreateForm()
-    await getTeachers()
+    await getStudents()
   } catch (err: any) {
     console.log(err)
     toast.add({
       title: 'Error',
-      description: err?.data?.error?.message || err?.data?.message || 'Failed to create teacher.',
+      description: err?.data?.error?.message || err?.data?.message || 'Failed to create student.',
       color: 'error'
     })
   } finally {
@@ -435,48 +401,36 @@ const createTeacher = async () => {
   }
 }
 
-const updateTeacher = async () => {
-  try {
+const updateStudent = async () => {
+ try {
     loadingUpdate.value = true
 
-    await $api(`/teachers/${selectedId.value}`, {
+    await $api(`/students/update-with-user/${selectedId.value}`, {
       method: 'PUT',
       body: {
-        data: {
-          employee_no: editForm.employee_no,
-          name: editForm.name,
-          department: editForm.department
-        }
+        student_id: editForm.student_id,
+        name: editForm.name,
+        course: editForm.course,
+        year_level: editForm.year_level,
+        section: editForm.section,
+        email: editForm.email
       }
     })
 
-    // optional user update
-    if (selectedUserId.value) {
-      await $api(`/users/${selectedUserId.value}`, {
-        method: 'PUT',
-        body: {
-          email: editForm.email,
-          roleName: editForm.roleName
-        }
-      }).catch((err) => {
-        console.log('User update skipped/failed:', err)
-      })
-    }
-
     toast.add({
       title: 'Success',
-      description: 'Teacher updated successfully.',
+      description: 'Student updated successfully.',
       color: 'success'
     })
 
     editModal.value = false
     resetEditForm()
-    await getTeachers()
+    await getStudents()
   } catch (err: any) {
     console.log(err)
     toast.add({
       title: 'Error',
-      description: err?.data?.error?.message || 'Failed to update teacher.',
+      description: err?.data?.error?.message || err?.data?.message || 'Failed to update student.',
       color: 'error'
     })
   } finally {
@@ -486,37 +440,37 @@ const updateTeacher = async () => {
 
 const deleteOne = async (row: any) => {
   try {
-    await $api(`/teachers/${row.documentId || row.id}`, {
+    await $api(`/students/delete-with-user/${row.id}`, {
       method: 'DELETE'
     })
 
     toast.add({
       title: 'Success',
-      description: 'Teacher deleted successfully.',
+      description: 'Student deleted successfully.',
       color: 'success'
     })
 
-    delete selectedRows.value[row.documentId || row.id]
-    await getTeachers()
+    delete selectedRows.value[row.id]
+    await getStudents()
   } catch (err: any) {
     console.log(err)
     toast.add({
       title: 'Error',
-      description: err?.data?.error?.message || 'Failed to delete teacher.',
+      description: err?.data?.error?.message || 'Failed to delete student.',
       color: 'error'
     })
   }
 }
 
 const deleteSelected = async () => {
-  const selectedItems = teachers.value.filter(
-    (item: any) => selectedRows.value[item.documentId || item.id]
+  const selectedItems = students.value.filter(
+    (item: any) => selectedRows.value[item.id]
   )
 
   try {
     await Promise.all(
       selectedItems.map((item: any) =>
-        $api(`/teachers/${item.documentId || item.id}`, {
+        $api(`/students/delete-with-user/${item.id}`, {
           method: 'DELETE'
         })
       )
@@ -524,23 +478,23 @@ const deleteSelected = async () => {
 
     toast.add({
       title: 'Success',
-      description: 'Selected teachers deleted successfully.',
+      description: 'Selected students deleted successfully.',
       color: 'success'
     })
 
     selectedRows.value = {}
-    await getTeachers()
+    await getStudents()
   } catch (err: any) {
     console.log(err)
     toast.add({
       title: 'Error',
-      description: err?.data?.error?.message || 'Failed to delete selected teachers.',
+      description: err?.data?.error?.message || 'Failed to delete selected students.',
       color: 'error'
     })
   }
 }
 
 onMounted(() => {
-  getTeachers()
+  getStudents()
 })
 </script>

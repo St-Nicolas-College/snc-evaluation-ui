@@ -14,13 +14,13 @@ const loading = ref(false)
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
-const userDetails = ref({
-  name: `${user.value?.user_info?.first_name} ${user.value?.user_info?.last_name}`,
-  avatar: {
-    src: '/SNC-Logo.png',
-    alt: `${user.value?.user_info?.first_name} ${user.value?.user_info?.last_name} || 'User'`
-  }
-})
+// const userDetails = ref({
+//   name: `${user.value?.user_info?.first_name} ${user.value?.user_info?.last_name}`,
+//   avatar: {
+//     src: '/SNC-Logo.png',
+//     alt: `${user.value?.user_info?.first_name} ${user.value?.user_info?.last_name} || 'User'`
+//   }
+// })
 
 
 
@@ -33,6 +33,30 @@ const handleLogout = async () => {
   await new Promise(r => setTimeout(r, 1500))
   logout()
 }
+
+const userDetails = computed(() => {
+ const role = user.value?.role ?? '';
+
+  const displayName =
+    role === 'Faculty'
+      ? user.value?.teacher?.name
+      : role === 'Student'
+      ? user.value?.student?.name
+      : role === 'Dean'
+      ? user.value?.teacher?.name
+      : role === 'Admin'
+      ? user.value?.username
+      : user.value?.username;
+
+  return {
+    name: displayName || 'User',
+    role,
+    avatar: {
+      src: '/SNC-Logo.png',
+      alt: displayName || 'User'
+    }
+  };
+})
 
 
 const items = computed<DropdownMenuItem[][]>(() => ([[{

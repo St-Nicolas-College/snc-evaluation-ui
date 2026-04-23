@@ -27,6 +27,14 @@
         <DashboardAdminDashboard />
       </div>
 
+      <!-- DEAN -->
+      <div v-else-if="role === 'Dean'">
+        <div class="py-10 text-center text-gray-500">
+          Dean Page
+        </div>
+        <!-- <DashboardAdminDashboard /> -->
+      </div>
+
       <!-- FACULTY -->
       <div v-else-if="role === 'Faculty'">
         <DashboardFacultyDashboard />
@@ -49,7 +57,7 @@
 //@ts-nocheck
 definePageMeta({
   middleware: ['auth', 'role'],
-  role: ['Admin', 'Faculty', 'Student']
+  role: ['Admin','Dean', 'Faculty', 'Student']
 })
 const { user } = useAuth()
 const { $api } = useNuxtApp()
