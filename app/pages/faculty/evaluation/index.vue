@@ -12,31 +12,35 @@
     </template>
 
     <template #body>
-      <div class="mx-auto w-full max-w-[1600px] bg-white p-6 shadow rounded-lg">
+      <div class="mx-auto w-full bg-white p-6 shadow rounded-lg">
         <div class="mb-6 text-center">
           <h2 class="text-xl font-bold uppercase">St. Nicolas College of Business and Technology</h2>
           <p class="text-sm">MEL-VI Bldg., Jose Abad Santos Avenue, City of San Fernando Pampanga</p>
           <p class="text-sm">Tel. No.: 861-3181</p>
-          <h1 class="mt-3 text-2xl font-extrabold uppercase">Performance Evaluation Form</h1>
+          <h1 class="mt-3 text-2xl font-extrabold uppercase">Peers Evaluation Form</h1>
           <p class="font-medium">Faculty - Dean/Coordinator</p>
         </div>
 
         <div class="mb-4 border border-gray-400 p-4">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <UFormField label="Semester">
+            <!-- <UFormField label="Semester">
               <UInput v-model="form.semester" />
+            </UFormField> -->
+            <UFormField label="Semester">
+              <USelectMenu v-model="form.semester" :items="semesterOptions" value-key="value"
+                placeholder="Select semester" class="w-full" />
             </UFormField>
 
             <UFormField label="School Year">
-              <UInput v-model="form.school_year" />
+              <UInput v-model="form.school_year" class="w-full" />
             </UFormField>
 
             <UFormField label="Date">
-              <UInput v-model="form.date" type="date" />
+              <UInput v-model="form.date" type="date" class="w-full" />
             </UFormField>
 
             <UFormField label="Department">
-              <UInput v-model="form.department" />
+              <UInput v-model="form.department" class="w-full" />
             </UFormField>
           </div>
         </div>
@@ -56,7 +60,7 @@
                 Loading...
               </div>
 
-              <div v-else class="max-h-[600px] overflow-y-auto pr-2">
+              <div v-else class="overflow-y-auto pr-2">
                 <UCheckboxGroup v-model="selectedTargetIds" value-key="value" :items="targetOptions" :ui="{
                   fieldset: 'grid grid-cols-1 gap-3',
                   item: 'rounded-lg border border-gray-300 p-4 hover:border-primary-500 transition'
@@ -211,6 +215,14 @@
                 </div>
               </div>
 
+              <div v-if="submitError" class="text-sm font-medium text-red-600">
+                {{ submitError }}
+              </div>
+
+              <div v-if="submitSuccess" class="text-sm font-medium text-green-600">
+                {{ submitSuccess }}
+              </div>
+
               <div class="flex justify-end gap-2">
                 <UButton color="neutral" variant="outline" @click="resetForm">
                   Reset
@@ -231,31 +243,49 @@
 <script lang="ts" setup>
 // @ts-nocheck
 const { $api } = useNuxtApp()
+const { user } = useAuth()
 const toast = useToast()
 
 const pending = ref(true)
 const submitLoading = ref(false)
+const submitError = ref('')
+const submitSuccess = ref('')
 const selectedTargetIds = ref<number[]>([])
 const currentPage = ref(1)
 const itemsPerPage = 2
+const semesterOptions = [
+  { label: '1st Semester', value: '1st Semester' },
+  { label: '2nd Semester', value: '2nd Semester' },
+  { label: 'Summer', value: 'Summer' }
+]
 
 const targets = ref([])
 const sections = ref([])
 const evaluationType = ref(null)
+const existingEvaluations = ref([])
 
 const form = reactive({
   semester: '',
   school_year: '',
   date: '',
-  department: '',
+  department: user.value?.teacher?.department,
   evaluations: [] as any[]
 })
 
 const targetOptions = computed(() =>
-  targets.value.map((item: any) => ({
-    label: item.name,
-    value: item.id
-  }))
+  targets.value.map((item: any) => {
+    const alreadyEvaluated = existingEvaluations.value.some(
+      (evaluation: any) => evaluation.dean_coordinator?.id === item.id
+    )
+
+    return {
+      label: alreadyEvaluated
+        ? `${item.name} (Already Evaluated)`
+        : item.name,
+      value: item.id,
+      disabled: alreadyEvaluated
+    }
+  })
 )
 
 const targetMap = computed(() => {
@@ -343,11 +373,43 @@ const getEvaluationType = async () => {
   evaluationType.value = res.data?.[0] || null
 }
 
+// Fetch existing evaluations
+const getExistingEvaluations = async () => {
+  if (!user.value?.id || !form.semester || !form.school_year) return
+
+  const res = await $api('/evaluations', {
+    query: {
+      'filters[evaluator_user][id][$eq]': user.value.id,
+      'filters[batch][semester][$eq]': form.semester,
+      'filters[batch][school_year][$eq]': form.school_year,
+      'filters[batch][evaluation_type][code][$eq]': 'faculty-dean-coordinator',
+      'populate[dean_coordinator]': true,
+      'pagination[pageSize]': 100
+    }
+  })
+
+  existingEvaluations.value = res.data || []
+}
+
+// Watch semester and school year
+watch(
+  () => [form.semester, form.school_year],
+  async () => {
+    selectedTargetIds.value = []
+    form.evaluations = []
+
+    if (form.semester && form.school_year) {
+      await getExistingEvaluations()
+    }
+  }
+)
+
 const getTargets = async () => {
   const res = await $api('/teachers', {
     query: {
       'populate[user][populate]': 'role',
       'filters[user][role][name]': 'Dean',
+      'filters[department][$eq]': user.value?.teacher?.department,
       'sort[0]': 'name:asc',
       'pagination[pageSize]': 100
     }
@@ -416,14 +478,19 @@ const submitEvaluation = async () => {
       }
     })
 
-    resetForm()
-
     toast.add({
       title: 'Success',
       description: 'Faculty to Dean/Coordinator evaluation submitted successfully.',
       color: 'success'
     })
-  } catch (err) {
+    await getExistingEvaluations()
+    resetForm()
+  } catch (err: any) {
+    submitError.value =
+      err?.data?.error?.message ||
+      err?.data?.message ||
+      'Failed to submit evaluations.'
+
     console.log(err)
   } finally {
     submitLoading.value = false

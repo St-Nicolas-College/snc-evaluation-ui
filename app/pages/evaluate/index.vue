@@ -59,9 +59,9 @@
               <template #label="{ item }">
                 <div class="flex flex-col">
                   <span class="font-medium">{{ item.label }}</span>
-                  <span v-if="item.description" class="text-xs text-gray-500">
+                  <!-- <span v-if="item.description" class="text-xs text-gray-500">
                     {{ item.description }}
-                  </span>
+                  </span> -->
                 </div>
               </template>
             </UCheckboxGroup>
@@ -368,6 +368,7 @@ const currentPage = ref(1)
 const itemsPerPage = 1
 
 const evaluationType = ref<any>(null)
+const existingEvaluations = ref([])
 
 const form = reactive({
   semester: '',
@@ -377,11 +378,20 @@ const form = reactive({
 })
 
 const teacherCheckboxItems = computed(() =>
-  teachers.value.map((teacher: any) => ({
-    label: teacher.name,
-    description: teacher.department || '',
-    value: teacher.id
-  }))
+  teachers.value.map((teacher: any) => {
+    const alreadyEvaluated = existingEvaluations.value.some(
+      (evaluation: any) => evaluation.teacher?.id === teacher.id
+    )
+
+    return {
+      label: alreadyEvaluated
+        ? `${teacher.name} (Already Evaluated)`
+        : teacher.name,
+      description: teacher.department || '',
+      value: teacher.id,
+      disabled: alreadyEvaluated
+    }
+  })
 )
 
 const teacherMap = computed(() => {
@@ -442,12 +452,23 @@ watch(
 const getSubjectOptions = (teacherId: number | string) => {
   const teacher = teacherMap.value[String(teacherId)]
 
-  return (teacher?.assigned_subjects || []).map((subject: any) => ({
-    label: subject.code ? `${subject.code} - ${subject.name}` : subject.name,
-    value: subject.id
-  }))
-}
+  return (teacher?.assigned_subjects || []).map((subject: any) => {
+    const alreadyEvaluated = existingEvaluations.value.some((evaluation: any) =>
+      evaluation.teacher?.id === Number(teacherId) &&
+      evaluation.subject?.id === subject.id
+    )
 
+    return {
+      label: alreadyEvaluated
+        ? `${subject.code ? `${subject.code} - ${subject.name}` : subject.name} (Already Evaluated)`
+        : subject.code
+          ? `${subject.code} - ${subject.name}`
+          : subject.name,
+      value: subject.id,
+      disabled: alreadyEvaluated
+    }
+  })
+}
 const getAnsweredCount = (evaluation: EvaluationFormItem) =>
   Object.keys(evaluation.responses).length
 
@@ -539,6 +560,37 @@ const getTeachers = async () => {
   syncEvaluationsFromSelection()
 }
 
+// Get Existing Evaluations
+const getExistingEvaluations = async () => {
+  if (!user.value?.id || !form.semester || !form.schoolYear) return
+
+  const res = await $api('/evaluations', {
+    query: {
+      'filters[evaluator_user][id][$eq]': user.value.id,
+      'filters[batch][semester][$eq]': form.semester,
+      'filters[batch][school_year][$eq]': form.schoolYear,
+      'filters[batch][evaluation_type][code][$eq]': 'student-faculty',
+      'populate[teacher]': true,
+      'pagination[pageSize]': 300
+    }
+  })
+
+  existingEvaluations.value = res.data || []
+}
+
+// Watch semester and school year
+watch(
+  () => [form.semester, form.schoolYear],
+  async () => {
+    selectedTeacherIds.value = []
+    form.evaluations = []
+
+    if (form.semester && form.schoolYear) {
+      await getExistingEvaluations()
+    }
+  }
+)
+
 const loadData = async () => {
   try {
     pending.value = true
@@ -624,6 +676,7 @@ const submitEvaluation = async () => {
     })
 
     submitSuccess.value = 'Evaluation submitted successfully.'
+    await getExistingEvaluations()
     resetForm()
   } catch (err: any) {
     submitError.value =

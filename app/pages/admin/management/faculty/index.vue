@@ -58,31 +58,31 @@
             </tr>
 
             <tr v-for="teacher in paginatedTeachers" :key="teacher.documentId || teacher.id">
-              <td class="border border-gray-300 px-3 py-3 text-center">
+              <td class="border border-gray-300 px-3 py-1 text-center">
                 <UCheckbox :model-value="isRowSelected(teacher)"
                   @update:model-value="toggleRowSelection(teacher, !!$event)" />
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ teacher.employee_no || '-' }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ teacher.name }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ teacher.department || '-' }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ teacher.user?.role?.name || '-' }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ teacher.user?.email || '-' }}
               </td>
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 <UTooltip v-if="teacher.assigned_subjects?.length"
                   :text="teacher.assigned_subjects.map((s: any) => s.code ? `${s.code} - ${s.name}` : s.name).join(', ')">
                   <div class="flex flex-wrap gap-1">
@@ -102,7 +102,7 @@
                 </span>
               </td>
 
-              <td class="border border-gray-300 px-4 py-3 text-center">
+              <td class="border border-gray-300 px-4 py-1 text-center">
                 <UDropdownMenu :items="getDropdownActions(teacher)">
                   <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
                 </UDropdownMenu>
@@ -166,13 +166,13 @@
       </UModal>
 
       <!-- EDIT MODAL -->
-      <UModal v-model:open="editModal">
+      <UModal v-model:open="editModal" :ui="{ content: 'max-w-4xl' }">
         <template #title>
           Edit Teacher
         </template>
 
         <template #body>
-          <UForm :state="editForm" class="space-y-4" @submit="updateTeacher">
+          <!-- <UForm :state="editForm" class="space-y-4" @submit="updateTeacher">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <UFormField label="Employee No." name="employee_no">
                 <UInput v-model="editForm.employee_no" class="w-full" />
@@ -203,6 +203,88 @@
 
             <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
               class="mt-3" size="lg" block />
+          </UForm> -->
+
+          <UForm :state="editForm" class="space-y-4" @submit="updateTeacher">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <UFormField label="Employee No." name="employee_no">
+                <UInput v-model="editForm.employee_no" class="w-full" />
+              </UFormField>
+
+              <UFormField label="Full Name" name="name">
+                <UInput v-model="editForm.name" class="w-full" />
+              </UFormField>
+
+              <UFormField label="Department" name="department">
+                <UInput v-model="editForm.department" class="w-full" />
+              </UFormField>
+
+              <UFormField label="Email" name="email">
+                <UInput v-model="editForm.email" type="email" class="w-full" />
+              </UFormField>
+
+              <UFormField label="Role" name="roleName">
+                <USelectMenu v-model="editForm.roleName" :items="roleOptions" value-key="value" class="w-full"
+                  placeholder="Select role" />
+              </UFormField>
+            </div>
+
+            <div class="space-y-3">
+              <UFormField label="Assigned Subjects">
+                <USelectMenu v-model="editForm.assigned_subjects" :items="subjectOptions" value-key="value" multiple
+                  class="w-full" placeholder="Select assigned subjects">
+                <!-- Selected items as chips -->
+                    <template #default="{ modelValue }">
+                      <div class="flex flex-wrap gap-1">
+                        <UBadge v-for="id in modelValue" :key="id" color="primary" variant="soft"
+                          class="flex items-center gap-1">
+                          {{ getSubjectName(id) }}
+
+                          <UIcon name="i-lucide-x" class="cursor-pointer" @click.stop="removeSubject(id)" />
+                        </UBadge>
+
+                        <span v-if="!modelValue?.length" class="text-gray-400">
+                          Select assigned teachers
+                        </span>
+                      </div>
+                    </template>
+                </USelectMenu>
+              </UFormField>
+
+              <div class="overflow-x-auto rounded-lg border border-gray-300">
+                <table class="w-full border-collapse text-sm">
+                  <thead>
+                    <tr class="bg-gray-100">
+                      <th class="border border-gray-300 px-3 py-2 text-left">Code</th>
+                      <th class="border border-gray-300 px-3 py-2 text-left">Subject</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-if="assignedSubjectPreview.length === 0">
+                      <td colspan="2" class="px-3 py-4 text-center text-gray-500">
+                        No assigned subjects selected.
+                      </td>
+                    </tr>
+
+                    <tr v-for="subject in assignedSubjectPreview" :key="subject.documentId || subject.id">
+                      <td class="border border-gray-300 px-3 py-2">
+                        {{ subject.code || '-' }}
+                      </td>
+
+                      <td class="border border-gray-300 px-3 py-2">
+                        {{ subject.name }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="mt-4 flex justify-end">
+              <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
+                size="lg" class="w-40 justify-center" />
+            </div>
           </UForm>
         </template>
       </UModal>
@@ -260,7 +342,7 @@ const editForm = reactive({
   department: '',
   roleName: '',
   email: '',
-  assigned_subjects: [] as number[]
+  assigned_subjects: [] as string[]
 })
 
 const filteredTeachers = computed(() => {
@@ -286,6 +368,12 @@ const selectedCount = computed(() =>
   Object.values(selectedRows.value).filter(Boolean).length
 )
 
+const assignedSubjectPreview = computed(() =>
+  subjects.value.filter((subject: any) =>
+    editForm.assigned_subjects.includes(subject.documentId)
+  )
+)
+
 watch(globalFilter, () => {
   page.value = 1
 })
@@ -306,6 +394,7 @@ function resetEditForm() {
   editForm.department = ''
   editForm.roleName = ''
   editForm.email = ''
+  editForm.assigned_subjects = []
 }
 
 function openCreateModal() {
@@ -347,7 +436,7 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
 
         // ✅ ADD THIS HERE
         editForm.assigned_subjects =
-          row.assigned_subjects?.map((s: any) => s.id) || []
+          row.assigned_subjects?.map((s: any) => s.documentId) || []
 
         editModal.value = true
       }
@@ -375,10 +464,22 @@ const getSubjects = async () => {
   subjects.value = res.data || []
 }
 
+const getSubjectName = (documentId: string) => {
+  const subject = subjects.value.find(
+    (t: any) => t.documentId === documentId
+  )
+  return subject?.name || 'Unknown'
+}
+
+const removeSubject = (id: string) => {
+  editForm.assigned_subjects =
+    editForm.assigned_subjects.filter((t: string) => t !== id)
+}
+
 const subjectOptions = computed(() =>
   subjects.value.map((s: any) => ({
     label: s.code ? `${s.code} - ${s.name}` : s.name,
-    value: s.id
+    value: s.documentId
   }))
 )
 

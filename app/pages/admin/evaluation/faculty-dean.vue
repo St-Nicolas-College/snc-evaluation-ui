@@ -1,29 +1,29 @@
 <template>
- <UDashboardPanel>
+  <UDashboardPanel>
     <template #header>
       <UDashboardNavbar>
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
         <template #title>
-          <span class="text-sm text-gray-500 uppercase">Faculty Evaluation Result</span>
+          <span class="text-sm text-gray-500 uppercase">Dean Evaluation Result</span>
         </template>
       </UDashboardNavbar>
     </template>
+
     <template #body>
       <div class="space-y-6">
-       <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-  <UFormField label="Select Faculty">
-    <USelectMenu
-      v-model="selectedFacultyId"
-      :items="facultyOptions"
-      value-key="value"
-      placeholder="Choose faculty"
-      class="w-full"
-    />
-  </UFormField>
-
-  <UFormField label="School Year">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <UFormField label="Select Dean / Coordinator">
+            <USelectMenu
+              v-model="selectedDeanId"
+              :items="deanOptions"
+              value-key="value"
+              placeholder="Choose dean / coordinator"
+              class="w-full"
+            />
+          </UFormField>
+          <UFormField label="School Year">
     <UInput
       v-model="selectedSchoolYear"
       placeholder="2025-2026"
@@ -40,20 +40,20 @@
       class="w-full"
     />
   </UFormField>
-</div>
+        </div>
 
         <div v-if="loading" class="py-10 text-center text-gray-500">
           Loading evaluations...
         </div>
 
         <div
-          v-else-if="selectedFacultyId && evaluations.length === 0"
+          v-else-if="selectedDeanId && evaluations.length === 0"
           class="py-10 text-center text-gray-500"
         >
-          No evaluations found for this faculty.
+          No evaluations found for this dean/coordinator.
         </div>
 
-        <div v-else-if="selectedFacultyId" class="space-y-6">
+        <div v-else-if="selectedDeanId" class="space-y-6">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <UCard>
               <div class="text-sm text-gray-500">Total Evaluations</div>
@@ -78,59 +78,75 @@
 
           <UCard>
             <template #header>
-              <div class="font-bold text-lg">
-                Section Summary
-              </div>
+              <div class="font-bold text-lg">Section Summary</div>
             </template>
 
-            <div class="overflow-x-auto">
-              <table class="w-full border-collapse border border-gray-300 text-sm">
-                <thead>
-                  <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-4 py-2 text-left">Section</th>
-                    <th class="border border-gray-300 px-4 py-2 text-center">Total Score</th>
-                    <th class="border border-gray-300 px-4 py-2 text-center">Items Rated</th>
-                    <th class="border border-gray-300 px-4 py-2 text-center">Average</th>
-                  </tr>
-                </thead>
+            <UTable :data="sectionSummary" :columns="sectionColumns">
+              <template #average-cell="{ row }">
+                <span class="font-bold">{{ row.original.average }}</span>
+              </template>
 
-                <tbody>
-                  <tr v-for="section in sectionSummary" :key="section.section">
-                    <td class="border border-gray-300 px-4 py-2 font-medium">
-                      {{ section.section }}
-                    </td>
-                    <td class="border border-gray-300 px-4 py-2 text-center">
-                      {{ section.totalScore }}
-                    </td>
-                    <td class="border border-gray-300 px-4 py-2 text-center">
-                      {{ section.totalItems }}
-                    </td>
-                    <td class="border border-gray-300 px-4 py-2 text-center font-bold">
-                      {{ section.average }}
-                    </td>
-                  </tr>
-
-                  <tr v-if="sectionSummary.length === 0">
-                    <td colspan="4" class="border border-gray-300 px-4 py-6 text-center text-gray-500">
-                      No section summary available.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+              <template #empty>
+                <div class="py-6 text-center text-gray-500">
+                  No section summary available.
+                </div>
+              </template>
+            </UTable>
           </UCard>
+
+          <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <UCard v-if="strengthsList.length > 0">
+              <template #header>
+                <div class="font-bold text-lg">Strengths</div>
+              </template>
+
+              <div class="space-y-3">
+                <div
+                  v-for="item in strengthsList"
+                  :key="`strength-${item.id}`"
+                  class="rounded-lg border border-gray-300 p-4"
+                >
+                  <div class="mb-1 text-xs text-gray-500">
+                    {{ formatDate(item.createdAt) }}
+                  </div>
+                  <div class="text-sm text-gray-700">
+                    {{ item.strengths }}
+                  </div>
+                </div>
+              </div>
+            </UCard>
+
+            <UCard v-if="improvementList.length > 0">
+              <template #header>
+                <div class="font-bold text-lg">Areas for Improvement</div>
+              </template>
+
+              <div class="space-y-3">
+                <div
+                  v-for="item in improvementList"
+                  :key="`improvement-${item.id}`"
+                  class="rounded-lg border border-gray-300 p-4"
+                >
+                  <div class="mb-1 text-xs text-gray-500">
+                    {{ formatDate(item.createdAt) }}
+                  </div>
+                  <div class="text-sm text-gray-700">
+                    {{ item.areas_for_improvement }}
+                  </div>
+                </div>
+              </div>
+            </UCard>
+          </div>
 
           <UCard v-if="commentsList.length > 0">
             <template #header>
-              <div class="font-bold text-lg">
-                Comments
-              </div>
+              <div class="font-bold text-lg">Comments</div>
             </template>
 
             <div class="space-y-3">
               <div
                 v-for="item in commentsList"
-                :key="item.id"
+                :key="`comment-${item.id}`"
                 class="rounded-lg border border-gray-300 p-4"
               >
                 <div class="mb-1 text-xs text-gray-500">
@@ -145,16 +161,15 @@
         </div>
 
         <div v-else class="py-10 text-center text-gray-500">
-          Please select a faculty to view evaluations.
+          Please select a dean/coordinator to view evaluations.
         </div>
       </div>
-
     </template>
   </UDashboardPanel>
 </template>
 
-<script lang="ts" setup>
-//@ts-nocheck
+<script setup lang="ts">
+// @ts-nocheck
 definePageMeta({
   middleware: ['auth', 'role'],
   role: ['Admin']
@@ -162,10 +177,18 @@ definePageMeta({
 
 const { $api } = useNuxtApp()
 
-const faculties = ref([])
-const selectedFacultyId = ref('')
+const deans = ref([])
+const selectedDeanId = ref('')
 const evaluations = ref([])
 const loading = ref(false)
+
+const sectionColumns = [
+  { accessorKey: 'section', header: 'Section' },
+  { accessorKey: 'totalScore', header: 'Total Score' },
+  { accessorKey: 'totalItems', header: 'Items Rated' },
+  { accessorKey: 'average', header: 'Average' }
+]
+
 const selectedSchoolYear = ref('')
 const selectedSemester = ref('')
 
@@ -175,10 +198,10 @@ const semesterOptions = [
   { label: 'Summer', value: 'Summer' }
 ]
 
-const facultyOptions = computed(() =>
-  faculties.value.map((faculty: any) => ({
-    label: faculty.name,
-    value: faculty.id
+const deanOptions = computed(() =>
+  deans.value.map((dean: any) => ({
+    label: `${dean.name}${dean.department ? ` (${dean.department})` : ''}`,
+    value: dean.id
   }))
 )
 
@@ -216,6 +239,26 @@ const commentsList = computed(() =>
     }))
 )
 
+const strengthsList = computed(() =>
+  evaluations.value
+    .filter((item: any) => item.strengths?.trim())
+    .map((item: any) => ({
+      id: item.id,
+      strengths: item.strengths,
+      createdAt: item.createdAt
+    }))
+)
+
+const improvementList = computed(() =>
+  evaluations.value
+    .filter((item: any) => item.areas_for_improvement?.trim())
+    .map((item: any) => ({
+      id: item.id,
+      areas_for_improvement: item.areas_for_improvement,
+      createdAt: item.createdAt
+    }))
+)
+
 const sectionSummary = computed(() => {
   const grouped: Record<string, any> = {}
 
@@ -248,33 +291,28 @@ const sectionSummary = computed(() => {
         ? Number((section.totalScore / section.totalItems).toFixed(2))
         : 0
     }))
-    .sort((a: any, b: any) => {
-      if (a.sectionOrder === b.sectionOrder) {
-        return a.section.localeCompare(b.section)
-      }
-      return a.sectionOrder - b.sectionOrder
-    })
+    .sort((a: any, b: any) => a.sectionOrder - b.sectionOrder)
 })
 
-const getFaculties = async () => {
+const getDeans = async () => {
   try {
     const res = await $api('/teachers', {
       query: {
-        sort: ['name:asc'],
-        pagination: {
-          pageSize: 100
-        }
+        'populate[user][populate]': 'role',
+        'filters[user][role][name][$eq]': 'Dean',
+        'sort[0]': 'name:asc',
+        'pagination[pageSize]': 100
       }
     })
 
-    faculties.value = res.data
+    deans.value = res.data || []
   } catch (err) {
     console.log(err)
   }
 }
 
-const getFacultyEvaluations = async () => {
-  if (!selectedFacultyId.value) {
+const getDeanEvaluations = async () => {
+  if (!selectedDeanId.value) {
     evaluations.value = []
     return
   }
@@ -283,16 +321,16 @@ const getFacultyEvaluations = async () => {
     loading.value = true
 
     const query: any = {
-      'filters[teacher][id][$eq]': selectedFacultyId.value,
-      'filters[batch][evaluation_type][code][$eq]': 'student-faculty',
-      'populate[teacher]': true,
-      'populate[subject]': true,
+      'filters[dean_coordinator][id][$eq]': selectedDeanId.value,
+      'filters[batch][evaluation_type][code][$eq]': 'faculty-dean-coordinator',
+      'populate[dean_coordinator]': true,
+      'populate[evaluator_user]': true,
       'populate[batch][populate]': 'evaluation_type',
       'sort[0]': 'createdAt:desc',
       'pagination[pageSize]': 300
     }
 
-    if (selectedSchoolYear.value) {
+     if (selectedSchoolYear.value) {
       query['filters[batch][school_year][$eq]'] = selectedSchoolYear.value
     }
 
@@ -302,7 +340,7 @@ const getFacultyEvaluations = async () => {
 
     const res = await $api('/evaluations', { query })
 
-    evaluations.value = res.data
+    evaluations.value = res.data || []
   } catch (err) {
     console.log(err)
   } finally {
@@ -320,15 +358,11 @@ const formatDate = (value: string) => {
   })
 }
 
-watch([selectedFacultyId, selectedSchoolYear, selectedSemester], async () => {
-  await getFacultyEvaluations()
+watch([selectedDeanId, selectedSchoolYear, selectedSemester], async () => {
+  await getDeanEvaluations()
 })
 
 onMounted(async () => {
-  await getFaculties()
+  await getDeans()
 })
 </script>
-
-<style>
-
-</style>

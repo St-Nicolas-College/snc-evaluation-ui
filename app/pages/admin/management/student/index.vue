@@ -56,36 +56,36 @@
             </tr>
 
             <tr v-for="student in paginatedStudents" :key="student.documentId || student.id">
-              <td class="border border-gray-300 px-3 py-3 text-center">
+              <td class="border border-gray-300 px-3 py-1 text-center">
                 <UCheckbox :model-value="isRowSelected(student)"
                   @update:model-value="toggleRowSelection(student, !!$event)" />
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ student.student_id }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ student.name }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ student.course || '-' }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ student.year_level || '-' }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ student.section || '-' }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3">
+              <td class="border border-gray-300 px-4 py-1">
                 {{ student.email || '-' }}
               </td>
 
-              <td class="border border-gray-300 px-4 py-3 text-center">
+              <td class="border border-gray-300 px-4 py-1 text-center">
                 <UDropdownMenu :items="getDropdownActions(student)">
                   <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
                 </UDropdownMenu>
@@ -152,41 +152,104 @@
       </UModal>
 
       <!-- EDIT MODAL -->
-      <UModal v-model:open="editModal">
+      <UModal v-model:open="editModal" :ui="{ content: 'max-w-4xl' }">
         <template #title>
           Edit Student
         </template>
 
         <template #body>
           <UForm :state="editForm" class="space-y-4" @submit="updateStudent">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <UFormField label="Student ID" name="student_id">
-                <UInput v-model="editForm.student_id" class="w-full" />
-              </UFormField>
+            <div class="md:col-span-2 space-y-3">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <UFormField label="Student ID" name="student_id">
+                  <UInput v-model="editForm.student_id" class="w-full" />
+                </UFormField>
 
-              <UFormField label="Full Name" name="name">
-                <UInput v-model="editForm.name" class="w-full" />
-              </UFormField>
+                <UFormField label="Full Name" name="name">
+                  <UInput v-model="editForm.name" class="w-full" />
+                </UFormField>
 
-              <UFormField label="Course" name="course">
-                <UInput v-model="editForm.course" class="w-full" />
-              </UFormField>
+                <UFormField label="Course" name="course">
+                  <UInput v-model="editForm.course" class="w-full" />
+                </UFormField>
 
-              <UFormField label="Year Level" name="year_level">
-                <UInput v-model="editForm.year_level" class="w-full" />
-              </UFormField>
+                <UFormField label="Year Level" name="year_level">
+                  <UInput v-model="editForm.year_level" class="w-full" />
+                </UFormField>
 
-              <UFormField label="Section" name="section">
-                <UInput v-model="editForm.section" class="w-full" />
-              </UFormField>
+                <UFormField label="Section" name="section">
+                  <UInput v-model="editForm.section" class="w-full" />
+                </UFormField>
 
-              <UFormField label="Email" name="email">
-                <UInput v-model="editForm.email" type="email" class="w-full" />
-              </UFormField>
+                <UFormField label="Email" name="email">
+                  <UInput v-model="editForm.email" type="email" class="w-full" />
+                </UFormField>
+              </div>
+
+              <div class="mt-4">
+                <UFormField label="Assigned Teachers">
+                  <USelectMenu v-model="editForm.assigned_teachers" :items="teacherOptions" value-key="value" multiple
+                    class="w-full" placeholder="Select assigned teachers">
+                    <!-- Selected items as chips -->
+                    <template #default="{ modelValue }">
+                      <div class="flex flex-wrap gap-1">
+                        <UBadge v-for="id in modelValue" :key="id" color="primary" variant="soft"
+                          class="flex items-center gap-1">
+                          {{ getTeacherName(id) }}
+
+                          <UIcon name="i-lucide-x" class="cursor-pointer" @click.stop="removeTeacher(id)" />
+                        </UBadge>
+
+                        <span v-if="!modelValue?.length" class="text-gray-400">
+                          Select assigned teachers
+                        </span>
+                      </div>
+                    </template>
+                  </USelectMenu>
+
+                </UFormField>
+              </div>
+
+              <!-- Assigned Teachers Preview Table -->
+              <div class="max-h-64 overflow-x-auto rounded-lg border border-gray-300">
+                <div class="text-sm text-gray-500 my-3 mx-3">
+                  {{ assignedTeacherPreview.length }} teacher(s) assigned
+                </div>
+                <table class="w-full border-collapse text-sm">
+                  <thead>
+                    <tr class="bg-gray-100">
+                      <th class="border border-gray-300 px-3 py-2 text-left">Employee No.</th>
+                      <th class="border border-gray-300 px-3 py-2 text-left">Teacher</th>
+                      <th class="border border-gray-300 px-3 py-2 text-left">Department</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-if="assignedTeacherPreview.length === 0">
+                      <td colspan="3" class="px-3 py-4 text-center text-gray-500">
+                        No assigned teachers selected.
+                      </td>
+                    </tr>
+
+                    <tr v-for="teacher in assignedTeacherPreview" :key="teacher.documentId || teacher.id">
+                      <td class="border border-gray-300 px-3 py-2">
+                        {{ teacher.employee_no || '-' }}
+                      </td>
+                      <td class="border border-gray-300 px-3 py-2">
+                        {{ teacher.name }}
+                      </td>
+                      <td class="border border-gray-300 px-3 py-2">
+                        {{ teacher.department || '-' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-
-            <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
-              class="mt-3" size="lg" block />
+            <div class="flex justify-end mt-4">
+              <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
+                class="mt-3" size="lg" />
+            </div>
           </UForm>
         </template>
       </UModal>
@@ -221,6 +284,7 @@ const students = ref([])
 const selectedId = ref(null)
 const selectedUserId = ref(null)
 const selectedRows = ref<Record<string | number, boolean>>({})
+const teachers = ref([])
 
 const createForm = reactive({
   student_id: '',
@@ -239,7 +303,8 @@ const editForm = reactive({
   course: '',
   year_level: '',
   section: '',
-  email: ''
+  email: '',
+  assigned_teachers: [] as string[]
 })
 
 const filteredStudents = computed(() => {
@@ -261,6 +326,8 @@ const paginatedStudents = computed(() => {
   const end = start + itemsPerPage
   return filteredStudents.value.slice(start, end)
 })
+
+
 
 const selectedCount = computed(() =>
   Object.values(selectedRows.value).filter(Boolean).length
@@ -288,6 +355,7 @@ function resetEditForm() {
   editForm.year_level = ''
   editForm.section = ''
   editForm.email = ''
+  editForm.assigned_teachers = []
 }
 
 function openCreateModal() {
@@ -327,6 +395,8 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
         editForm.year_level = row.year_level || ''
         editForm.section = row.section || ''
         editForm.email = row.user?.email || ''
+        editForm.assigned_teachers =
+          row.assigned_teachers?.map((teacher: any) => teacher.documentId) || []
 
         editModal.value = true
       }
@@ -342,6 +412,19 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
   ]]
 }
 
+const teacherOptions = computed(() =>
+  teachers.value.map((teacher: any) => ({
+    label: teacher.name,
+    value: teacher.documentId
+  }))
+)
+
+const assignedTeacherPreview = computed(() =>
+  teachers.value.filter((teacher: any) =>
+    editForm.assigned_teachers.includes(teacher.documentId)
+  )
+)
+
 const getStudents = async () => {
   try {
     loading.value = true
@@ -349,6 +432,7 @@ const getStudents = async () => {
     const res = await $api('/students', {
       query: {
         'populate[user]': true,
+        'populate[assigned_teachers]': true,
         'sort[0]': 'name:asc',
         'pagination[pageSize]': 200
       }
@@ -360,6 +444,29 @@ const getStudents = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const getTeacherName = (documentId: string) => {
+  const teacher = teachers.value.find(
+    (t: any) => t.documentId === documentId
+  )
+  return teacher?.name || 'Unknown'
+}
+
+const removeTeacher = (id: string) => {
+  editForm.assigned_teachers =
+    editForm.assigned_teachers.filter((t: string) => t !== id)
+}
+
+const getTeachers = async () => {
+  const res = await $api('/teachers', {
+    query: {
+      'sort[0]': 'name:asc',
+      'pagination[pageSize]': 200
+    }
+  })
+
+  teachers.value = res.data || []
 }
 
 const createStudent = async () => {
@@ -402,7 +509,7 @@ const createStudent = async () => {
 }
 
 const updateStudent = async () => {
- try {
+  try {
     loadingUpdate.value = true
 
     await $api(`/students/update-with-user/${selectedId.value}`, {
@@ -413,7 +520,8 @@ const updateStudent = async () => {
         course: editForm.course,
         year_level: editForm.year_level,
         section: editForm.section,
-        email: editForm.email
+        email: editForm.email,
+        assigned_teachers: editForm.assigned_teachers
       }
     })
 
@@ -494,7 +602,10 @@ const deleteSelected = async () => {
   }
 }
 
-onMounted(() => {
-  getStudents()
+onMounted(async () => {
+  await Promise.all([
+    getStudents(),
+    getTeachers()
+  ])
 })
 </script>

@@ -1,10 +1,9 @@
 <template>
   <UDashboardGroup>
-    <UDashboardSidebar v-model:collapsed="collapsed" collapsible resizable
-      :storage="false" class="bg-elevated/25" :ui="{
-        header: 'border-b border-default',
-        footer: 'border-t border-default'
-      }">
+    <UDashboardSidebar v-model:collapsed="collapsed" collapsible resizable :storage="false" class="bg-elevated/25" :ui="{
+      header: 'border-b border-default',
+      footer: 'border-t border-default'
+    }">
 
       <template #header="{ collapsed }">
         <div class="flex items-center gap-3">
@@ -41,17 +40,19 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
   Admin: [
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
-      { label: 'Faculty', icon: 'i-lucide-user-round', to: '/admin/faculty' },
-      { label: 'Student', icon: 'i-lucide-user-round', to: '/admin/student' },
-      // { label: 'Evaluation', icon: 'i-lucide-circle-user-round', to: '/admin/evaluation' },
+      // { label: 'Faculty', icon: 'i-lucide-user-round', to: '/admin/faculty' },
+      // { label: 'Student', icon: 'i-lucide-user-round', to: '/admin/student' },
+      // { label: 'Subjects', icon: 'i-lucide-notebook-text', to: '/admin/subjects' },
+
       {
         label: 'Evaluation',
-        icon: 'i-lucide-circle-user-round',
+        icon: 'i-lucide-clipboard-check',
         to: '/admin/evaluation',
         defaultOpen: open,
         type: 'trigger',
         children: [{
-          label: 'Faculty Evaluation',
+          label: 'Student - Faculty',
+          icon: 'i-lucide-circle-small',
           to: '/admin/evaluation',
           exact: true,
           onSelect: () => {
@@ -59,27 +60,70 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
           }
         },
         {
+          label: 'Faculty - Dean',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/evaluation/faculty-dean',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Summary',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/evaluation/evaluation-summary',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        ]
+      },
+      {
+        label: 'Management',
+        icon: 'i-lucide-user-round-cog',
+        //to: '/admin/management',
+        //defaultOpen: open,
+        type: 'trigger',
+        children: [{
+          label: 'Faculty',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/management/faculty',
+          exact: true,
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Students',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/management/student',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Subjects',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/management/subjects',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
           label: 'Section',
-          to: '/admin/evaluation/section',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/management/section',
           onSelect: () => {
             open.value = false
           }
         },
         {
           label: 'Criteria',
-          to: '/admin/evaluation/criteria',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/management/criteria',
           onSelect: () => {
             open.value = false
           }
-        },
-        // {
-        //   label: 'Scale Options',
-        //   to: '/admin/evaluation/scale-options',
-        //   onSelect: () => {
-        //     open.value = false
-        //   }
-        // }
-        ]
+        },]
       },
       { label: 'Feedback', icon: 'i-lucide-circle-user-round', to: '/admin/feedback' },
       {
@@ -100,7 +144,7 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
       // { label: 'Student', icon: 'i-lucide-user-round', to: '/student' },
-      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check',},
+      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check', },
       { label: 'My Evaluations', icon: 'i-heroicons-user-circle', },
       { label: 'Faculty', icon: 'i-heroicons-user-circle', }
     ]
@@ -173,7 +217,7 @@ const items = computed(() => {
 onMounted(() => {
   //resetSidebar()
   collapsed.value = false
-  
+
 })
 </script>
 
