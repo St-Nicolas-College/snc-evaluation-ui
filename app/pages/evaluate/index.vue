@@ -14,19 +14,25 @@
     <template #body>
       <div class="mx-auto w-full">
         <div class="mb-6 text-center">
-          <h2 class="text-xl font-bold uppercase">St. Nicolas College of Business and Technology</h2>
-          <p class="text-sm">MEL-VI Bldg., Jose Abad Santos Avenue, City of San Fernando Pampanga</p>
+          <h2 class="text-xl font-bold uppercase">
+            St. Nicolas College of Business and Technology
+          </h2>
+          <p class="text-sm">
+            MEL-VI Bldg., Jose Abad Santos Avenue, City of San Fernando Pampanga
+          </p>
           <p class="text-sm">Tel. No.: (045) 455-0958</p>
-          <h1 class="mt-3 text-2xl font-extrabold uppercase">Performance Evaluation Form</h1>
+          <h1 class="mt-3 text-2xl font-extrabold uppercase">
+            Performance Evaluation Form
+          </h1>
           <p class="font-medium">Student - Faculty</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
         <!-- LEFT SIDE -->
-        <div class="lg:col-span-1 border border-gray-300 p-4 h-fit rounded-lg">
+        <div class="h-fit rounded-lg border border-gray-300 p-4 lg:col-span-1">
           <div class="mb-3 flex items-center justify-between">
-            <div class="font-bold">Select Teacher(s)</div>
+            <div class="font-bold">Assigned Teacher(s)</div>
             <div class="text-sm text-gray-500">
               {{ selectedTeacherIds.length }} selected
             </div>
@@ -36,19 +42,26 @@
             Loading teachers...
           </div>
 
+          <div v-else-if="teacherCheckboxItems.length === 0" class="py-6 text-center text-gray-500">
+            No assigned teachers found.
+          </div>
+
           <div v-else>
             <UCheckboxGroup
               v-model="selectedTeacherIds"
               value-key="value"
               :items="teacherCheckboxItems"
               :ui="{
-                fieldset: 'grid grid-cols-1 gap-3 md:grid-cols-2',
+                fieldset: 'grid grid-cols-1 gap-3',
                 item: 'rounded-lg border border-gray-300 p-4 hover:border-primary-500 transition'
               }"
             >
               <template #label="{ item }">
                 <div class="flex flex-col">
                   <span class="font-medium">{{ item.label }}</span>
+                  <span v-if="item.description" class="text-xs text-gray-500">
+                    {{ item.description }}
+                  </span>
                 </div>
               </template>
             </UCheckboxGroup>
@@ -56,8 +69,8 @@
         </div>
 
         <!-- RIGHT SIDE -->
-        <div class="lg:col-span-3 space-y-8">
-          <div class="mb-4 border border-gray-300 p-4 rounded-lg">
+        <div class="space-y-8 lg:col-span-3">
+          <div class="rounded-lg border border-gray-300 p-4">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
               <UFormField label="Semester">
                 <UInput v-model="form.semester" class="w-full" />
@@ -75,14 +88,19 @@
 
           <div
             v-if="!pending && selectedTeacherIds.length"
-            class="mb-4 flex items-center justify-between border border-gray-300 p-4 rounded-lg"
+            class="flex items-center justify-between rounded-lg border border-gray-300 p-4"
           >
             <div class="font-semibold">
               Selected Teachers: {{ selectedTeacherIds.length }}
             </div>
 
             <div class="flex items-center gap-2">
-              <UButton color="neutral" variant="outline" :disabled="currentPage === 1" @click="prevPage">
+              <UButton
+                color="neutral"
+                variant="outline"
+                :disabled="currentPage === 1"
+                @click="prevPage"
+              >
                 Previous
               </UButton>
 
@@ -90,7 +108,12 @@
                 Page {{ currentPage }} of {{ totalPages }}
               </span>
 
-              <UButton color="neutral" variant="outline" :disabled="currentPage === totalPages" @click="nextPage">
+              <UButton
+                color="neutral"
+                variant="outline"
+                :disabled="currentPage === totalPages"
+                @click="nextPage"
+              >
                 Next
               </UButton>
             </div>
@@ -102,7 +125,7 @@
 
           <div
             v-else-if="!pending && !selectedTeacherIds.length"
-            class="py-10 text-center text-gray-500 border border-gray-300 p-4 rounded-lg"
+            class="rounded-lg border border-gray-300 p-4 py-10 text-center text-gray-500"
           >
             Please select at least one teacher to start evaluation.
           </div>
@@ -111,7 +134,7 @@
             <div
               v-for="evaluation in paginatedEvaluations"
               :key="evaluation.teacherId"
-              class="border border-gray-300 p-10 px-10 rounded-xl"
+              class="rounded-xl border border-gray-300 p-10"
             >
               <div class="mb-4">
                 <h3 class="text-lg font-bold">Teacher Evaluation</h3>
@@ -128,12 +151,23 @@
                     class="w-full"
                   />
                 </UFormField>
+
+                <UFormField label="Subject">
+                  <USelectMenu
+                    v-model="evaluation.subjectId"
+                    value-key="value"
+                    :items="getSubjectOptions(evaluation.teacherId)"
+                    placeholder="Select subject"
+                    class="w-full"
+                  />
+                </UFormField>
               </div>
 
               <div class="mb-4 text-center">
                 <p class="font-semibold">
                   Please rate the teacher on each of the items listed below.
                 </p>
+
                 <div class="mt-2 flex flex-wrap justify-center gap-6 text-sm font-bold">
                   <span>5. Outstanding</span>
                   <span>4. Excellent</span>
@@ -144,7 +178,11 @@
               </div>
 
               <div class="space-y-4">
-                <div v-for="section in sections" :key="section.id" class="overflow-x-auto">
+                <div
+                  v-for="section in sections"
+                  :key="section.id"
+                  class="overflow-x-auto"
+                >
                   <table class="w-full border-collapse border border-gray-500 text-sm">
                     <thead>
                       <tr>
@@ -155,21 +193,28 @@
                           {{ section.title }}
                         </th>
                       </tr>
+
                       <tr class="bg-gray-50">
-                        <th colspan="2" class="border border-gray-500 px-3 py-2 text-left">Criteria</th>
-                        <th class="border border-gray-500 px-2 py-2 text-center w-12">5</th>
-                        <th class="border border-gray-500 px-2 py-2 text-center w-12">4</th>
-                        <th class="border border-gray-500 px-2 py-2 text-center w-12">3</th>
-                        <th class="border border-gray-500 px-2 py-2 text-center w-12">2</th>
-                        <th class="border border-gray-500 px-2 py-2 text-center w-12">1</th>
+                        <th colspan="2" class="border border-gray-500 px-3 py-2 text-left">
+                          Criteria
+                        </th>
+                        <th class="w-12 border border-gray-500 px-2 py-2 text-center">5</th>
+                        <th class="w-12 border border-gray-500 px-2 py-2 text-center">4</th>
+                        <th class="w-12 border border-gray-500 px-2 py-2 text-center">3</th>
+                        <th class="w-12 border border-gray-500 px-2 py-2 text-center">2</th>
+                        <th class="w-12 border border-gray-500 px-2 py-2 text-center">1</th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      <tr v-for="criterion in section.evaluation_criteria" :key="criterion.id">
-                        <td class="border px-3 py-2 text-left">
+                      <tr
+                        v-for="criterion in section.evaluation_criteria"
+                        :key="criterion.id"
+                      >
+                        <td class="border border-gray-500 px-3 py-2 text-center">
                           {{ criterion.order }}
                         </td>
+
                         <td class="border border-gray-500 px-3 py-2">
                           {{ criterion.statement }}
                         </td>
@@ -195,32 +240,48 @@
                   <div class="border-b border-gray-500 bg-gray-100 px-3 py-2 font-bold">
                     Strongest and Weakest points of the teacher:
                   </div>
+
                   <div class="p-3">
-                    <UTextarea v-model="evaluation.comment" :rows="6" class="w-full" />
+                    <UTextarea
+                      v-model="evaluation.comment"
+                      :rows="6"
+                      class="w-full"
+                    />
                   </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div class="border border-gray-500 p-3">
                     <div class="text-sm font-semibold">Answered Items</div>
-                    <div class="text-lg font-bold">{{ getAnsweredCount(evaluation) }}</div>
+                    <div class="text-lg font-bold">
+                      {{ getAnsweredCount(evaluation) }}
+                    </div>
                   </div>
 
                   <div class="border border-gray-500 p-3">
                     <div class="text-sm font-semibold">Total Score</div>
-                    <div class="text-lg font-bold">{{ getTotalScore(evaluation) }}</div>
+                    <div class="text-lg font-bold">
+                      {{ getTotalScore(evaluation) }}
+                    </div>
                   </div>
 
                   <div class="border border-gray-500 p-3">
                     <div class="text-sm font-semibold">Average Score</div>
-                    <div class="text-lg font-bold">{{ getAverageScore(evaluation) }}</div>
+                    <div class="text-lg font-bold">
+                      {{ getAverageScore(evaluation) }}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div v-if="selectedTeacherIds.length > 1" class="flex items-center justify-center gap-2">
-              <UButton color="neutral" variant="outline" :disabled="currentPage === 1" @click="prevPage">
+              <UButton
+                color="neutral"
+                variant="outline"
+                :disabled="currentPage === 1"
+                @click="prevPage"
+              >
                 Previous
               </UButton>
 
@@ -228,7 +289,12 @@
                 Page {{ currentPage }} of {{ totalPages }}
               </span>
 
-              <UButton color="neutral" variant="outline" :disabled="currentPage === totalPages" @click="nextPage">
+              <UButton
+                color="neutral"
+                variant="outline"
+                :disabled="currentPage === totalPages"
+                @click="nextPage"
+              >
                 Next
               </UButton>
             </div>
@@ -246,7 +312,11 @@
                 Reset
               </UButton>
 
-              <UButton :loading="submitLoading" :disabled="!isFormValid" @click="submitEvaluation">
+              <UButton
+                :loading="submitLoading"
+                :disabled="!isFormValid"
+                @click="submitEvaluation"
+              >
                 Submit All Evaluations
               </UButton>
             </div>
@@ -258,13 +328,14 @@
 </template>
 
 <script setup lang="ts">
-//@ts-nocheck
+// @ts-nocheck
 definePageMeta({
   middleware: ['auth', 'role'],
   role: ['Student']
 })
 
 const { $api } = useNuxtApp()
+const { user } = useAuth()
 const toast = useToast()
 
 type Teacher = {
@@ -272,31 +343,22 @@ type Teacher = {
   name: string
   department?: string
   email?: string
-}
-
-type Criterion = {
-  id: number
-  statement: string
-  order: number
-}
-
-type Section = {
-  id: number
-  title: string
-  order: number
-  evaluation_criteria: Criterion[]
+  assigned_subjects?: any[]
 }
 
 type EvaluationFormItem = {
   teacherId: number
+  subjectId: number | null
   comment: string
   responses: Record<number, number>
 }
 
 const sections = ref<any[]>([])
 const teachers = ref<any[]>([])
+
 const pending = ref(true)
 const error = ref<any>(null)
+
 const submitLoading = ref(false)
 const submitError = ref('')
 const submitSuccess = ref('')
@@ -304,30 +366,31 @@ const submitSuccess = ref('')
 const selectedTeacherIds = ref<number[]>([])
 const currentPage = ref(1)
 const itemsPerPage = 1
+
 const evaluationType = ref<any>(null)
 
 const form = reactive({
   semester: '',
   schoolYear: '',
-  date: '',
   courseYearLevel: '',
-  daysTime: '',
   evaluations: [] as EvaluationFormItem[]
 })
 
 const teacherCheckboxItems = computed(() =>
   teachers.value.map((teacher: any) => ({
     label: teacher.name,
-    description: teacher.department || teacher.email || '',
+    description: teacher.department || '',
     value: teacher.id
   }))
 )
 
 const teacherMap = computed(() => {
   const map: Record<string, Teacher> = {}
-  for (const teacher of teachers.value) {
+
+  teachers.value.forEach((teacher: any) => {
     map[String(teacher.id)] = teacher
-  }
+  })
+
   return map
 })
 
@@ -347,13 +410,17 @@ const paginatedEvaluations = computed(() => {
 
 const createEvaluation = (teacherId: number | string) => ({
   teacherId: Number(teacherId),
+  subjectId: null,
   comment: '',
   responses: {} as Record<number, number>
 })
 
 const syncEvaluationsFromSelection = () => {
   const existingMap = new Map(
-    form.evaluations.map((evaluation) => [Number(evaluation.teacherId), evaluation])
+    form.evaluations.map((evaluation) => [
+      Number(evaluation.teacherId),
+      evaluation
+    ])
   )
 
   form.evaluations = selectedTeacherIds.value.map((teacherId) => {
@@ -372,29 +439,49 @@ watch(
   { deep: true }
 )
 
+const getSubjectOptions = (teacherId: number | string) => {
+  const teacher = teacherMap.value[String(teacherId)]
+
+  return (teacher?.assigned_subjects || []).map((subject: any) => ({
+    label: subject.code ? `${subject.code} - ${subject.name}` : subject.name,
+    value: subject.id
+  }))
+}
+
 const getAnsweredCount = (evaluation: EvaluationFormItem) =>
   Object.keys(evaluation.responses).length
 
 const getTotalScore = (evaluation: EvaluationFormItem) =>
-  Object.values(evaluation.responses).reduce((sum, score) => sum + Number(score), 0)
+  Object.values(evaluation.responses).reduce(
+    (sum, score) => sum + Number(score),
+    0
+  )
 
 const getAverageScore = (evaluation: EvaluationFormItem) => {
   const answered = getAnsweredCount(evaluation)
   if (!answered) return 0
+
   return Number((getTotalScore(evaluation) / answered).toFixed(2))
 }
 
 const isEvaluationComplete = (evaluation: EvaluationFormItem) =>
   Boolean(
     evaluation.teacherId &&
+    evaluation.subjectId &&
     allCriteria.value.length > 0 &&
     getAnsweredCount(evaluation) === allCriteria.value.length
   )
 
 const isFormValid = computed(() => {
-  if (!form.semester || !form.schoolYear || !form.courseYearLevel) return false
+  if (!form.semester || !form.schoolYear || !form.courseYearLevel) {
+    return false
+  }
+
   if (!form.evaluations.length) return false
-  return form.evaluations.every((evaluation) => isEvaluationComplete(evaluation))
+
+  return form.evaluations.every((evaluation) =>
+    isEvaluationComplete(evaluation)
+  )
 })
 
 const goToPage = (page: number) => {
@@ -434,20 +521,22 @@ const getSections = async () => {
 }
 
 const getTeachers = async () => {
-  try {
-    const res = await $api('/teachers', {
-      query: {
-        'populate[user][populate]': 'role',
-        'filters[user][role][name][$eq]': 'Faculty',
-        'sort[0]': 'name:asc',
-        'pagination[pageSize]': 100
-      }
-    })
+  if (!user.value?.id) return
 
-    teachers.value = res.data || []
-  } catch (err) {
-    console.log(err)
-  }
+  const res = await $api('/students', {
+    query: {
+      'filters[user][id][$eq]': user.value.id,
+      'populate[assigned_teachers][populate][assigned_subjects]': true,
+      'pagination[pageSize]': 1
+    }
+  })
+
+  const student = res.data?.[0]
+
+  teachers.value = student?.assigned_teachers || []
+
+  selectedTeacherIds.value = teachers.value.map((teacher: any) => teacher.id)
+  syncEvaluationsFromSelection()
 }
 
 const loadData = async () => {
@@ -498,7 +587,10 @@ const submitEvaluation = async () => {
     return
   }
 
-  const hasIncomplete = form.evaluations.some((evaluation) => !isEvaluationComplete(evaluation))
+  const hasIncomplete = form.evaluations.some((evaluation) =>
+    !isEvaluationComplete(evaluation)
+  )
+
   if (hasIncomplete) {
     submitError.value = 'Please complete all teacher evaluations before submitting.'
     return
@@ -509,6 +601,7 @@ const submitEvaluation = async () => {
 
     const evaluations = form.evaluations.map((evaluation) => ({
       teacher: evaluation.teacherId,
+      subject: evaluation.subjectId,
       comment: evaluation.comment,
       responses: evaluation.responses
     }))
@@ -526,14 +619,18 @@ const submitEvaluation = async () => {
 
     toast.add({
       title: 'Success',
-      description: 'Evaluation submitted successfully',
+      description: 'Evaluation submitted successfully.',
       color: 'success'
     })
 
     submitSuccess.value = 'Evaluation submitted successfully.'
     resetForm()
   } catch (err: any) {
-    submitError.value = err?.data?.error?.message || 'Failed to submit evaluations.'
+    submitError.value =
+      err?.data?.error?.message ||
+      err?.data?.message ||
+      'Failed to submit evaluations.'
+
     console.log(err)
   } finally {
     submitLoading.value = false
@@ -543,9 +640,7 @@ const submitEvaluation = async () => {
 const resetForm = () => {
   form.semester = ''
   form.schoolYear = ''
-  form.date = ''
   form.courseYearLevel = ''
-  form.daysTime = ''
   form.evaluations = []
   selectedTeacherIds.value = []
   currentPage.value = 1
@@ -553,7 +648,13 @@ const resetForm = () => {
   submitSuccess.value = ''
 }
 
-onMounted(() => {
-  loadData()
-})
+watch(
+  user,
+  async (val) => {
+    if (val?.id) {
+      await loadData()
+    }
+  },
+  { immediate: true }
+)
 </script>

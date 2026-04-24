@@ -13,32 +13,17 @@
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <UInput
-          v-model="globalFilter"
-          icon="i-lucide-search"
-          placeholder="Search teacher..."
-          class="max-w-sm"
-        />
+        <UInput v-model="globalFilter" icon="i-lucide-search" placeholder="Search teacher..." class="max-w-sm" />
 
         <div class="flex items-center gap-2">
-          <UButton
-            v-if="selectedCount > 0"
-            label="Delete"
-            color="error"
-            variant="subtle"
-            icon="i-lucide-trash"
-            @click="deleteSelected"
-          >
+          <UButton v-if="selectedCount > 0" label="Delete" color="error" variant="subtle" icon="i-lucide-trash"
+            @click="deleteSelected">
             <template #trailing>
               <UKbd>{{ selectedCount }}</UKbd>
             </template>
           </UButton>
 
-          <UButton
-            label="New Teacher"
-            icon="i-lucide-plus"
-            @click="openCreateModal"
-          />
+          <UButton label="New Teacher" icon="i-lucide-plus" @click="openCreateModal" />
         </div>
       </div>
 
@@ -52,6 +37,9 @@
               <th class="border border-gray-300 px-4 py-3 text-left">Department</th>
               <th class="border border-gray-300 px-4 py-3 text-left">Role</th>
               <th class="border border-gray-300 px-4 py-3 text-left">Email</th>
+              <th class="border border-gray-300 px-4 py-3 text-left">
+                Assigned Subjects
+              </th>
               <th class="w-20 border border-gray-300 px-4 py-3 text-center">Action</th>
             </tr>
           </thead>
@@ -71,10 +59,8 @@
 
             <tr v-for="teacher in paginatedTeachers" :key="teacher.documentId || teacher.id">
               <td class="border border-gray-300 px-3 py-3 text-center">
-                <UCheckbox
-                  :model-value="isRowSelected(teacher)"
-                  @update:model-value="toggleRowSelection(teacher, !!$event)"
-                />
+                <UCheckbox :model-value="isRowSelected(teacher)"
+                  @update:model-value="toggleRowSelection(teacher, !!$event)" />
               </td>
 
               <td class="border border-gray-300 px-4 py-3">
@@ -96,14 +82,29 @@
               <td class="border border-gray-300 px-4 py-3">
                 {{ teacher.user?.email || '-' }}
               </td>
+              <td class="border border-gray-300 px-4 py-3">
+                <UTooltip v-if="teacher.assigned_subjects?.length"
+                  :text="teacher.assigned_subjects.map((s: any) => s.code ? `${s.code} - ${s.name}` : s.name).join(', ')">
+                  <div class="flex flex-wrap gap-1">
+                    <UBadge v-for="subject in teacher.assigned_subjects.slice(0, 3)" :key="subject.id" color="primary"
+                      variant="soft">
+                      {{ subject.code || subject.name }}
+                    </UBadge>
+
+                    <UBadge v-if="teacher.assigned_subjects.length > 3" color="neutral" variant="soft">
+                      +{{ teacher.assigned_subjects.length - 3 }} more
+                    </UBadge>
+                  </div>
+                </UTooltip>
+
+                <span v-else class="text-gray-400">
+                  No subjects
+                </span>
+              </td>
 
               <td class="border border-gray-300 px-4 py-3 text-center">
                 <UDropdownMenu :items="getDropdownActions(teacher)">
-                  <UButton
-                    icon="i-lucide-ellipsis-vertical"
-                    color="neutral"
-                    variant="ghost"
-                  />
+                  <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
                 </UDropdownMenu>
               </td>
             </tr>
@@ -116,11 +117,7 @@
           {{ selectedCount }} of {{ filteredTeachers.length }} row(s) selected.
         </div>
 
-        <UPagination
-          v-model:page="page"
-          :total="filteredTeachers.length"
-          :items-per-page="itemsPerPage"
-        />
+        <UPagination v-model:page="page" :total="filteredTeachers.length" :items-per-page="itemsPerPage" />
       </div>
 
       <!-- CREATE MODAL -->
@@ -145,13 +142,8 @@
               </UFormField>
 
               <UFormField label="Role" name="roleName">
-                <USelectMenu
-                  v-model="createForm.roleName"
-                  :items="roleOptions"
-                  value-key="value"
-                  class="w-full"
-                  placeholder="Select role"
-                />
+                <USelectMenu v-model="createForm.roleName" :items="roleOptions" value-key="value" class="w-full"
+                  placeholder="Select role" />
               </UFormField>
 
               <UFormField label="Username" name="username">
@@ -167,14 +159,8 @@
               </UFormField>
             </div>
 
-            <UButton
-              :label="loadingCreate ? 'Saving...' : 'Save'"
-              :disabled="loadingCreate"
-              type="submit"
-              class="mt-3"
-              size="lg"
-              block
-            />
+            <UButton :label="loadingCreate ? 'Saving...' : 'Save'" :disabled="loadingCreate" type="submit" class="mt-3"
+              size="lg" block />
           </UForm>
         </template>
       </UModal>
@@ -201,28 +187,22 @@
               </UFormField>
 
               <UFormField label="Role" name="roleName">
-                <USelectMenu
-                  v-model="editForm.roleName"
-                  :items="roleOptions"
-                  value-key="value"
-                  class="w-full"
-                  placeholder="Select role"
-                />
+                <USelectMenu v-model="editForm.roleName" :items="roleOptions" value-key="value" class="w-full"
+                  placeholder="Select role" />
               </UFormField>
 
               <UFormField label="Email" name="email">
                 <UInput v-model="editForm.email" type="email" class="w-full" />
               </UFormField>
+
+              <UFormField label="Assigned Subjects">
+                <USelectMenu v-model="editForm.assigned_subjects" :items="subjectOptions" value-key="value" multiple
+                  class="w-full" placeholder="Select subjects" />
+              </UFormField>
             </div>
 
-            <UButton
-              :label="loadingUpdate ? 'Updating...' : 'Update'"
-              :disabled="loadingUpdate"
-              type="submit"
-              class="mt-3"
-              size="lg"
-              block
-            />
+            <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
+              class="mt-3" size="lg" block />
           </UForm>
         </template>
       </UModal>
@@ -257,6 +237,7 @@ const teachers = ref([])
 const selectedId = ref(null)
 const selectedUserId = ref(null)
 const selectedRows = ref<Record<string | number, boolean>>({})
+const subjects = ref([])
 
 const roleOptions = [
   { label: 'Faculty', value: 'Faculty' },
@@ -278,7 +259,8 @@ const editForm = reactive({
   name: '',
   department: '',
   roleName: '',
-  email: ''
+  email: '',
+  assigned_subjects: [] as number[]
 })
 
 const filteredTeachers = computed(() => {
@@ -354,7 +336,7 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
       label: 'Edit',
       icon: 'i-lucide-edit',
       onSelect() {
-        selectedId.value = row.documentId || row.id
+        selectedId.value = row.id
         selectedUserId.value = row.user?.id || null
 
         editForm.employee_no = row.employee_no || ''
@@ -362,6 +344,10 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
         editForm.department = row.department || ''
         editForm.roleName = row.user?.role?.name || ''
         editForm.email = row.user?.email || ''
+
+        // ✅ ADD THIS HERE
+        editForm.assigned_subjects =
+          row.assigned_subjects?.map((s: any) => s.id) || []
 
         editModal.value = true
       }
@@ -377,12 +363,33 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
   ]]
 }
 
+const getSubjects = async () => {
+  const res = await $api('/subjects', {
+    query: {
+      'sort[0]': 'name:asc',
+      'pagination[pageSize]': 100
+    }
+  })
+
+  console.log('SUBJECTS:', res.data)
+  subjects.value = res.data || []
+}
+
+const subjectOptions = computed(() =>
+  subjects.value.map((s: any) => ({
+    label: s.code ? `${s.code} - ${s.name}` : s.name,
+    value: s.id
+  }))
+)
+
+
 const getTeachers = async () => {
   try {
     loading.value = true
 
     const res = await $api('/teachers', {
       query: {
+        'populate[assigned_subjects]': true,
         'populate[user][populate]': 'role',
         'sort[0]': 'name:asc',
         'pagination[pageSize]': 200
@@ -439,29 +446,17 @@ const updateTeacher = async () => {
   try {
     loadingUpdate.value = true
 
-    await $api(`/teachers/${selectedId.value}`, {
+    await $api(`/teachers/update-with-user/${selectedId.value}`, {
       method: 'PUT',
       body: {
-        data: {
-          employee_no: editForm.employee_no,
-          name: editForm.name,
-          department: editForm.department
-        }
+        employee_no: editForm.employee_no,
+        name: editForm.name,
+        department: editForm.department,
+        email: editForm.email,
+        roleName: editForm.roleName,
+        assigned_subjects: editForm.assigned_subjects
       }
     })
-
-    // optional user update
-    if (selectedUserId.value) {
-      await $api(`/users/${selectedUserId.value}`, {
-        method: 'PUT',
-        body: {
-          email: editForm.email,
-          roleName: editForm.roleName
-        }
-      }).catch((err) => {
-        console.log('User update skipped/failed:', err)
-      })
-    }
 
     toast.add({
       title: 'Success',
@@ -472,8 +467,10 @@ const updateTeacher = async () => {
     editModal.value = false
     resetEditForm()
     await getTeachers()
+
   } catch (err: any) {
     console.log(err)
+
     toast.add({
       title: 'Error',
       description: err?.data?.error?.message || 'Failed to update teacher.',
@@ -542,5 +539,6 @@ const deleteSelected = async () => {
 
 onMounted(() => {
   getTeachers()
+  getSubjects()
 })
 </script>
