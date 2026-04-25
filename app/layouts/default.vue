@@ -144,7 +144,7 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
       // { label: 'Student', icon: 'i-lucide-user-round', to: '/student' },
-      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check', },
+      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check', to: '/dean/evaluation'},
       { label: 'My Evaluations', icon: 'i-heroicons-user-circle', },
       { label: 'Faculty', icon: 'i-heroicons-user-circle', }
     ]

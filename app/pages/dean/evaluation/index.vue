@@ -5,8 +5,11 @@
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+
         <template #title>
-          <span class="text-sm text-gray-500 uppercase">Peers Evaluation Form</span>
+          <span class="text-sm text-gray-500 uppercase">
+            Dean to Faculty Evaluation Form
+          </span>
         </template>
       </UDashboardNavbar>
     </template>
@@ -14,18 +17,21 @@
     <template #body>
       <div class="mx-auto w-full bg-white p-6 shadow rounded-lg">
         <div class="mb-6 text-center">
-          <h2 class="text-xl font-bold uppercase">St. Nicolas College of Business and Technology</h2>
-          <p class="text-sm">MEL-VI Bldg., Jose Abad Santos Avenue, City of San Fernando Pampanga</p>
+          <h2 class="text-xl font-bold uppercase">
+            St. Nicolas College of Business and Technology
+          </h2>
+          <p class="text-sm">
+            MEL-VI Bldg., Jose Abad Santos Avenue, City of San Fernando Pampanga
+          </p>
           <p class="text-sm">Tel. No.: 861-3181</p>
-          <h1 class="mt-3 text-2xl font-extrabold uppercase">Peers Evaluation Form</h1>
-          <p class="font-medium">Faculty - Dean/Coordinator</p>
+          <h1 class="mt-3 text-2xl font-extrabold uppercase">
+            Overall Performance Evaluation Form
+          </h1>
+          <p class="font-medium">Dean/Coordinator - Faculty</p>
         </div>
 
         <div class="mb-4 border border-gray-400 p-4">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <!-- <UFormField label="Semester">
-              <UInput v-model="form.semester" />
-            </UFormField> -->
             <UFormField label="Semester">
               <USelectMenu v-model="form.semester" :items="semesterOptions" value-key="value"
                 placeholder="Select semester" class="w-full" />
@@ -40,7 +46,7 @@
             </UFormField>
 
             <UFormField label="Department">
-              <UInput v-model="form.department" class="w-full" />
+              <UInput v-model="form.department" class="w-full" readonly />
             </UFormField>
           </div>
         </div>
@@ -50,7 +56,7 @@
           <div class="lg:col-span-1">
             <div class="border border-gray-400 p-4 rounded-lg">
               <div class="mb-3 flex items-center justify-between">
-                <div class="font-bold">Select Dean/Coordinator</div>
+                <div class="font-bold">Select Faculty</div>
                 <div class="text-sm text-gray-500">
                   {{ selectedTargetIds.length }} selected
                 </div>
@@ -82,7 +88,7 @@
             </div>
 
             <div v-else-if="!selectedTargetIds.length" class="py-10 text-center text-gray-500">
-              Please select at least one dean/coordinator to start evaluation.
+              Please select at least one faculty member to start evaluation.
             </div>
 
             <div v-else class="space-y-8">
@@ -106,22 +112,23 @@
                 </div>
               </div>
 
-              <div v-for="evaluation in paginatedEvaluations" :key="evaluation.deanCoordinatorId"
+              <div v-for="evaluation in paginatedEvaluations" :key="evaluation.teacherId"
                 class="border border-gray-400 p-4 rounded-lg">
                 <div class="mb-4">
-                  <h3 class="text-lg font-bold">Dean/Coordinator Evaluation</h3>
+                  <h3 class="text-lg font-bold">Faculty Evaluation</h3>
                   <p class="text-sm text-gray-600">
-                    {{ targetMap[String(evaluation.deanCoordinatorId)]?.name || 'Unknown' }}
+                    {{ targetMap[String(evaluation.teacherId)]?.name || 'Unknown' }}
                   </p>
                 </div>
 
                 <div class="mb-4 text-center">
                   <p class="font-semibold">
-                    Please rate the Dean/Coordinator on each of the items listed below.
+                    Please rate the faculty member on each of the items listed below.
                   </p>
+
                   <div class="mt-2 flex flex-wrap justify-center gap-6 text-sm font-bold">
-                    <span>4 - Superior</span>
-                    <span>3 - Average</span>
+                    <span>4 - Excellent</span>
+                    <span>3 - Satisfactory</span>
                     <span>2 - Fair</span>
                     <span>1 - Needs Improvement</span>
                   </div>
@@ -137,14 +144,23 @@
                             {{ section.title }}
                           </th>
                         </tr>
+
                         <tr class="bg-gray-50">
                           <th colspan="2" class="border border-gray-500 px-3 py-2 text-left">
                             Criteria
                           </th>
-                          <th class="border border-gray-500 px-2 py-2 text-center w-12">4</th>
-                          <th class="border border-gray-500 px-2 py-2 text-center w-12">3</th>
-                          <th class="border border-gray-500 px-2 py-2 text-center w-12">2</th>
-                          <th class="border border-gray-500 px-2 py-2 text-center w-12">1</th>
+                          <th class="border border-gray-500 px-2 py-2 text-center w-12">
+                            4
+                          </th>
+                          <th class="border border-gray-500 px-2 py-2 text-center w-12">
+                            3
+                          </th>
+                          <th class="border border-gray-500 px-2 py-2 text-center w-12">
+                            2
+                          </th>
+                          <th class="border border-gray-500 px-2 py-2 text-center w-12">
+                            1
+                          </th>
                         </tr>
                       </thead>
 
@@ -159,7 +175,8 @@
                           </td>
 
                           <td v-for="score in [4, 3, 2, 1]" :key="score" class="border border-gray-500 text-center">
-                            <input v-model="evaluation.responses[criterion.id]" :value="Number(score)" type="radio"
+                            <input v-model="evaluation.responses[criterion.id]" :value="Number(score)"
+                              :name="`teacher-${evaluation.teacherId}-criteria-${criterion.id}`" type="radio"
                               class="h-4 w-4">
                           </td>
                         </tr>
@@ -167,49 +184,49 @@
                     </table>
                   </div>
 
-                  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div class="border border-gray-500">
-                      <div class="border-b border-gray-500 bg-gray-100 px-3 py-2 font-bold">
-                        Strengths
-                      </div>
-                      <div class="p-3">
-                        <UTextarea v-model="evaluation.strengths" :rows="6" class="w-full" />
-                      </div>
-                    </div>
+                  <!-- 5 QUESTION BOTTOM PART -->
+                  <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <UFormField label="1. What are the teacher's greatest strengths?">
+                      <UTextarea v-model="evaluation.strengths" :rows="3" class="w-full" />
+                    </UFormField>
 
-                    <div class="border border-gray-500">
-                      <div class="border-b border-gray-500 bg-gray-100 px-3 py-2 font-bold">
-                        Areas for Improvements
-                      </div>
-                      <div class="p-3">
-                        <UTextarea v-model="evaluation.areas_for_improvement" :rows="6" class="w-full" />
-                      </div>
-                    </div>
-                  </div>
+                    <UFormField label="2. In what ways could she/he be more effective?">
+                      <UTextarea v-model="evaluation.effectiveness" :rows="3" class="w-full" />
+                    </UFormField>
 
-                  <div class="border border-gray-500">
-                    <div class="border-b border-gray-500 bg-gray-100 px-3 py-2 font-bold">
-                      Additional Comment
-                    </div>
-                    <div class="p-3">
-                      <UTextarea v-model="evaluation.comment" :rows="4" class="w-full" />
-                    </div>
+                    <UFormField label="3. What areas for improvement are needed?">
+                      <UTextarea v-model="evaluation.areas_for_improvement" :rows="3" class="w-full" />
+                    </UFormField>
+
+                    <UFormField label="4. What teaching improvement activities can you suggest?">
+                      <UTextarea v-model="evaluation.suggested_activities" :rows="3" class="w-full" />
+                    </UFormField>
+
+                    <UFormField label="5. What would be your overall rating? Explain why." class="md:col-span-2">
+                      <UTextarea v-model="evaluation.comment" :rows="3" class="w-full" />
+                    </UFormField>
                   </div>
 
                   <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <div class="border border-gray-500 p-3">
                       <div class="text-sm font-semibold">Answered Items</div>
-                      <div class="text-lg font-bold">{{ getAnsweredCount(evaluation) }}</div>
+                      <div class="text-lg font-bold">
+                        {{ getAnsweredCount(evaluation) }}
+                      </div>
                     </div>
 
                     <div class="border border-gray-500 p-3">
                       <div class="text-sm font-semibold">Total Score</div>
-                      <div class="text-lg font-bold">{{ getTotalScore(evaluation) }}</div>
+                      <div class="text-lg font-bold">
+                        {{ getTotalScore(evaluation) }}
+                      </div>
                     </div>
 
                     <div class="border border-gray-500 p-3">
                       <div class="text-sm font-semibold">Average Score</div>
-                      <div class="text-lg font-bold">{{ getAverageScore(evaluation) }}</div>
+                      <div class="text-lg font-bold">
+                        {{ getAverageScore(evaluation) }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -219,17 +236,13 @@
                 {{ submitError }}
               </div>
 
-              <div v-if="submitSuccess" class="text-sm font-medium text-green-600">
-                {{ submitSuccess }}
-              </div>
-
               <div class="flex justify-end gap-2">
                 <UButton color="neutral" variant="outline" @click="resetForm">
                   Reset
                 </UButton>
 
                 <UButton :loading="submitLoading" :disabled="!isFormValid" @click="submitEvaluation">
-                  Submit All Evaluations
+                  Submit Evaluation
                 </UButton>
               </div>
             </div>
@@ -249,10 +262,10 @@ const toast = useToast()
 const pending = ref(true)
 const submitLoading = ref(false)
 const submitError = ref('')
-const submitSuccess = ref('')
 const selectedTargetIds = ref<number[]>([])
 const currentPage = ref(1)
 const itemsPerPage = 2
+
 const semesterOptions = [
   { label: '1st Semester', value: '1st Semester' },
   { label: '2nd Semester', value: '2nd Semester' },
@@ -268,20 +281,18 @@ const form = reactive({
   semester: '',
   school_year: '',
   date: new Date().toISOString().slice(0, 10),
-  department: user.value?.teacher?.department,
+  department: '',
   evaluations: [] as any[]
 })
 
 const targetOptions = computed(() =>
   targets.value.map((item: any) => {
     const alreadyEvaluated = existingEvaluations.value.some(
-      (evaluation: any) => evaluation.dean_coordinator?.id === item.id
+      (evaluation: any) => evaluation.teacher?.id === item.id
     )
 
     return {
-      label: alreadyEvaluated
-        ? `${item.name} (Already Evaluated)`
-        : item.name,
+      label: alreadyEvaluated ? `${item.name} (Already Evaluated)` : item.name,
       value: item.id,
       disabled: alreadyEvaluated
     }
@@ -290,9 +301,11 @@ const targetOptions = computed(() =>
 
 const targetMap = computed(() => {
   const map: Record<string, any> = {}
+
   targets.value.forEach((item: any) => {
     map[String(item.id)] = item
   })
+
   return map
 })
 
@@ -305,17 +318,22 @@ const paginatedEvaluations = computed(() => {
   return form.evaluations.slice(start, start + itemsPerPage)
 })
 
-const createEvaluation = (deanCoordinatorId: number | string) => ({
-  deanCoordinatorId: Number(deanCoordinatorId),
+const createEvaluation = (teacherId: number | string) => ({
+  teacherId: Number(teacherId),
   strengths: '',
+  effectiveness: '',
   areas_for_improvement: '',
+  suggested_activities: '',
   comment: '',
   responses: {} as Record<number, number>
 })
 
 const syncEvaluationsFromSelection = () => {
   const existingMap = new Map(
-    form.evaluations.map((evaluation) => [Number(evaluation.deanCoordinatorId), evaluation])
+    form.evaluations.map((evaluation) => [
+      Number(evaluation.teacherId),
+      evaluation
+    ])
   )
 
   form.evaluations = selectedTargetIds.value.map((id) => {
@@ -345,27 +363,32 @@ const getTotalScore = (evaluation: any) =>
 
 const getAverageScore = (evaluation: any) => {
   const answered = getAnsweredCount(evaluation)
+
   if (!answered) return 0
+
   return Number((getTotalScore(evaluation) / answered).toFixed(2))
 }
 
 const totalCriteriaCount = computed(() => filteredCriteria.value.length)
 
 const isEvaluationComplete = (evaluation: any) =>
-  evaluation.deanCoordinatorId &&
+  evaluation.teacherId &&
   totalCriteriaCount.value > 0 &&
   getAnsweredCount(evaluation) === totalCriteriaCount.value
 
 const isFormValid = computed(() => {
   if (!form.semester || !form.school_year || !form.date || !form.department) return false
   if (!form.evaluations.length) return false
-  return form.evaluations.every((evaluation) => isEvaluationComplete(evaluation))
+
+  return form.evaluations.every((evaluation) =>
+    isEvaluationComplete(evaluation)
+  )
 })
 
 const getEvaluationType = async () => {
   const res = await $api('/evaluation-types', {
     query: {
-      'filters[code][$eq]': 'faculty-dean-coordinator',
+      'filters[code][$eq]': 'dean-to-faculty',
       'pagination[pageSize]': 1
     }
   })
@@ -373,7 +396,20 @@ const getEvaluationType = async () => {
   evaluationType.value = res.data?.[0] || null
 }
 
-// Fetch existing evaluations
+const getLoggedInDeanProfile = async () => {
+  if (!user.value?.id) return null
+
+  const res = await $api('/teachers', {
+    query: {
+      'filters[user][id][$eq]': user.value.id,
+      'populate[user][populate][0]': 'role',
+      'pagination[pageSize]': 1
+    }
+  })
+
+  return res.data?.[0] || null
+}
+
 const getExistingEvaluations = async () => {
   if (!user.value?.id || !form.semester || !form.school_year) return
 
@@ -382,8 +418,8 @@ const getExistingEvaluations = async () => {
       'filters[evaluator_user][id][$eq]': user.value.id,
       'filters[batch][semester][$eq]': form.semester,
       'filters[batch][school_year][$eq]': form.school_year,
-      'filters[batch][evaluation_type][code][$eq]': 'faculty-dean-coordinator',
-      'populate[dean_coordinator]': true,
+      'filters[batch][evaluation_type][code][$eq]': 'dean-to-faculty',
+      'populate[teacher]': true,
       'pagination[pageSize]': 100
     }
   })
@@ -391,7 +427,6 @@ const getExistingEvaluations = async () => {
   existingEvaluations.value = res.data || []
 }
 
-// Watch semester and school year
 watch(
   () => [form.semester, form.school_year],
   async () => {
@@ -405,17 +440,34 @@ watch(
 )
 
 const getTargets = async () => {
+  const deanProfile = await getLoggedInDeanProfile()
+
+  if (!deanProfile) {
+    targets.value = []
+    return
+  }
+
+  form.department = deanProfile.department
+
   const res = await $api('/teachers', {
     query: {
-      'populate[user][populate]': 'role',
-      'filters[user][role][name]': 'Dean',
-      'filters[department][$eq]': user.value?.teacher?.department,
+      'populate[user][populate][0]': 'role',
+      'filters[user][role][name][$eq]': 'Faculty',
+      'filters[department][$eq]': deanProfile.department,
       'sort[0]': 'name:asc',
       'pagination[pageSize]': 100
     }
   })
 
-  targets.value = res.data || []
+  targets.value = (res.data || []).filter((teacher: any) => {
+    const roleName = teacher.user?.role?.name?.toLowerCase()
+
+    return (
+      teacher.id !== deanProfile.id &&
+      roleName !== 'dean' &&
+      roleName !== 'coordinator'
+    )
+  })
 }
 
 const getSections = async () => {
@@ -438,10 +490,11 @@ const resetForm = () => {
   form.semester = ''
   form.school_year = ''
   form.date = new Date().toISOString().slice(0, 10)
-  form.department = user.value?.teacher?.department
   form.evaluations = []
+
   selectedTargetIds.value = []
   currentPage.value = 1
+  submitError.value = ''
 }
 
 const submitEvaluation = async () => {
@@ -457,11 +510,14 @@ const submitEvaluation = async () => {
     }
 
     submitLoading.value = true
+    submitError.value = ''
 
     const evaluations = form.evaluations.map((evaluation) => ({
-      dean_coordinator: evaluation.deanCoordinatorId,
+      teacher: evaluation.teacherId,
       strengths: evaluation.strengths,
+      effectiveness: evaluation.effectiveness,
       areas_for_improvement: evaluation.areas_for_improvement,
+      suggested_activities: evaluation.suggested_activities,
       comment: evaluation.comment,
       responses: evaluation.responses
     }))
@@ -480,9 +536,10 @@ const submitEvaluation = async () => {
 
     toast.add({
       title: 'Success',
-      description: 'Faculty to Dean/Coordinator evaluation submitted successfully.',
+      description: 'Dean to Faculty evaluation submitted successfully.',
       color: 'success'
     })
+
     await getExistingEvaluations()
     resetForm()
   } catch (err: any) {
@@ -512,7 +569,7 @@ onMounted(async () => {
     await getEvaluationType()
 
     if (!evaluationType.value) {
-      alert('Evaluation type not configured in backend.')
+      alert('Dean to Faculty evaluation type not configured in backend.')
       return
     }
 
