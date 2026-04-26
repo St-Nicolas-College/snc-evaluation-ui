@@ -68,6 +68,22 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
           }
         },
         {
+          label: 'Dean - Faculty',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/evaluation/dean-faculty',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Overall Feedback',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/evaluation/overall-feedback',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
           label: 'Summary',
           icon: 'i-lucide-circle-small',
           to: '/admin/evaluation/evaluation-summary',
@@ -96,6 +112,14 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
           label: 'Students',
           icon: 'i-lucide-circle-small',
           to: '/admin/management/student',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Course',
+          icon: 'i-lucide-circle-small',
+          to: '/admin/management/course',
           onSelect: () => {
             open.value = false
           }
@@ -153,8 +177,33 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
     [
       { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/' },
       // { label: 'Student', icon: 'i-lucide-user-round', to: '/student' },
-      { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check', to: '/evaluate' },
-      { label: 'My Evaluations', icon: 'i-heroicons-user-circle', to: '/my-evaluations' }
+      {
+        label: 'Evaluation',
+        icon: 'i-lucide-clipboard-check',
+        to: '/admin/evaluation',
+        defaultOpen: open,
+        type: 'trigger',
+        children: [{
+          label: 'Student - Faculty',
+          icon: 'i-lucide-circle-small',
+          to: '/student/evaluate',
+          exact: true,
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        {
+          label: 'Overall Performance',
+          icon: 'i-lucide-circle-small',
+          to: '/student/overall-performance',
+          onSelect: () => {
+            open.value = false
+          }
+        },
+        ]
+      },
+      // { label: 'Evaluate', icon: 'i-heroicons-clipboard-document-check', to: '/student/evaluate' },
+      { label: 'My Evaluations', icon: 'i-heroicons-user-circle', to: '/student/my-evaluations' }
     ]
   ],
   Faculty: [

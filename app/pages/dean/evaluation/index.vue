@@ -264,7 +264,7 @@ const submitLoading = ref(false)
 const submitError = ref('')
 const selectedTargetIds = ref<number[]>([])
 const currentPage = ref(1)
-const itemsPerPage = 2
+const itemsPerPage = 1
 
 const semesterOptions = [
   { label: '1st Semester', value: '1st Semester' },
@@ -276,6 +276,8 @@ const targets = ref([])
 const sections = ref([])
 const evaluationType = ref(null)
 const existingEvaluations = ref([])
+const loggedInDean = ref<any>(null)
+const departmentId = ref<number | null>(null)
 
 const form = reactive({
   semester: '',
@@ -402,12 +404,20 @@ const getLoggedInDeanProfile = async () => {
   const res = await $api('/teachers', {
     query: {
       'filters[user][id][$eq]': user.value.id,
+      'populate[department]': true,
       'populate[user][populate][0]': 'role',
       'pagination[pageSize]': 1
     }
   })
 
-  return res.data?.[0] || null
+  loggedInDean.value = res.data?.[0] || null
+
+  departmentId.value = loggedInDean.value?.department?.id || null
+
+  // Keep this as string because evaluation-batch.department is string
+  form.department = loggedInDean.value?.department?.name || ''
+
+  return loggedInDean.value
 }
 
 const getExistingEvaluations = async () => {
@@ -440,20 +450,24 @@ watch(
 )
 
 const getTargets = async () => {
-  const deanProfile = await getLoggedInDeanProfile()
+  const deanProfile = loggedInDean.value || await getLoggedInDeanProfile()
 
-  if (!deanProfile) {
+  if (!deanProfile?.department?.id) {
     targets.value = []
     return
   }
 
-  form.department = deanProfile.department
-
   const res = await $api('/teachers', {
     query: {
       'populate[user][populate][0]': 'role',
+      'populate[department]': true,
+
+      // only Faculty role
       'filters[user][role][name][$eq]': 'Faculty',
-      'filters[department][$eq]': deanProfile.department,
+
+      // same department as logged-in dean
+      'filters[department][id][$eq]': deanProfile.department.id,
+
       'sort[0]': 'name:asc',
       'pagination[pageSize]': 100
     }
@@ -487,9 +501,10 @@ const getSections = async () => {
 }
 
 const resetForm = () => {
-  form.semester = ''
+ form.semester = ''
   form.school_year = ''
   form.date = new Date().toISOString().slice(0, 10)
+  form.department = loggedInDean.value?.department?.name || ''
   form.evaluations = []
 
   selectedTargetIds.value = []
@@ -572,6 +587,8 @@ onMounted(async () => {
       alert('Dean to Faculty evaluation type not configured in backend.')
       return
     }
+
+    await getLoggedInDeanProfile()
 
     await Promise.all([
       getTargets(),

@@ -8,7 +8,7 @@
 
         <template #title>
           <span class="text-sm text-gray-500 uppercase">
-            Student to Faculty Evaluation Results
+            Dean to Faculty Evaluation Results
           </span>
         </template>
       </UDashboardNavbar>
@@ -19,30 +19,47 @@
         <!-- FILTERS -->
         <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
-            <UFormField label="Faculty">
-              <USelectMenu v-model="filters.faculty_id" :items="facultyOptions" value-key="value"
-                placeholder="Select faculty" class="w-full" />
-            </UFormField>
-
             <UFormField label="School Year">
-              <UInput v-model="filters.school_year" placeholder="2025-2026" class="w-full" />
+              <UInput v-model="filters.school_year" placeholder="2025-2026" class="w-full"/>
             </UFormField>
 
             <UFormField label="Semester">
-              <USelectMenu v-model="filters.semester" :items="semesterOptions" value-key="value"
-                placeholder="Select semester" class="w-full" />
+              <USelectMenu
+                v-model="filters.semester"
+                :items="semesterOptions"
+                value-key="value"
+                placeholder="Select semester"
+                class="w-full"
+              />
             </UFormField>
 
             <UFormField label="Department">
               <UInput v-model="filters.department" placeholder="BSIT" class="w-full" />
             </UFormField>
 
-            <div class="flex items-end gap-2">
-              <UButton label="Search" icon="i-lucide-search" :loading="pending" @click="searchResults" block />
+            <UFormField label="Search Faculty">
+              <UInput v-model="filters.search" placeholder="Faculty name" class="w-full" />
+            </UFormField>
 
-              <UButton label="Reset" icon="i-lucide-repeat" color="neutral" variant="outline" @click="resetFilters"
-                block />
+            <div class="flex items-end gap-2">
+              <UButton
+                label="Search"
+                icon="i-lucide-search"
+                :loading="pending"
+                @click="searchResults"
+                block
+              />
+
+              <UButton
+                label="Reset"
+                color="neutral"
+                variant="outline"
+                icon="i-lucide-repeat"
+                @click="resetFilters"
+              block
+              />
             </div>
+            
           </div>
         </div>
 
@@ -64,7 +81,7 @@
           </div>
 
           <div v-else-if="!evaluations.length" class="py-12 text-center text-gray-500">
-            No Student to Faculty evaluation results found.
+            No Dean to Faculty evaluation results found.
           </div>
 
           <div v-else class="overflow-x-auto">
@@ -72,7 +89,8 @@
               <thead class="bg-gray-50 text-xs uppercase text-gray-600">
                 <tr>
                   <th class="px-4 py-3 text-left">Faculty</th>
-                  <th class="px-4 py-3 text-left">Subject</th>
+                  <th class="px-4 py-3 text-left">Department</th>
+                  <th class="px-4 py-3 text-left">Evaluator</th>
                   <th class="px-4 py-3 text-left">School Year</th>
                   <th class="px-4 py-3 text-left">Semester</th>
                   <th class="px-4 py-3 text-center">Total</th>
@@ -83,13 +101,21 @@
               </thead>
 
               <tbody class="divide-y divide-gray-100">
-                <tr v-for="evaluation in evaluations" :key="evaluation.id" class="transition hover:bg-gray-50">
+                <tr
+                  v-for="evaluation in evaluations"
+                  :key="evaluation.id"
+                  class="transition hover:bg-gray-50"
+                >
                   <td class="px-4 py-3 font-medium text-gray-800">
                     {{ evaluation.teacher?.name || 'Unknown Faculty' }}
                   </td>
 
                   <td class="px-4 py-3 text-gray-600">
-                    {{ evaluation.subject?.name || evaluation.subject?.subject_name || 'N/A' }}
+                    {{ evaluation.teacher?.department || evaluation.batch?.department || 'N/A' }}
+                  </td>
+
+                  <td class="px-4 py-3 text-gray-600">
+                    {{ getEvaluatorName(evaluation) }}
                   </td>
 
                   <td class="px-4 py-3 text-gray-600">
@@ -109,15 +135,22 @@
                   </td>
 
                   <td class="px-4 py-3 text-center">
-                    <span class="rounded-full px-2 py-1 text-xs font-semibold"
-                      :class="ratingBadge(evaluation.average_score)">
+                    <span
+                      class="rounded-full px-2 py-1 text-xs font-semibold"
+                      :class="ratingBadge(evaluation.average_score)"
+                    >
                       {{ getRatingLabel(evaluation.average_score) }}
                     </span>
                   </td>
 
                   <td class="px-4 py-3 text-center">
-                    <UButton size="xs" color="primary" variant="soft" icon="i-lucide-eye"
-                      @click="openDetails(evaluation)">
+                    <UButton
+                      size="xs"
+                      color="primary"
+                      variant="soft"
+                      icon="i-lucide-eye"
+                      @click="openDetails(evaluation)"
+                    >
                       View
                     </UButton>
                   </td>
@@ -133,10 +166,21 @@
             </div>
 
             <div class="flex items-center gap-2">
-              <UButton label="Previous" color="neutral" variant="outline" :disabled="page <= 1" @click="prevPage" />
+              <UButton
+                label="Previous"
+                color="neutral"
+                variant="outline"
+                :disabled="page <= 1"
+                @click="prevPage"
+              />
 
-              <UButton label="Next" color="neutral" variant="outline" :disabled="page >= totalPages"
-                @click="nextPage" />
+              <UButton
+                label="Next"
+                color="neutral"
+                variant="outline"
+                :disabled="page >= totalPages"
+                @click="nextPage"
+              />
             </div>
           </div>
         </div>
@@ -144,14 +188,16 @@
         <!-- DETAILS MODAL -->
         <UModal v-model:open="showDetails">
           <template #content>
-            <div v-if="selectedEvaluation" class="max-h-[85vh] overflow-y-auto p-6">
+            <div
+              v-if="selectedEvaluation"
+              class="max-h-[85vh] overflow-y-auto p-6"
+            >
               <div class="mb-5">
                 <h2 class="text-xl font-bold text-gray-800">
                   {{ selectedEvaluation.teacher?.name || 'Unknown Faculty' }}
                 </h2>
                 <p class="text-sm text-gray-500">
-                  Subject:
-                  {{ selectedEvaluation.subject?.name || selectedEvaluation.subject?.subject_name || 'N/A' }}
+                  {{ selectedEvaluation.teacher?.department || selectedEvaluation.batch?.department || 'N/A' }}
                 </p>
               </div>
 
@@ -188,7 +234,10 @@
                   </thead>
 
                   <tbody class="divide-y divide-gray-100">
-                    <tr v-for="item in formatResponses(selectedEvaluation.responses)" :key="item.criteria_id">
+                    <tr
+                      v-for="item in formatResponses(selectedEvaluation.responses)"
+                      :key="item.criteria_id"
+                    >
                       <td class="px-3 py-2">
                         {{ item.statement }}
                       </td>
@@ -201,17 +250,59 @@
                 </table>
               </div>
 
-              <div class="rounded-lg border border-gray-200">
-                <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
-                  Student Comment
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="rounded-lg border border-gray-200">
+                  <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
+                    1. Teacher's Greatest Strengths
+                  </div>
+                  <div class="min-h-20 p-3 text-sm">
+                    {{ selectedEvaluation.strengths || 'N/A' }}
+                  </div>
                 </div>
-                <div class="min-h-20 p-3 text-sm">
-                  {{ selectedEvaluation.comment || 'N/A' }}
+
+                <div class="rounded-lg border border-gray-200">
+                  <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
+                    2. In what ways could she/he be more effective?
+                  </div>
+                  <div class="min-h-20 p-3 text-sm">
+                    {{ selectedEvaluation.effectiveness || 'N/A' }}
+                  </div>
+                </div>
+
+                <div class="rounded-lg border border-gray-200">
+                  <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
+                    3. Areas for Improvement
+                  </div>
+                  <div class="min-h-20 p-3 text-sm">
+                    {{ selectedEvaluation.areas_for_improvement || 'N/A' }}
+                  </div>
+                </div>
+
+                <div class="rounded-lg border border-gray-200">
+                  <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
+                    4. Suggested Teaching Improvement Activities
+                  </div>
+                  <div class="min-h-20 p-3 text-sm">
+                    {{ selectedEvaluation.suggested_activities || 'N/A' }}
+                  </div>
+                </div>
+
+                <div class="rounded-lg border border-gray-200 md:col-span-2">
+                  <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
+                    5. Overall Rating Explanation
+                  </div>
+                  <div class="min-h-20 p-3 text-sm">
+                    {{ selectedEvaluation.comment || 'N/A' }}
+                  </div>
                 </div>
               </div>
 
               <div class="mt-6 flex justify-end">
-                <UButton color="neutral" variant="outline" @click="showDetails = false">
+                <UButton
+                  color="neutral"
+                  variant="outline"
+                  @click="showDetails = false"
+                >
                   Close
                 </UButton>
               </div>
@@ -226,14 +317,12 @@
 <script setup lang="ts">
 // @ts-nocheck
 definePageMeta({
-  middleware: ['auth', 'role'],
-  role: ['Admin']
+  middleware: ['auth']
 })
 
 const { $api } = useNuxtApp()
 
 const pending = ref(false)
-const faculties = ref([])
 const evaluations = ref([])
 const selectedEvaluation = ref(null)
 const showDetails = ref(false)
@@ -243,9 +332,9 @@ const pageSize = ref(10)
 const total = ref(0)
 
 const filters = reactive({
-  faculty_id: '',
   school_year: '',
   semester: '',
+  department: '',
   search: ''
 })
 
@@ -255,53 +344,25 @@ const semesterOptions = [
   { label: 'Summer', value: 'Summer' }
 ]
 
-const facultyOptions = computed(() =>
-  faculties.value.map((faculty: any) => ({
-    label: `${faculty.name}${faculty.department ? ` (${faculty.department})` : ''}`,
-    value: faculty.id
-  }))
-)
-
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(total.value / pageSize.value))
 )
-
-const getFaculties = async () => {
-  try {
-    const res = await $api('/teachers', {
-      query: {
-        'populate[user][populate][0]': 'role',
-        'filters[user][role][name][$eq]': 'Faculty',
-        'sort[0]': 'name:asc',
-        'pagination[pageSize]': 100
-      }
-    })
-
-    faculties.value = res.data || []
-  } catch (err) {
-    console.log(err)
-  }
-}
 
 const getResults = async () => {
   pending.value = true
 
   try {
     const query: any = {
-      'filters[batch][evaluation_type][code][$eq]': 'student-faculty',
+      'filters[batch][evaluation_type][code][$eq]': 'dean-to-faculty',
 
       'populate[teacher]': true,
-      'populate[subject]': true,
+      'populate[evaluator_user]': true,
       'populate[batch][populate][0]': 'evaluation_type',
 
       'sort[0]': 'createdAt:desc',
 
       'pagination[page]': page.value,
       'pagination[pageSize]': pageSize.value
-    }
-
-    if (filters.faculty_id) {
-      query['filters[teacher][id][$eq]'] = filters.faculty_id
     }
 
     if (filters.school_year) {
@@ -313,7 +374,11 @@ const getResults = async () => {
     }
 
     if (filters.department) {
-      query['filters[teacher][department][$eq]'] = filters.department
+      query['filters[batch][department][$eq]'] = filters.department
+    }
+
+    if (filters.search) {
+      query['filters[teacher][name][$containsi]'] = filters.search
     }
 
     const res: any = await $api('/evaluations', { query })
@@ -335,9 +400,9 @@ const searchResults = async () => {
 }
 
 const resetFilters = async () => {
-  filters.faculty_id = ''
   filters.school_year = ''
   filters.semester = ''
+  filters.department = ''
   filters.search = ''
 
   page.value = 1
@@ -361,6 +426,16 @@ const nextPage = async () => {
 const openDetails = (evaluation: any) => {
   selectedEvaluation.value = evaluation
   showDetails.value = true
+}
+
+const getEvaluatorName = (evaluation: any) => {
+  const user = evaluation.evaluator_user
+
+  return (
+    user?.user_info?.first_name && user?.user_info?.last_name
+      ? `${user.user_info.first_name} ${user.user_info.last_name}`
+      : user?.username || user?.email || 'N/A'
+  )
 }
 
 const formatResponses = (responses: any) => {
@@ -404,9 +479,6 @@ const ratingBadge = (average: number) => {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    getFaculties(),
-    getResults()
-  ])
+  await getResults()
 })
 </script>

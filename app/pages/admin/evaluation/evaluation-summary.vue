@@ -132,6 +132,10 @@ const typeOptions = [
   {
     label: 'Faculty - Dean/Coordinator',
     value: 'faculty-dean-coordinator'
+  },
+  {
+    label: 'Dean/Coordinator - Faculty',
+    value: 'dean-to-faculty'
   }
 ]
 

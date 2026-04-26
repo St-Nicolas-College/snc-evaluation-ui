@@ -13,18 +13,9 @@
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <UInput
-          v-model="globalFilter"
-          icon="i-lucide-search"
-          placeholder="Search subject..."
-          class="max-w-sm"
-        />
+        <UInput v-model="globalFilter" icon="i-lucide-search" placeholder="Search subject..." class="max-w-sm" />
 
-        <UButton
-          label="New Subject"
-          icon="i-lucide-plus"
-          @click="openCreateModal"
-        />
+        <UButton label="New Subject" icon="i-lucide-plus" @click="openCreateModal" />
       </div>
 
       <div class="mt-4 overflow-x-auto">
@@ -33,6 +24,7 @@
             <tr class="bg-gray-100">
               <th class="border border-gray-300 px-4 py-3 text-left">Code</th>
               <th class="border border-gray-300 px-4 py-3 text-left">Name</th>
+              <th class="border border-gray-300 px-4 py-3 text-left">Course</th>
               <th class="w-20 border border-gray-300 px-4 py-3 text-center">Action</th>
             </tr>
           </thead>
@@ -58,14 +50,13 @@
               <td class="border border-gray-300 px-4 py-1">
                 {{ subject.name }}
               </td>
+              <td class="border border-gray-300 px-4 py-1">
+                {{ subject.course?.name || '-' }}
+              </td>
 
               <td class="border border-gray-300 px-4 py-1 text-center">
                 <UDropdownMenu :items="getDropdownActions(subject)">
-                  <UButton
-                    icon="i-lucide-ellipsis-vertical"
-                    color="neutral"
-                    variant="ghost"
-                  />
+                  <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
                 </UDropdownMenu>
               </td>
             </tr>
@@ -88,14 +79,13 @@
             <UFormField label="Subject Name">
               <UInput v-model="createForm.name" class="w-full" placeholder="Example: Programming 1" />
             </UFormField>
+            <UFormField label="Course">
+              <USelectMenu v-model="createForm.course" :items="courseOptions" value-key="value"
+                placeholder="Select course" class="w-full" />
+            </UFormField>
 
             <div class="flex justify-end">
-              <UButton
-                :loading="loadingCreate"
-                type="submit"
-                label="Save"
-                class="w-32 justify-center"
-              />
+              <UButton :loading="loadingCreate" type="submit" label="Save" class="w-32 justify-center" />
             </div>
           </UForm>
         </template>
@@ -117,13 +107,12 @@
               <UInput v-model="editForm.name" class="w-full" />
             </UFormField>
 
+            <UFormField label="Course">
+              <USelectMenu v-model="editForm.course" :items="courseOptions" value-key="value"
+                placeholder="Select course" class="w-full" />
+            </UFormField>
             <div class="flex justify-end">
-              <UButton
-                :loading="loadingUpdate"
-                type="submit"
-                label="Update"
-                class="w-32 justify-center"
-              />
+              <UButton :loading="loadingUpdate" type="submit" label="Update" class="w-32 justify-center" />
             </div>
           </UForm>
         </template>
@@ -154,15 +143,18 @@ const editModal = ref(false)
 const subjects = ref([])
 const selectedSubjectId = ref('')
 const globalFilter = ref('')
+const courses = ref([])
 
 const createForm = reactive({
   code: '',
-  name: ''
+  name: '',
+  course: null
 })
 
 const editForm = reactive({
   code: '',
-  name: ''
+  name: '',
+  course: null
 })
 
 const filteredSubjects = computed(() => {
@@ -191,12 +183,33 @@ const openCreateModal = () => {
   createModal.value = true
 }
 
+
+const courseOptions = computed(() =>
+  courses.value.map((c: any) => ({
+    label: `${c.name} (${c.department?.name || 'No Dept'})`,
+    value: c.id
+  }))
+)
+
+const getCourses = async () => {
+  const res = await $api('/courses', {
+    query: {
+      'populate[department]': true,
+      'sort[0]': 'name:asc',
+      'pagination[pageSize]': 200
+    }
+  })
+
+  courses.value = res.data || []
+}
+
 const getSubjects = async () => {
   try {
     loading.value = true
 
     const res = await $api('/subjects', {
       query: {
+        'populate[course][populate][0]': 'department',
         'sort[0]': 'name:asc',
         'pagination[pageSize]': 200
       }
@@ -234,7 +247,8 @@ const createSubject = async () => {
       body: {
         data: {
           code: createForm.code,
-          name: createForm.name
+          name: createForm.name,
+          course: createForm.course
         }
       }
     })
@@ -279,7 +293,8 @@ const updateSubject = async () => {
       body: {
         data: {
           code: editForm.code,
-          name: editForm.name
+          name: editForm.name,
+          course: editForm.course
         }
       }
     })
@@ -346,6 +361,7 @@ const getDropdownActions = (subject: any): DropdownMenuItem[][] => {
         selectedSubjectId.value = subject.documentId
         editForm.code = subject.code || ''
         editForm.name = subject.name || ''
+        editForm.course = subject.course?.id || null
         editModal.value = true
       }
     },
@@ -362,5 +378,6 @@ const getDropdownActions = (subject: any): DropdownMenuItem[][] => {
 
 onMounted(() => {
   getSubjects()
+  getCourses()
 })
 </script>

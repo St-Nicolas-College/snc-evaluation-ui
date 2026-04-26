@@ -72,7 +72,7 @@
               </td>
 
               <td class="border border-gray-300 px-4 py-1">
-                {{ teacher.department || '-' }}
+                {{ teacher.department?.name || '-' }}
               </td>
 
               <td class="border border-gray-300 px-4 py-1">
@@ -138,7 +138,8 @@
               </UFormField>
 
               <UFormField label="Department" name="department">
-                <UInput v-model="createForm.department" class="w-full" />
+                <USelectMenu v-model="createForm.department" :items="departmentOptions" value-key="value" class="w-full"
+                  placeholder="Select department" />
               </UFormField>
 
               <UFormField label="Role" name="roleName">
@@ -172,39 +173,6 @@
         </template>
 
         <template #body>
-          <!-- <UForm :state="editForm" class="space-y-4" @submit="updateTeacher">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <UFormField label="Employee No." name="employee_no">
-                <UInput v-model="editForm.employee_no" class="w-full" />
-              </UFormField>
-
-              <UFormField label="Full Name" name="name">
-                <UInput v-model="editForm.name" class="w-full" />
-              </UFormField>
-
-              <UFormField label="Department" name="department">
-                <UInput v-model="editForm.department" class="w-full" />
-              </UFormField>
-
-              <UFormField label="Role" name="roleName">
-                <USelectMenu v-model="editForm.roleName" :items="roleOptions" value-key="value" class="w-full"
-                  placeholder="Select role" />
-              </UFormField>
-
-              <UFormField label="Email" name="email">
-                <UInput v-model="editForm.email" type="email" class="w-full" />
-              </UFormField>
-
-              <UFormField label="Assigned Subjects">
-                <USelectMenu v-model="editForm.assigned_subjects" :items="subjectOptions" value-key="value" multiple
-                  class="w-full" placeholder="Select subjects" />
-              </UFormField>
-            </div>
-
-            <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
-              class="mt-3" size="lg" block />
-          </UForm> -->
-
           <UForm :state="editForm" class="space-y-4" @submit="updateTeacher">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <UFormField label="Employee No." name="employee_no">
@@ -216,7 +184,8 @@
               </UFormField>
 
               <UFormField label="Department" name="department">
-                <UInput v-model="editForm.department" class="w-full" />
+                <USelectMenu v-model="editForm.department" :items="departmentOptions" value-key="value" class="w-full"
+                  placeholder="Select department" />
               </UFormField>
 
               <UFormField label="Email" name="email">
@@ -233,21 +202,21 @@
               <UFormField label="Assigned Subjects">
                 <USelectMenu v-model="editForm.assigned_subjects" :items="subjectOptions" value-key="value" multiple
                   class="w-full" placeholder="Select assigned subjects">
-                <!-- Selected items as chips -->
-                    <template #default="{ modelValue }">
-                      <div class="flex flex-wrap gap-1">
-                        <UBadge v-for="id in modelValue" :key="id" color="primary" variant="soft"
-                          class="flex items-center gap-1">
-                          {{ getSubjectName(id) }}
+                  <!-- Selected items as chips -->
+                  <template #default="{ modelValue }">
+                    <div class="flex flex-wrap gap-1">
+                      <UBadge v-for="id in modelValue" :key="id" color="primary" variant="soft"
+                        class="flex items-center gap-1">
+                        {{ getSubjectName(id) }}
 
-                          <UIcon name="i-lucide-x" class="cursor-pointer" @click.stop="removeSubject(id)" />
-                        </UBadge>
+                        <UIcon name="i-lucide-x" class="cursor-pointer" @click.stop="removeSubject(id)" />
+                      </UBadge>
 
-                        <span v-if="!modelValue?.length" class="text-gray-400">
-                          Select assigned teachers
-                        </span>
-                      </div>
-                    </template>
+                      <span v-if="!modelValue?.length" class="text-gray-400">
+                        Select assigned teachers
+                      </span>
+                    </div>
+                  </template>
                 </USelectMenu>
               </UFormField>
 
@@ -320,6 +289,7 @@ const selectedId = ref(null)
 const selectedUserId = ref(null)
 const selectedRows = ref<Record<string | number, boolean>>({})
 const subjects = ref([])
+const departments = ref([])
 
 const roleOptions = [
   { label: 'Faculty', value: 'Faculty' },
@@ -329,7 +299,7 @@ const roleOptions = [
 const createForm = reactive({
   employee_no: '',
   name: '',
-  department: '',
+  department: null,
   roleName: '',
   username: '',
   email: '',
@@ -339,7 +309,7 @@ const createForm = reactive({
 const editForm = reactive({
   employee_no: '',
   name: '',
-  department: '',
+  department: null,
   roleName: '',
   email: '',
   assigned_subjects: [] as string[]
@@ -352,7 +322,7 @@ const filteredTeachers = computed(() => {
   return teachers.value.filter((item: any) =>
     item.employee_no?.toLowerCase().includes(keyword) ||
     item.name?.toLowerCase().includes(keyword) ||
-    item.department?.toLowerCase().includes(keyword) ||
+    item.department?.name?.toLowerCase().includes(keyword) ||
     item.user?.email?.toLowerCase().includes(keyword) ||
     item.user?.role?.name?.toLowerCase().includes(keyword)
   )
@@ -381,7 +351,7 @@ watch(globalFilter, () => {
 function resetCreateForm() {
   createForm.employee_no = ''
   createForm.name = ''
-  createForm.department = ''
+  createForm.department = null
   createForm.roleName = ''
   createForm.username = ''
   createForm.email = ''
@@ -391,7 +361,7 @@ function resetCreateForm() {
 function resetEditForm() {
   editForm.employee_no = ''
   editForm.name = ''
-  editForm.department = ''
+  editForm.department = null
   editForm.roleName = ''
   editForm.email = ''
   editForm.assigned_subjects = []
@@ -430,7 +400,7 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
 
         editForm.employee_no = row.employee_no || ''
         editForm.name = row.name || ''
-        editForm.department = row.department || ''
+        editForm.department = row.department?.id || null || ''
         editForm.roleName = row.user?.role?.name || ''
         editForm.email = row.user?.email || ''
 
@@ -455,12 +425,13 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
 const getSubjects = async () => {
   const res = await $api('/subjects', {
     query: {
+      'populate[course][populate][0]': 'department',
       'sort[0]': 'name:asc',
       'pagination[pageSize]': 100
     }
   })
 
-  console.log('SUBJECTS:', res.data)
+  //console.log('SUBJECTS:', res.data)
   subjects.value = res.data || []
 }
 
@@ -478,10 +449,28 @@ const removeSubject = (id: string) => {
 
 const subjectOptions = computed(() =>
   subjects.value.map((s: any) => ({
-    label: s.code ? `${s.code} - ${s.name}` : s.name,
+    label: `${s.code ? `${s.code} - ` : ''}${s.name}${s.course?.name ? ` (${s.course.name})` : ''}`,
     value: s.documentId
   }))
 )
+
+const departmentOptions = computed(() =>
+  departments.value.map((department: any) => ({
+    label: department.name,
+    value: department.id
+  }))
+)
+
+const getDepartments = async () => {
+  const res = await $api('/departments', {
+    query: {
+      'sort[0]': 'name:asc',
+      'pagination[pageSize]': 100
+    }
+  })
+
+  departments.value = res.data || []
+}
 
 
 const getTeachers = async () => {
@@ -490,8 +479,9 @@ const getTeachers = async () => {
 
     const res = await $api('/teachers', {
       query: {
-        'populate[assigned_subjects]': true,
-        'populate[user][populate]': 'role',
+        'populate[department]': true,
+        'populate[assigned_subjects][populate][0]': 'course',
+        'populate[user][populate][0]': 'role',
         'sort[0]': 'name:asc',
         'pagination[pageSize]': 200
       }
@@ -639,6 +629,7 @@ const deleteSelected = async () => {
 }
 
 onMounted(() => {
+  getDepartments()
   getTeachers()
   getSubjects()
 })

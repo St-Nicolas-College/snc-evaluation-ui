@@ -70,7 +70,7 @@
               </td>
 
               <td class="border border-gray-300 px-4 py-1">
-                {{ student.course || '-' }}
+                {{ student.course?.name || '-' }}
               </td>
 
               <td class="border border-gray-300 px-4 py-1">
@@ -82,7 +82,7 @@
               </td>
 
               <td class="border border-gray-300 px-4 py-1">
-                {{ student.email || '-' }}
+                {{ student.user?.email || '-' }}
               </td>
 
               <td class="border border-gray-300 px-4 py-1 text-center">
@@ -121,7 +121,8 @@
               </UFormField>
 
               <UFormField label="Course" name="course">
-                <UInput v-model="createForm.course" class="w-full" />
+                <USelectMenu v-model="createForm.course" :items="courseOptions" value-key="value"
+                  placeholder="Select course" class="w-full" />
               </UFormField>
 
               <UFormField label="Year Level" name="year_level">
@@ -170,7 +171,8 @@
                 </UFormField>
 
                 <UFormField label="Course" name="course">
-                  <UInput v-model="editForm.course" class="w-full" />
+                  <USelectMenu v-model="editForm.course" :items="courseOptions" value-key="value"
+                    placeholder="Select course" class="w-full" />
                 </UFormField>
 
                 <UFormField label="Year Level" name="year_level">
@@ -239,7 +241,7 @@
                         {{ teacher.name }}
                       </td>
                       <td class="border border-gray-300 px-3 py-2">
-                        {{ teacher.department || '-' }}
+                        {{ teacher.department?.name || '-' }}
                       </td>
                     </tr>
                   </tbody>
@@ -285,11 +287,12 @@ const selectedId = ref(null)
 const selectedUserId = ref(null)
 const selectedRows = ref<Record<string | number, boolean>>({})
 const teachers = ref([])
+const courses = ref([])
 
 const createForm = reactive({
   student_id: '',
   name: '',
-  course: '',
+  course: null,
   year_level: '',
   section: '',
   username: '',
@@ -300,7 +303,7 @@ const createForm = reactive({
 const editForm = reactive({
   student_id: '',
   name: '',
-  course: '',
+  course: null,
   year_level: '',
   section: '',
   email: '',
@@ -314,7 +317,8 @@ const filteredStudents = computed(() => {
   return students.value.filter((item: any) =>
     item.student_id?.toLowerCase().includes(keyword) ||
     item.name?.toLowerCase().includes(keyword) ||
-    item.course?.toLowerCase().includes(keyword) ||
+    item.course?.name?.toLowerCase().includes(keyword) ||
+    item.course?.code?.toLowerCase().includes(keyword) ||
     item.year_level?.toLowerCase().includes(keyword) ||
     item.section?.toLowerCase().includes(keyword) ||
     item.user?.email?.toLowerCase().includes(keyword)
@@ -340,7 +344,7 @@ watch(globalFilter, () => {
 function resetCreateForm() {
   createForm.student_id = ''
   createForm.name = ''
-  createForm.course = ''
+  createForm.course = null
   createForm.year_level = ''
   createForm.section = ''
   createForm.username = ''
@@ -351,7 +355,7 @@ function resetCreateForm() {
 function resetEditForm() {
   editForm.student_id = ''
   editForm.name = ''
-  editForm.course = ''
+  editForm.course = null
   editForm.year_level = ''
   editForm.section = ''
   editForm.email = ''
@@ -391,7 +395,7 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
 
         editForm.student_id = row.student_id || ''
         editForm.name = row.name || ''
-        editForm.course = row.course || ''
+        editForm.course = row.course?.id || null
         editForm.year_level = row.year_level || ''
         editForm.section = row.section || ''
         editForm.email = row.user?.email || ''
@@ -425,6 +429,26 @@ const assignedTeacherPreview = computed(() =>
   )
 )
 
+
+const courseOptions = computed(() =>
+  courses.value.map((course: any) => ({
+    label: `${course.code?.toUpperCase() || 'NO CODE'} - ${course.name}`,
+    value: course.id
+  }))
+)
+
+const getCourses = async () => {
+  const res = await $api('/courses', {
+    query: {
+      'populate[department]': true,
+      'sort[0]': 'name:asc',
+      'pagination[pageSize]': 200
+    }
+  })
+
+  courses.value = res.data || []
+}
+
 const getStudents = async () => {
   try {
     loading.value = true
@@ -433,6 +457,7 @@ const getStudents = async () => {
       query: {
         'populate[user]': true,
         'populate[assigned_teachers]': true,
+        'populate[course][populate][0]': 'department',
         'sort[0]': 'name:asc',
         'pagination[pageSize]': 200
       }
@@ -461,6 +486,7 @@ const removeTeacher = (id: string) => {
 const getTeachers = async () => {
   const res = await $api('/teachers', {
     query: {
+      'populate[department]': true,
       'sort[0]': 'name:asc',
       'pagination[pageSize]': 200
     }
@@ -605,7 +631,8 @@ const deleteSelected = async () => {
 onMounted(async () => {
   await Promise.all([
     getStudents(),
-    getTeachers()
+    getTeachers(),
+    getCourses()
   ])
 })
 </script>
