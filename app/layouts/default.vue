@@ -83,14 +83,14 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
             open.value = false
           }
         },
-        {
-          label: 'Summary',
-          icon: 'i-lucide-circle-small',
-          to: '/admin/evaluation/evaluation-summary',
-          onSelect: () => {
-            open.value = false
-          }
-        },
+        // {
+        //   label: 'Summary',
+        //   icon: 'i-lucide-circle-small',
+        //   to: '/admin/evaluation/evaluation-summary',
+        //   onSelect: () => {
+        //     open.value = false
+        //   }
+        // },
         ]
       },
       {

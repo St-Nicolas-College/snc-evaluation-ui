@@ -78,6 +78,8 @@
                   <th class="px-4 py-3 text-center">Total</th>
                   <th class="px-4 py-3 text-center">Average</th>
                   <th class="px-4 py-3 text-center">Rating</th>
+                  <th class="px-4 py-3 text-center">Sentiment</th>
+                  <th class="px-4 py-3 text-center">AI Score</th>
                   <th class="px-4 py-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -113,6 +115,16 @@
                       :class="ratingBadge(evaluation.average_score)">
                       {{ getRatingLabel(evaluation.average_score) }}
                     </span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="rounded-full px-2 py-1 text-xs font-semibold"
+                      :class="sentimentBadge(evaluation.feedback_sentiment)">
+                      {{ evaluation.feedback_sentiment || 'Neutral' }}
+                    </span>
+                  </td>
+
+                  <td class="px-4 py-3 text-center font-semibold">
+                    {{ Number(evaluation.feedback_sentiment_score || 0).toFixed(2) }}
                   </td>
 
                   <td class="px-4 py-3 text-center">
@@ -201,12 +213,57 @@
                 </table>
               </div>
 
-              <div class="rounded-lg border border-gray-200">
+             
+
+              <div class="rounded-lg mb-5 border border-gray-200">
                 <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
                   Student Comment
                 </div>
                 <div class="min-h-20 p-3 text-sm">
                   {{ selectedEvaluation.comment || 'N/A' }}
+                </div>
+              </div>
+
+               <div class="mb-5 rounded-lg border border-gray-200">
+                <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
+                  AI Sentiment Analysis
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 p-3 md:grid-cols-2">
+                  <div class="rounded-lg bg-gray-50 p-3 text-center">
+                    <p class="text-xs text-gray-500">Sentiment</p>
+                    <span class="mt-1 inline-block rounded-full px-2 py-1 text-xs font-semibold"
+                      :class="sentimentBadge(selectedEvaluation.feedback_sentiment)">
+                      {{ selectedEvaluation.feedback_sentiment || 'Neutral' }}
+                    </span>
+                  </div>
+
+                  <!-- <div class="rounded-lg bg-gray-50 p-3 text-center">
+                    <p class="text-xs text-gray-500">AI Score</p>
+                    <p class="text-lg font-bold">
+                      {{ Number(selectedEvaluation.feedback_sentiment_score || 0).toFixed(2) }}
+                    </p>
+                  </div> -->
+
+                  <div class="rounded-lg bg-gray-50 p-3 text-center">
+                    <p class="text-xs text-gray-500">Keywords</p>
+                    <p class="text-sm font-semibold">
+                      {{ formatKeywords(selectedEvaluation.feedback_keywords) }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="border-t border-gray-200 p-3">
+                  <p class="text-xs font-semibold text-gray-500">AI Summary</p>
+                  <p class="mt-1 text-sm text-gray-700">
+                    {{ selectedEvaluation.feedback_sentiment_summary || 'No AI summary available.' }}
+                  </p>
+                </div>
+                <div class="border-t border-gray-200 p-3">
+                  <p class="text-xs font-semibold text-gray-500">AI Suggestion</p>
+                  <p class="mt-1 text-sm text-gray-700">
+                    {{ selectedEvaluation.feedback_sentiment_suggestion || 'No AI summary available.' }}
+                  </p>
                 </div>
               </div>
 
@@ -246,6 +303,7 @@ const filters = reactive({
   faculty_id: '',
   school_year: '',
   semester: '',
+  department: '',
   search: ''
 })
 
@@ -289,13 +347,11 @@ const getResults = async () => {
   try {
     const query: any = {
       'filters[batch][evaluation_type][code][$eq]': 'student-faculty',
-
       'populate[teacher]': true,
       'populate[subject]': true,
+      'populate[evaluator_user]': true,
       'populate[batch][populate][0]': 'evaluation_type',
-
       'sort[0]': 'createdAt:desc',
-
       'pagination[page]': page.value,
       'pagination[pageSize]': pageSize.value
     }
@@ -338,6 +394,7 @@ const resetFilters = async () => {
   filters.faculty_id = ''
   filters.school_year = ''
   filters.semester = ''
+  filters.department = ''
   filters.search = ''
 
   page.value = 1
@@ -401,6 +458,22 @@ const ratingBadge = (average: number) => {
   if (avg > 0) return 'bg-red-100 text-red-700'
 
   return 'bg-gray-100 text-gray-600'
+}
+
+const sentimentBadge = (sentiment: string) => {
+  if (sentiment === 'Positive') return 'bg-green-100 text-green-700'
+  if (sentiment === 'Negative') return 'bg-red-100 text-red-700'
+  return 'bg-gray-100 text-gray-700'
+}
+
+const formatKeywords = (keywords: any) => {
+  if (!keywords) return 'N/A'
+
+  if (Array.isArray(keywords)) {
+    return keywords.length ? keywords.join(', ') : 'N/A'
+  }
+
+  return 'N/A'
 }
 
 onMounted(async () => {

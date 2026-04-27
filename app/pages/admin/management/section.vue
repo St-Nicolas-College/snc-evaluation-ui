@@ -33,6 +33,7 @@
               <th class="w-12 border border-gray-300 px-3 py-2 text-center"></th>
               <th class="w-24 border border-gray-300 px-4 py-2 text-center">Order</th>
               <th class="border border-gray-300 px-4 py-2 text-left">Title</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">Evaluation Type</th>
               <th class="w-20 border border-gray-300 px-4 py-2 text-center">Action</th>
             </tr>
           </thead>
@@ -61,6 +62,9 @@
 
               <td class="border border-gray-300 px-4 py-1">
                 {{ row.title }}
+              </td>
+              <td class="border border-gray-300 px-4 py-1">
+                {{ row.evaluation_type?.name || row.evaluation_type?.code || '—' }}
               </td>
 
               <td class="w-20 border border-gray-300 px-4 py-1 text-center">
@@ -98,6 +102,11 @@
               <UInput v-model="state.title" placeholder="Enter section title" class="w-full" size="xl" />
             </UFormField>
 
+            <UFormField label="Evaluation Type" name="evaluation_type">
+              <USelectMenu v-model="state.evaluation_type" :items="evaluationTypeOptions" value-key="value"
+                placeholder="Select evaluation type" class="w-full" size="xl" />
+            </UFormField>
+
             <UButton :label="loadingCreate ? 'Saving...' : 'Save'" :disabled="loadingCreate" type="submit" class="mt-3"
               size="lg" block />
           </UForm>
@@ -117,6 +126,11 @@
 
             <UFormField label="Title" name="title">
               <UInput v-model="state.title" placeholder="Enter section title" class="w-full" size="xl" />
+            </UFormField>
+
+            <UFormField label="Evaluation Type" name="evaluation_type">
+              <USelectMenu v-model="state.evaluation_type" :items="evaluationTypeOptions" value-key="value"
+                placeholder="Select evaluation type" class="w-full" size="xl" />
             </UFormField>
 
             <UButton :label="loadingUpdate ? 'Updating...' : 'Update'" :disabled="loadingUpdate" type="submit"
@@ -152,10 +166,12 @@ const sections = ref([])
 const globalFilter = ref('')
 const selectedId = ref(null)
 const selectedRows = ref<Record<string | number, boolean>>({})
+const evaluationTypes = ref([])
 
 const state = reactive({
   title: undefined,
-  order: undefined
+  order: undefined,
+  evaluation_type: undefined
 })
 
 const filteredSections = computed(() => {
@@ -179,6 +195,13 @@ const selectedCount = computed(() =>
   Object.values(selectedRows.value).filter(Boolean).length
 )
 
+const evaluationTypeOptions = computed(() =>
+  evaluationTypes.value.map((type: any) => ({
+    label: `${type.name || type.title || type.code}`,
+    value: type.id
+  }))
+)
+
 watch(globalFilter, () => {
   page.value = 1
 })
@@ -186,6 +209,7 @@ watch(globalFilter, () => {
 function resetForm() {
   state.title = undefined
   state.order = undefined
+  state.evaluation_type = undefined
 }
 
 function openCreateModal() {
@@ -220,6 +244,10 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
         selectedId.value = row.documentId || row.id
         state.title = row.title
         state.order = row.order
+        state.evaluation_type =
+          row.evaluation_type?.id ||
+          row.evaluation_type?.value ||
+          undefined
       }
     },
     {
@@ -233,16 +261,26 @@ function getDropdownActions(row: any): DropdownMenuItem[][] {
   ]]
 }
 
+const getEvaluationTypes = async () => {
+  const res = await $api('/evaluation-types', {
+    query: {
+      'sort[0]': 'name:asc',
+      'pagination[pageSize]': 100
+    }
+  })
+
+  evaluationTypes.value = res.data || []
+}
+
 const getEvaluationSections = async () => {
   try {
     loading.value = true
 
     const res = await $api('/evaluation-sections', {
       query: {
-        sort: ['order:asc'],
-        pagination: {
-          pageSize: 100
-        }
+        'populate[evaluation_type]': true,
+        'sort[0]': 'order:asc',
+        'pagination[pageSize]': 100
       }
     })
 
@@ -261,7 +299,8 @@ const createSection = async () => {
     const payload = {
       data: {
         title: state.title,
-        order: Number(state.order)
+        order: Number(state.order),
+        evaluation_type: state.evaluation_type?.value || state.evaluation_type
       }
     }
 
@@ -293,7 +332,8 @@ const updateSection = async () => {
     const payload = {
       data: {
         title: state.title,
-        order: Number(state.order)
+        order: Number(state.order),
+        evaluation_type: state.evaluation_type?.value || state.evaluation_type
       }
     }
 
@@ -365,7 +405,10 @@ const deleteSelected = async () => {
 }
 
 onMounted(async () => {
-  await getEvaluationSections()
+  await Promise.all([
+    getEvaluationTypes(),
+    getEvaluationSections()
+  ])
 })
 </script>
 
