@@ -149,19 +149,19 @@ const roleMenus: Record<string, NavigationMenuItem[][]> = {
           }
         },]
       },
-      { label: 'Feedback', icon: 'i-lucide-circle-user-round', to: '/admin/feedback' },
-      {
-        label: 'Settings',
-        icon: 'i-lucide-settings',
-        defaultOpen: false,
-        children: [{
-          label: 'General'
-        }, {
-          label: 'Members'
-        }, {
-          label: 'Notifications'
-        }]
-      }
+      // { label: 'Feedback', icon: 'i-lucide-circle-user-round', to: '/admin/feedback' },
+      // {
+      //   label: 'Settings',
+      //   icon: 'i-lucide-settings',
+      //   defaultOpen: false,
+      //   children: [{
+      //     label: 'General'
+      //   }, {
+      //     label: 'Members'
+      //   }, {
+      //     label: 'Notifications'
+      //   }]
+      // }
     ],
   ],
   Dean: [
