@@ -1,200 +1,215 @@
 <template>
   <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar>
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-        <template #title>
-          <div class="flex flex-col">
-            <span class="text-sm text-gray-500 uppercase">Dashboard</span>
-          </div>
-        </template>
-        <template #right>
-          <UColorModeSwitch />
+    <!-- DASHBOARD HEADER -->
+       
 
-        </template>
-      </UDashboardNavbar>
-    </template>
+    <!-- DASHBOARD BODY -->
     <template #body>
-      <!-- Loading -->
-      <div v-if="!user" class="py-10 text-center text-gray-500">
-        Loading...
-      </div>
+      <div class="min-h-full bg-gray-50/50 dark:bg-gray-950/30">
+        <!-- USER LOADING STATE -->
+        <div v-if="!user" class="flex min-h-[65vh] items-center justify-center">
+          <div class="text-center">
+            <div
+              class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 dark:bg-primary-950/50 dark:text-primary-400"
+            >
+              <UIcon
+                name="i-lucide-loader-circle"
+                class="size-7 animate-spin"
+              />
+            </div>
 
-      <!-- ADMIN -->
-      <div v-else-if="role === 'Admin'">
-        <DashboardAdminDashboard />
-      </div>
+            <p
+              class="mt-4 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Loading your dashboard
+            </p>
 
-      <!-- DEAN -->
-      <div v-else-if="role === 'Dean'">
-        <div class="py-10 text-center text-gray-500">
-          Dean Page
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Preparing your account information and evaluation data.
+            </p>
+          </div>
         </div>
-        <!-- <DashboardAdminDashboard /> -->
-      </div>
 
-      <!-- FACULTY -->
-      <div v-else-if="role === 'Faculty'">
-        <DashboardFacultyDashboard />
-      </div>
+        <!-- ADMIN DASHBOARD -->
+        <DashboardAdminDashboard v-else-if="role === 'Admin'" />
 
-      <!-- STUDENT -->
-      <div v-else-if="role === 'Student'">
-        <DashboardStudentDashboard />
-      </div>
+        <!-- DEAN DASHBOARD -->
+        <DashboardDeanDashboard v-else-if="role === 'Dean'" />
 
-      <!-- FALLBACK -->
-      <div v-else class="py-10 text-center text-gray-500">
-        Unknown role: {{ role }}
+        <!-- FACULTY DASHBOARD -->
+        <DashboardFacultyDashboard v-else-if="role === 'Faculty'" />
+
+        <!-- STUDENT DASHBOARD -->
+        <DashboardStudentDashboard v-else-if="role === 'Student'" />
+
+        <!-- UNKNOWN ROLE -->
+        <div v-else class="flex min-h-[65vh] items-center justify-center">
+          <div
+            class="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900"
+          >
+            <div
+              class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
+            >
+              <UIcon name="i-lucide-shield-alert" class="size-7" />
+            </div>
+
+            <h2
+              class="mt-5 text-lg font-semibold text-gray-900 dark:text-white"
+            >
+              Dashboard unavailable
+            </h2>
+
+            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
+              Your account does not have a recognised dashboard role. Please
+              contact the system administrator.
+            </p>
+
+            <div
+              class="mt-5 rounded-xl bg-gray-50 px-4 py-3 text-sm dark:bg-gray-800/70"
+            >
+              <span class="text-gray-500 dark:text-gray-400">
+                Current role:
+              </span>
+
+              <span class="ml-1 font-semibold text-gray-800 dark:text-gray-200">
+                {{ role || "No role assigned" }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
   </UDashboardPanel>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //@ts-nocheck
 definePageMeta({
-  middleware: ['auth', 'role'],
-  role: ['Admin','Dean', 'Faculty', 'Student']
-})
-const { user } = useAuth()
-const { $api } = useNuxtApp()
+  middleware: ["auth", "role"],
+  role: ["Admin", "Dean", "Faculty", "Student"],
+});
 
-const loading = ref(true)
-
-const faculties = ref([])
-const sections = ref([])
-const criteria = ref([])
-const evaluations = ref([])
-
-const totalFaculties = computed(() => faculties.value.length)
-const totalSections = computed(() => sections.value.length)
-const totalCriteria = computed(() => criteria.value.length)
-const totalEvaluations = computed(() => evaluations.value.length)
+const { user, logout } = useAuth();
 
 const role = computed(() => {
-  return user.value?.role || ''
-})
+  const currentRole = user.value?.role;
 
-const overallAverage = computed(() => {
-  if (!evaluations.value.length) return 0
-
-  const total = evaluations.value.reduce(
-    (sum: number, item: any) => sum + Number(item.average_score || 0),
-    0
-  )
-
-  return Number((total / evaluations.value.length).toFixed(2))
-})
-
-const recentEvaluations = computed(() =>
-  [...evaluations.value]
-    .sort(
-      (a: any, b: any) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    .slice(0, 5)
-)
-
-const facultySummary = computed(() => {
-  const grouped: Record<string, any> = {}
-
-  evaluations.value.forEach((item: any) => {
-    const teacherId = item.teacher?.id
-    const teacherName = item.teacher?.name || 'Unknown Faculty'
-
-    if (!teacherId) return
-
-    if (!grouped[teacherId]) {
-      grouped[teacherId] = {
-        teacherId,
-        teacherName,
-        totalAverage: 0,
-        count: 0,
-        average: 0
-      }
-    }
-
-    grouped[teacherId].totalAverage += Number(item.average_score || 0)
-    grouped[teacherId].count += 1
-  })
-
-  return Object.values(grouped)
-    .map((item: any) => ({
-      ...item,
-      average: item.count
-        ? Number((item.totalAverage / item.count).toFixed(2))
-        : 0
-    }))
-    .sort((a: any, b: any) => b.average - a.average)
-    .slice(0, 5)
-})
-
-const getFaculties = async () => {
-  const res = await $api('/teachers', {
-    query: {
-      pagination: { pageSize: 100 }
-    }
-  })
-  faculties.value = res.data || []
-}
-
-const getSections = async () => {
-  const res = await $api('/evaluation-sections', {
-    query: {
-      pagination: { pageSize: 100 }
-    }
-  })
-  sections.value = res.data || []
-}
-
-const getCriteria = async () => {
-  const res = await $api('/evaluation-criterias', {
-    query: {
-      pagination: { pageSize: 100 }
-    }
-  })
-  criteria.value = res.data || []
-}
-
-const getEvaluations = async () => {
-  const res = await $api('/evaluations', {
-    query: {
-      'populate[teacher]': true,
-      pagination: { pageSize: 100 }
-    }
-  })
-  evaluations.value = res.data || []
-}
-
-const formatDate = (value: string) => {
-  if (!value) return '-'
-
-  return new Date(value).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-}
-
-onMounted(async () => {
-  try {
-    loading.value = true
-
-    await Promise.all([
-      getFaculties(),
-      getSections(),
-      getCriteria(),
-      getEvaluations()
-    ])
-  } catch (err) {
-    console.log(err)
-  } finally {
-    loading.value = false
+  if (typeof currentRole === "string") {
+    return currentRole;
   }
-})
-</script>
 
-<style></style>
+  return currentRole?.name || "";
+});
+
+const displayName = computed(() => {
+  return (
+    user.value?.full_name ||
+    user.value?.name ||
+    user.value?.username ||
+    "System User"
+  );
+});
+
+const userInitials = computed(() => {
+  const name = displayName.value.trim();
+
+  if (!name) return "U";
+
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part: string) => part.charAt(0).toUpperCase())
+    .join("");
+});
+
+const dashboardTitle = computed(() => {
+  switch (role.value) {
+    case "Admin":
+      return "Administrator Dashboard";
+
+    case "Dean":
+      return "Dean Dashboard";
+
+    case "Faculty":
+      return "Faculty Dashboard";
+
+    case "Student":
+      return "Student Dashboard";
+
+    default:
+      return "Dashboard";
+  }
+});
+
+const dashboardDescription = computed(() => {
+  switch (role.value) {
+    case "Admin":
+      return "Monitor evaluations, users, faculty performance and system activity.";
+
+    case "Dean":
+      return "Review faculty evaluations and departmental performance.";
+
+    case "Faculty":
+      return "View assigned evaluations, feedback and performance results.";
+
+    case "Student":
+      return "Complete evaluations and monitor your submission progress.";
+
+    default:
+      return "Evaluation management and performance insights.";
+  }
+});
+
+const dashboardIcon = computed(() => {
+  switch (role.value) {
+    case "Admin":
+      return "i-lucide-layout-dashboard";
+
+    case "Dean":
+      return "i-lucide-building-2";
+
+    case "Faculty":
+      return "i-lucide-presentation";
+
+    case "Student":
+      return "i-lucide-graduation-cap";
+
+    default:
+      return "i-lucide-gauge";
+  }
+});
+
+const profileItems = computed(() => [
+  [
+    {
+      label: displayName.value,
+      type: "label",
+    },
+  ],
+  [
+    {
+      label: "My Profile",
+      icon: "i-lucide-user",
+      to: "/profile",
+    },
+    {
+      label: "Account Settings",
+      icon: "i-lucide-settings",
+      to: "/settings",
+    },
+  ],
+  [
+    {
+      label: "Sign out",
+      icon: "i-lucide-log-out",
+      color: "error",
+      onSelect: handleLogout,
+    },
+  ],
+]);
+
+async function handleLogout() {
+  await logout();
+  await navigateTo("/auth/login");
+}
+</script>
