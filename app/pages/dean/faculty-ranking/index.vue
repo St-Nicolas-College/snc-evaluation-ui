@@ -34,27 +34,25 @@
               <span
                 class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
               >
-                Faculty Portal
+                Dean Portal
               </span>
 
               <span
                 class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
               >
-                Performance Ranking
+                Department Performance
               </span>
             </div>
 
-            <h1
-              class="text-2xl font-bold tracking-tight sm:text-3xl"
-            >
-              Faculty Performance Ranking
+            <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
+              Department Faculty Ranking
             </h1>
 
             <p
               class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90"
             >
-              View faculty performance rankings based on available
-              Student–Faculty and Dean–Faculty evaluation records.
+              Review the performance ranking of faculty members in your
+              department using available student and Dean evaluation records.
             </p>
           </div>
         </div>
@@ -98,7 +96,7 @@
             <p
               class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100"
             >
-              Overall Avg.
+              Department Avg.
             </p>
           </div>
         </div>
@@ -106,7 +104,7 @@
     </section>
 
     <!-- =====================================================
-      CURRENT FACULTY / ACTIVE PERIOD
+      DEAN PROFILE / ACTIVE PERIOD
     ====================================================== -->
     <section
       class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
@@ -117,7 +115,7 @@
         <div
           class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-lg font-bold text-white shadow-lg shadow-emerald-500/20"
         >
-          {{ currentFacultyInitials }}
+          {{ deanInitials }}
         </div>
 
         <div class="min-w-0 flex-1">
@@ -125,7 +123,7 @@
             <h2
               class="truncate text-base font-bold text-gray-900 sm:text-lg dark:text-white"
             >
-              {{ currentFacultyName }}
+              {{ deanName }}
             </h2>
 
             <UBadge
@@ -133,7 +131,7 @@
               variant="subtle"
               size="sm"
             >
-              Your Profile
+              Dean
             </UBadge>
           </div>
 
@@ -146,19 +144,19 @@
                 class="size-3.5"
               />
 
-              {{ currentFacultyDepartment }}
+              {{ deanDepartment }}
             </span>
 
             <span
-              v-if="currentFacultyRank"
+              v-if="deanEmail"
               class="flex items-center gap-1.5"
             >
               <UIcon
-                name="i-lucide-medal"
+                name="i-lucide-mail"
                 class="size-3.5"
               />
 
-              Rank #{{ currentFacultyRank }}
+              {{ deanEmail }}
             </span>
           </div>
         </div>
@@ -231,7 +229,7 @@
       <h2
         class="mt-4 text-lg font-bold text-gray-900 dark:text-white"
       >
-        Unable to load faculty rankings
+        Unable to load department rankings
       </h2>
 
       <p
@@ -252,13 +250,12 @@
 
     <template v-else>
       <!-- ===================================================
-        TOP 3 PODIUM
+        TOP 3
       ==================================================== -->
       <section
         v-if="topThree.length"
         class="grid grid-cols-1 items-end gap-5 md:grid-cols-3"
       >
-        <!-- SECOND -->
         <article
           v-if="topThree[1]"
           class="order-2 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm md:order-1 dark:border-slate-700 dark:bg-gray-900"
@@ -267,40 +264,28 @@
             class="relative overflow-hidden bg-gradient-to-br from-slate-500 to-slate-700 px-5 py-6 text-center text-white"
           >
             <div
-              class="pointer-events-none absolute -right-12 -top-16 size-40 rounded-full bg-white/15 blur-3xl"
-            />
-
-            <div class="relative">
-              <div
-                class="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-xl font-bold"
-              >
-                {{ getFacultyInitials(topThree[1]) }}
-              </div>
-
-              <div
-                class="mx-auto mt-4 flex size-9 items-center justify-center rounded-full bg-slate-200 font-bold text-slate-700"
-              >
-                2
-              </div>
-
-              <h2
-                class="mt-3 truncate text-base font-bold"
-              >
-                {{ topThree[1].name }}
-              </h2>
-
-              <p
-                class="mt-1 truncate text-xs text-slate-200"
-              >
-                {{ topThree[1].department }}
-              </p>
+              class="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-xl font-bold"
+            >
+              {{ getFacultyInitials(topThree[1]) }}
             </div>
+
+            <div
+              class="mx-auto mt-4 flex size-9 items-center justify-center rounded-full bg-slate-200 font-bold text-slate-700"
+            >
+              2
+            </div>
+
+            <h2 class="mt-3 truncate text-base font-bold">
+              {{ topThree[1].name }}
+            </h2>
+
+            <p class="mt-1 truncate text-xs text-slate-200">
+              {{ topThree[1].department }}
+            </p>
           </div>
 
           <div class="p-5 text-center">
-            <p
-              class="text-3xl font-bold text-gray-900 dark:text-white"
-            >
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">
               {{ formatScore(topThree[1].overallAverage) }}
             </p>
 
@@ -309,7 +294,7 @@
             </p>
 
             <UBadge
-              :color="getScoreColour(topThree[1].overallAverage)"
+              :color="getScoreColor(topThree[1].overallAverage)"
               variant="subtle"
               class="mt-3"
             >
@@ -318,7 +303,6 @@
           </div>
         </article>
 
-        <!-- FIRST -->
         <article
           v-if="topThree[0]"
           class="order-1 overflow-hidden rounded-[28px] border border-amber-200 bg-white shadow-xl shadow-amber-900/10 md:order-2 dark:border-amber-800 dark:bg-gray-900"
@@ -327,43 +311,31 @@
             class="relative overflow-hidden bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500 px-5 py-8 text-center text-white"
           >
             <div
-              class="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-white/20 blur-3xl"
-            />
-
-            <div class="relative">
-              <div
-                class="mx-auto flex size-16 items-center justify-center rounded-[22px] border border-white/25 bg-white/20 text-2xl font-bold shadow-lg"
-              >
-                {{ getFacultyInitials(topThree[0]) }}
-              </div>
-
-              <div
-                class="mx-auto mt-4 flex size-11 items-center justify-center rounded-full bg-white font-bold text-amber-600 shadow-lg"
-              >
-                <UIcon
-                  name="i-lucide-crown"
-                  class="size-5"
-                />
-              </div>
-
-              <h2
-                class="mt-3 truncate text-lg font-bold"
-              >
-                {{ topThree[0].name }}
-              </h2>
-
-              <p
-                class="mt-1 truncate text-xs text-amber-50"
-              >
-                {{ topThree[0].department }}
-              </p>
+              class="mx-auto flex size-16 items-center justify-center rounded-[22px] border border-white/25 bg-white/20 text-2xl font-bold shadow-lg"
+            >
+              {{ getFacultyInitials(topThree[0]) }}
             </div>
+
+            <div
+              class="mx-auto mt-4 flex size-11 items-center justify-center rounded-full bg-white font-bold text-amber-600 shadow-lg"
+            >
+              <UIcon
+                name="i-lucide-crown"
+                class="size-5"
+              />
+            </div>
+
+            <h2 class="mt-3 truncate text-lg font-bold">
+              {{ topThree[0].name }}
+            </h2>
+
+            <p class="mt-1 truncate text-xs text-amber-50">
+              {{ topThree[0].department }}
+            </p>
           </div>
 
           <div class="p-6 text-center">
-            <p
-              class="text-4xl font-bold text-gray-900 dark:text-white"
-            >
+            <p class="text-4xl font-bold text-gray-900 dark:text-white">
               {{ formatScore(topThree[0].overallAverage) }}
             </p>
 
@@ -372,7 +344,7 @@
             </p>
 
             <UBadge
-              :color="getScoreColour(topThree[0].overallAverage)"
+              :color="getScoreColor(topThree[0].overallAverage)"
               variant="subtle"
               class="mt-3"
             >
@@ -381,7 +353,6 @@
           </div>
         </article>
 
-        <!-- THIRD -->
         <article
           v-if="topThree[2]"
           class="order-3 overflow-hidden rounded-[24px] border border-orange-200 bg-white shadow-sm dark:border-orange-900 dark:bg-gray-900"
@@ -390,40 +361,28 @@
             class="relative overflow-hidden bg-gradient-to-br from-orange-600 to-amber-800 px-5 py-6 text-center text-white"
           >
             <div
-              class="pointer-events-none absolute -right-12 -top-16 size-40 rounded-full bg-white/15 blur-3xl"
-            />
-
-            <div class="relative">
-              <div
-                class="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-xl font-bold"
-              >
-                {{ getFacultyInitials(topThree[2]) }}
-              </div>
-
-              <div
-                class="mx-auto mt-4 flex size-9 items-center justify-center rounded-full bg-orange-200 font-bold text-orange-800"
-              >
-                3
-              </div>
-
-              <h2
-                class="mt-3 truncate text-base font-bold"
-              >
-                {{ topThree[2].name }}
-              </h2>
-
-              <p
-                class="mt-1 truncate text-xs text-orange-100"
-              >
-                {{ topThree[2].department }}
-              </p>
+              class="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-xl font-bold"
+            >
+              {{ getFacultyInitials(topThree[2]) }}
             </div>
+
+            <div
+              class="mx-auto mt-4 flex size-9 items-center justify-center rounded-full bg-orange-200 font-bold text-orange-800"
+            >
+              3
+            </div>
+
+            <h2 class="mt-3 truncate text-base font-bold">
+              {{ topThree[2].name }}
+            </h2>
+
+            <p class="mt-1 truncate text-xs text-orange-100">
+              {{ topThree[2].department }}
+            </p>
           </div>
 
           <div class="p-5 text-center">
-            <p
-              class="text-3xl font-bold text-gray-900 dark:text-white"
-            >
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">
               {{ formatScore(topThree[2].overallAverage) }}
             </p>
 
@@ -432,7 +391,7 @@
             </p>
 
             <UBadge
-              :color="getScoreColour(topThree[2].overallAverage)"
+              :color="getScoreColor(topThree[2].overallAverage)"
               variant="subtle"
               class="mt-3"
             >
@@ -452,33 +411,22 @@
           class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
         >
           <div>
-            <h2
-              class="text-sm font-bold text-gray-900 dark:text-white"
-            >
-              Faculty Leaderboard
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+              Department Leaderboard
             </h2>
 
-            <p
-              class="mt-1 text-xs text-gray-500 dark:text-gray-400"
-            >
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Search and filter faculty ranking records.
             </p>
           </div>
 
           <div
-            class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[240px_200px_190px_190px]"
+            class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[240px_190px_190px]"
           >
             <UInput
               v-model="searchQuery"
               icon="i-lucide-search"
               placeholder="Search faculty..."
-              class="w-full"
-            />
-
-            <USelectMenu
-              v-model="selectedDepartment"
-              :items="departmentFilterOptions"
-              value-key="value"
               class="w-full"
             />
 
@@ -502,9 +450,7 @@
           v-if="hasActiveFilters"
           class="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4 dark:border-gray-800"
         >
-          <span
-            class="text-xs font-medium text-gray-500 dark:text-gray-400"
-          >
+          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
             Active filters:
           </span>
 
@@ -514,14 +460,6 @@
             variant="subtle"
           >
             Search: {{ searchQuery }}
-          </UBadge>
-
-          <UBadge
-            v-if="selectedDepartment !== 'all'"
-            color="primary"
-            variant="subtle"
-          >
-            {{ selectedDepartment }}
           </UBadge>
 
           <UBadge
@@ -563,18 +501,12 @@
           class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
         >
           <UIcon
-            :name="
-              rankedFaculty.length
-                ? 'i-lucide-search-x'
-                : 'i-lucide-trophy'
-            "
+            :name="rankedFaculty.length ? 'i-lucide-search-x' : 'i-lucide-trophy'"
             class="size-8"
           />
         </div>
 
-        <h2
-          class="mt-5 text-lg font-bold text-gray-900 dark:text-white"
-        >
+        <h2 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
           {{
             rankedFaculty.length
               ? 'No matching faculty found'
@@ -588,7 +520,7 @@
           {{
             rankedFaculty.length
               ? 'Try changing or clearing the current search and filters.'
-              : 'Faculty rankings will appear once evaluation records are available.'
+              : 'Department faculty rankings will appear once evaluation records are available.'
           }}
         </p>
 
@@ -614,14 +546,8 @@
         <article
           v-for="faculty in paginatedRanking"
           :key="faculty.teacherKey"
-          class="overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-gray-900"
-          :class="
-            faculty.isCurrentFaculty
-              ? 'border-emerald-300 ring-2 ring-emerald-100 dark:border-emerald-700 dark:ring-emerald-950'
-              : 'border-gray-200 dark:border-gray-800'
-          "
+          class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
         >
-          <!-- HEADER -->
           <div
             class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 px-4 py-4 text-white"
           >
@@ -629,9 +555,7 @@
               class="pointer-events-none absolute -right-10 -top-14 size-36 rounded-full bg-emerald-500/20 blur-3xl"
             />
 
-            <div
-              class="relative flex items-center justify-between gap-3"
-            >
+            <div class="relative flex items-center justify-between gap-3">
               <div class="flex min-w-0 items-center gap-3">
                 <div
                   class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 font-bold text-emerald-300"
@@ -640,32 +564,17 @@
                 </div>
 
                 <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <p
-                      class="text-[9px] font-semibold uppercase tracking-[0.14em] text-emerald-300"
-                    >
-                      Faculty Rank
-                    </p>
-
-                    <UBadge
-                      v-if="faculty.isCurrentFaculty"
-                      color="success"
-                      variant="solid"
-                      size="sm"
-                    >
-                      You
-                    </UBadge>
-                  </div>
-
-                  <h2
-                    class="mt-0.5 truncate text-base font-bold"
+                  <p
+                    class="text-[9px] font-semibold uppercase tracking-[0.14em] text-emerald-300"
                   >
+                    Faculty Rank
+                  </p>
+
+                  <h2 class="mt-0.5 truncate text-base font-bold">
                     {{ faculty.name }}
                   </h2>
 
-                  <p
-                    class="mt-0.5 truncate text-[11px] text-slate-300"
-                  >
+                  <p class="mt-0.5 truncate text-[11px] text-slate-300">
                     {{ faculty.department }}
                   </p>
                 </div>
@@ -680,14 +589,11 @@
           </div>
 
           <div class="space-y-4 p-4">
-            <!-- OVERALL SCORE -->
             <div
               class="rounded-xl border p-4"
               :class="getScoreContainerClass(faculty.overallAverage)"
             >
-              <div
-                class="flex items-center justify-between gap-3"
-              >
+              <div class="flex items-center justify-between gap-3">
                 <div>
                   <p
                     class="text-[10px] font-medium text-gray-500 dark:text-gray-400"
@@ -696,21 +602,17 @@
                   </p>
 
                   <div class="mt-1 flex items-end gap-1.5">
-                    <p
-                      class="text-3xl font-bold text-gray-900 dark:text-white"
-                    >
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white">
                       {{ formatScore(faculty.overallAverage) }}
                     </p>
 
-                    <span
-                      class="mb-1 text-xs font-medium text-gray-400"
-                    >
+                    <span class="mb-1 text-xs font-medium text-gray-400">
                       / 5
                     </span>
                   </div>
 
                   <UBadge
-                    :color="getScoreColour(faculty.overallAverage)"
+                    :color="getScoreColor(faculty.overallAverage)"
                     variant="subtle"
                     size="sm"
                     class="mt-1.5"
@@ -727,20 +629,15 @@
               </div>
             </div>
 
-            <!-- BREAKDOWN -->
             <div class="grid grid-cols-2 gap-2">
               <div
                 class="rounded-xl border border-blue-100 bg-blue-50/70 p-3 dark:border-blue-900 dark:bg-blue-950/20"
               >
-                <p
-                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
-                >
+                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                   Student Avg.
                 </p>
 
-                <p
-                  class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
                   {{ formatScore(faculty.studentAverage) }}
                 </p>
 
@@ -752,15 +649,11 @@
               <div
                 class="rounded-xl border border-violet-100 bg-violet-50/70 p-3 dark:border-violet-900 dark:bg-violet-950/20"
               >
-                <p
-                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
-                >
+                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                   Dean Avg.
                 </p>
 
-                <p
-                  class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
                   {{ formatScore(faculty.deanAverage) }}
                 </p>
 
@@ -772,15 +665,11 @@
               <div
                 class="rounded-xl border border-amber-100 bg-amber-50/70 p-3 dark:border-amber-900 dark:bg-amber-950/20"
               >
-                <p
-                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
-                >
+                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                   Subjects
                 </p>
 
-                <p
-                  class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
                   {{ faculty.subjectCount }}
                 </p>
               </div>
@@ -788,21 +677,16 @@
               <div
                 class="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 dark:border-emerald-900 dark:bg-emerald-950/20"
               >
-                <p
-                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
-                >
+                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                   Total Records
                 </p>
 
-                <p
-                  class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
                   {{ faculty.evaluationCount }}
                 </p>
               </div>
             </div>
 
-            <!-- FOOTER -->
             <div
               class="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-800"
             >
@@ -831,9 +715,7 @@
         v-if="filteredRanking.length > itemsPerPage"
         class="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800 dark:bg-gray-900"
       >
-        <p
-          class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
-        >
+        <p class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400">
           Showing {{ paginationStart }}–{{ paginationEnd }} of
           {{ filteredRanking.length }} faculty members
         </p>
@@ -882,9 +764,7 @@
               class="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-emerald-500/20 blur-3xl"
             />
 
-            <div
-              class="relative flex items-start justify-between gap-4"
-            >
+            <div class="relative flex items-start justify-between gap-4">
               <div class="flex min-w-0 items-center gap-4">
                 <div
                   class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 font-bold text-emerald-300"
@@ -899,15 +779,11 @@
                     Faculty Ranking Details
                   </p>
 
-                  <h2
-                    class="mt-1 truncate text-xl font-bold"
-                  >
+                  <h2 class="mt-1 truncate text-xl font-bold">
                     {{ selectedFaculty.name }}
                   </h2>
 
-                  <p
-                    class="mt-1 truncate text-xs text-slate-300"
-                  >
+                  <p class="mt-1 truncate text-xs text-slate-300">
                     {{ selectedFaculty.department }}
                   </p>
                 </div>
@@ -925,9 +801,7 @@
           </div>
 
           <div class="space-y-5 p-6">
-            <div
-              class="grid grid-cols-2 gap-3 sm:grid-cols-4"
-            >
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div
                 class="rounded-xl border border-amber-100 bg-amber-50 p-3 text-center dark:border-amber-900 dark:bg-amber-950/20"
               >
@@ -935,9 +809,7 @@
                   Rank
                 </p>
 
-                <p
-                  class="mt-1 text-xl font-bold text-amber-600 dark:text-amber-400"
-                >
+                <p class="mt-1 text-xl font-bold text-amber-600 dark:text-amber-400">
                   #{{ selectedFaculty.rank }}
                 </p>
               </div>
@@ -949,9 +821,7 @@
                   Overall
                 </p>
 
-                <p
-                  class="mt-1 text-xl font-bold text-emerald-700 dark:text-emerald-400"
-                >
+                <p class="mt-1 text-xl font-bold text-emerald-700 dark:text-emerald-400">
                   {{ formatScore(selectedFaculty.overallAverage) }}
                 </p>
               </div>
@@ -963,9 +833,7 @@
                   Student
                 </p>
 
-                <p
-                  class="mt-1 text-xl font-bold text-blue-700 dark:text-blue-400"
-                >
+                <p class="mt-1 text-xl font-bold text-blue-700 dark:text-blue-400">
                   {{ formatScore(selectedFaculty.studentAverage) }}
                 </p>
               </div>
@@ -977,9 +845,7 @@
                   Dean
                 </p>
 
-                <p
-                  class="mt-1 text-xl font-bold text-violet-700 dark:text-violet-400"
-                >
+                <p class="mt-1 text-xl font-bold text-violet-700 dark:text-violet-400">
                   {{ formatScore(selectedFaculty.deanAverage) }}
                 </p>
               </div>
@@ -988,57 +854,37 @@
             <div
               class="rounded-2xl border border-gray-200 p-4 dark:border-gray-800"
             >
-              <h3
-                class="text-sm font-bold text-gray-900 dark:text-white"
-              >
+              <h3 class="text-sm font-bold text-gray-900 dark:text-white">
                 Evaluation Summary
               </h3>
 
               <div class="mt-4 space-y-3">
-                <div
-                  class="flex items-center justify-between"
-                >
-                  <span
-                    class="text-sm text-gray-500 dark:text-gray-400"
-                  >
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
                     Student evaluations
                   </span>
 
-                  <span
-                    class="text-sm font-bold text-gray-900 dark:text-white"
-                  >
+                  <span class="text-sm font-bold text-gray-900 dark:text-white">
                     {{ selectedFaculty.studentEvaluationCount }}
                   </span>
                 </div>
 
-                <div
-                  class="flex items-center justify-between"
-                >
-                  <span
-                    class="text-sm text-gray-500 dark:text-gray-400"
-                  >
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
                     Dean evaluations
                   </span>
 
-                  <span
-                    class="text-sm font-bold text-gray-900 dark:text-white"
-                  >
+                  <span class="text-sm font-bold text-gray-900 dark:text-white">
                     {{ selectedFaculty.deanEvaluationCount }}
                   </span>
                 </div>
 
-                <div
-                  class="flex items-center justify-between"
-                >
-                  <span
-                    class="text-sm text-gray-500 dark:text-gray-400"
-                  >
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
                     Subjects evaluated
                   </span>
 
-                  <span
-                    class="text-sm font-bold text-gray-900 dark:text-white"
-                  >
+                  <span class="text-sm font-bold text-gray-900 dark:text-white">
                     {{ selectedFaculty.subjectCount }}
                   </span>
                 </div>
@@ -1046,15 +892,11 @@
                 <div
                   class="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-800"
                 >
-                  <span
-                    class="text-sm text-gray-500 dark:text-gray-400"
-                  >
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
                     Total records
                   </span>
 
-                  <span
-                    class="text-sm font-bold text-gray-900 dark:text-white"
-                  >
+                  <span class="text-sm font-bold text-gray-900 dark:text-white">
                     {{ selectedFaculty.evaluationCount }}
                   </span>
                 </div>
@@ -1068,32 +910,24 @@
               <div
                 class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <h3
-                  class="text-sm font-bold text-gray-900 dark:text-white"
-                >
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">
                   Evaluated Subjects
                 </h3>
               </div>
 
-              <div
-                class="divide-y divide-gray-200 dark:divide-gray-800"
-              >
+              <div class="divide-y divide-gray-200 dark:divide-gray-800">
                 <div
                   v-for="subject in selectedFaculty.subjects"
                   :key="subject.key"
                   class="flex items-center justify-between gap-4 px-4 py-3"
                 >
                   <div class="min-w-0">
-                    <p
-                      class="truncate text-sm font-medium text-gray-800 dark:text-gray-200"
-                    >
+                    <p class="truncate text-sm font-medium text-gray-800 dark:text-gray-200">
                       {{ subject.name }}
                     </p>
                   </div>
 
-                  <span
-                    class="shrink-0 text-xs font-bold text-emerald-600 dark:text-emerald-400"
-                  >
+                  <span class="shrink-0 text-xs font-bold text-emerald-600 dark:text-emerald-400">
                     {{ subject.count }} record(s)
                   </span>
                 </div>
@@ -1121,27 +955,22 @@
 
 definePageMeta({
   middleware: ['auth', 'role'],
-  role: ['Admin', 'Dean']
+  role: ['Dean', 'Admin']
 })
 
 const { $api } = useNuxtApp()
 const { user } = useAuth()
 const toast = useToast()
 
-/* =========================================================
-   STATE
-========================================================= */
-
 const teachers = ref<any[]>([])
 const evaluations = ref<any[]>([])
-const currentFaculty = ref<any>(null)
+const currentDean = ref<any>(null)
 const activeSchoolYear = ref<any>(null)
 
 const pending = ref(true)
 const loadError = ref('')
 
 const searchQuery = ref('')
-const selectedDepartment = ref('all')
 const selectedSemester = ref('all')
 const selectedSchoolYear = ref('all')
 
@@ -1151,10 +980,6 @@ const itemsPerPage = 9
 const detailsOpen = ref(false)
 const selectedFaculty = ref<any>(null)
 
-/* =========================================================
-   ACTIVE PERIOD
-========================================================= */
-
 const activeSemester = computed(() => {
   return activeSchoolYear.value?.semester || ''
 })
@@ -1163,69 +988,41 @@ const activeSchoolYearLabel = computed(() => {
   return activeSchoolYear.value?.school_year || ''
 })
 
-/* =========================================================
-   CURRENT FACULTY
-========================================================= */
-
-const currentFacultyName = computed(() => {
+const deanName = computed(() => {
   return (
-    currentFaculty.value?.name ||
-    currentFaculty.value?.full_name ||
+    currentDean.value?.name ||
+    currentDean.value?.full_name ||
     user.value?.name ||
     user.value?.username ||
-    'Faculty Member'
+    'Dean'
   )
 })
 
-const currentFacultyDepartment = computed(() => {
+const deanDepartment = computed(() => {
   return (
-    currentFaculty.value?.department?.name ||
+    currentDean.value?.department?.name ||
     'No department assigned'
   )
 })
 
-const currentFacultyInitials = computed(() => {
-  return createInitials(
-    currentFacultyName.value
+const deanEmail = computed(() => {
+  return (
+    currentDean.value?.email ||
+    currentDean.value?.user?.email ||
+    user.value?.email ||
+    ''
   )
 })
 
-/* =========================================================
-   FILTER OPTIONS
-========================================================= */
-
-const departmentFilterOptions = computed(() => {
-  const departments = Array.from(
-    new Set(
-      teachers.value
-        .map(
-          teacher =>
-            teacher?.department?.name
-        )
-        .filter(Boolean)
-    )
-  ).sort()
-
-  return [
-    {
-      label: 'All Departments',
-      value: 'all'
-    },
-    ...departments.map(value => ({
-      label: value,
-      value
-    }))
-  ]
+const deanInitials = computed(() => {
+  return createInitials(deanName.value)
 })
 
 const semesterFilterOptions = computed(() => {
   const values = Array.from(
     new Set(
       evaluations.value
-        .map(
-          evaluation =>
-            getSemester(evaluation)
-        )
+        .map(evaluation => getSemester(evaluation))
         .filter(
           value =>
             value &&
@@ -1250,10 +1047,7 @@ const schoolYearFilterOptions = computed(() => {
   const values = Array.from(
     new Set(
       evaluations.value
-        .map(
-          evaluation =>
-            getSchoolYear(evaluation)
-        )
+        .map(evaluation => getSchoolYear(evaluation))
         .filter(
           value =>
             value &&
@@ -1276,38 +1070,22 @@ const schoolYearFilterOptions = computed(() => {
   ]
 })
 
-/* =========================================================
-   FILTERED EVALUATIONS
-========================================================= */
-
 const periodFilteredEvaluations = computed(() => {
-  return evaluations.value.filter(
-    evaluation => {
-      const semester =
-        getSemester(evaluation)
+  return evaluations.value.filter(evaluation => {
+    const semester = getSemester(evaluation)
+    const schoolYear = getSchoolYear(evaluation)
 
-      const schoolYear =
-        getSchoolYear(evaluation)
+    const matchesSemester =
+      selectedSemester.value === 'all' ||
+      semester === selectedSemester.value
 
-      const matchesSemester =
-        selectedSemester.value === 'all' ||
-        semester === selectedSemester.value
+    const matchesSchoolYear =
+      selectedSchoolYear.value === 'all' ||
+      schoolYear === selectedSchoolYear.value
 
-      const matchesSchoolYear =
-        selectedSchoolYear.value === 'all' ||
-        schoolYear === selectedSchoolYear.value
-
-      return (
-        matchesSemester &&
-        matchesSchoolYear
-      )
-    }
-  )
+    return matchesSemester && matchesSchoolYear
+  })
 })
-
-/* =========================================================
-   RANKING
-========================================================= */
 
 const rankedFaculty = computed(() => {
   const groups = new Map<string, any>()
@@ -1322,224 +1100,138 @@ const rankedFaculty = computed(() => {
         teacher.name ||
         teacher.full_name ||
         'Unknown Faculty',
-
       department:
         teacher.department?.name ||
-        'No department',
-
+        deanDepartment.value,
       evaluations: []
     })
   })
 
-  periodFilteredEvaluations.value.forEach(
-    (evaluation: any) => {
-      const teacher =
-        evaluation.teacher
+  periodFilteredEvaluations.value.forEach((evaluation: any) => {
+    const teacher = evaluation.teacher
 
-      if (!teacher) {
-        return
-      }
+    if (!teacher) return
 
-      const key =
-        getTeacherKey(teacher)
+    const key = getTeacherKey(teacher)
 
-      if (!groups.has(key)) {
-        groups.set(key, {
-          teacherKey: key,
-          teacher,
-          name:
-            teacher.name ||
-            teacher.full_name ||
-            'Unknown Faculty',
-
-          department:
-            teacher.department?.name ||
-            'No department',
-
-          evaluations: []
-        })
-      }
-
-      groups.get(key).evaluations.push(
-        evaluation
-      )
+    if (!groups.has(key)) {
+      groups.set(key, {
+        teacherKey: key,
+        teacher,
+        name:
+          teacher.name ||
+          teacher.full_name ||
+          'Unknown Faculty',
+        department:
+          teacher.department?.name ||
+          deanDepartment.value,
+        evaluations: []
+      })
     }
-  )
 
-  const ranking = Array.from(
-    groups.values()
-  )
+    groups.get(key).evaluations.push(evaluation)
+  })
+
+  const ranking = Array.from(groups.values())
     .map(group => {
-      const studentRecords =
-        group.evaluations.filter(
-          (evaluation: any) =>
-            getSourceType(evaluation) ===
-            'student'
-        )
-
-      const deanRecords =
-        group.evaluations.filter(
-          (evaluation: any) =>
-            getSourceType(evaluation) ===
-            'dean'
-        )
-
-      const studentAverage =
-        calculateAverage(
-          studentRecords.map(
-            (evaluation: any) =>
-              getNormalisedScore(
-                evaluation
-              )
-          )
-        )
-
-      const deanAverage =
-        calculateAverage(
-          deanRecords.map(
-            (evaluation: any) =>
-              getNormalisedScore(
-                evaluation
-              )
-          )
-        )
-
-      const allScores =
-        group.evaluations
-          .map(
-            (evaluation: any) =>
-              getNormalisedScore(
-                evaluation
-              )
-          )
-          .filter(
-            (score: number) =>
-              score > 0
-          )
-
-      const overallAverage =
-        calculateAverage(allScores)
-
-      const subjectMap =
-        new Map<string, any>()
-
-      studentRecords.forEach(
-        (evaluation: any) => {
-          const subject =
-            evaluation.subject
-
-          if (!subject) {
-            return
-          }
-
-          const key =
-            String(
-              subject.documentId ||
-              subject.id ||
-              subject.name
-            )
-
-          if (!subjectMap.has(key)) {
-            subjectMap.set(key, {
-              key,
-              name:
-                subject.code &&
-                subject.name
-                  ? `${subject.code} - ${subject.name}`
-                  : subject.name ||
-                    subject.code ||
-                    'Unknown Subject',
-
-              count: 0
-            })
-          }
-
-          subjectMap.get(key).count += 1
-        }
+      const studentRecords = group.evaluations.filter(
+        (evaluation: any) =>
+          getSourceType(evaluation) === 'student'
       )
 
-      const currentKey =
-        currentFaculty.value
-          ? getTeacherKey(
-              currentFaculty.value
-            )
-          : ''
+      const deanRecords = group.evaluations.filter(
+        (evaluation: any) =>
+          getSourceType(evaluation) === 'dean'
+      )
+
+      const studentAverage = calculateAverage(
+        studentRecords.map((evaluation: any) =>
+          getNormalisedScore(evaluation)
+        )
+      )
+
+      const deanAverage = calculateAverage(
+        deanRecords.map((evaluation: any) =>
+          getNormalisedScore(evaluation)
+        )
+      )
+
+      const allScores = group.evaluations
+        .map((evaluation: any) =>
+          getNormalisedScore(evaluation)
+        )
+        .filter((score: number) => score > 0)
+
+      const overallAverage = calculateAverage(allScores)
+
+      const subjectMap = new Map<string, any>()
+
+      studentRecords.forEach((evaluation: any) => {
+        const subject = evaluation.subject
+
+        if (!subject) return
+
+        const key = String(
+          subject.documentId ||
+          subject.id ||
+          subject.name
+        )
+
+        if (!subjectMap.has(key)) {
+          subjectMap.set(key, {
+            key,
+            name:
+              subject.code && subject.name
+                ? `${subject.code} - ${subject.name}`
+                : subject.name ||
+                  subject.code ||
+                  'Unknown Subject',
+            count: 0
+          })
+        }
+
+        subjectMap.get(key).count += 1
+      })
 
       return {
         ...group,
-
         studentAverage,
         deanAverage,
         overallAverage,
-
-        studentEvaluationCount:
-          studentRecords.length,
-
-        deanEvaluationCount:
-          deanRecords.length,
-
-        evaluationCount:
-          group.evaluations.length,
-
-        subjects:
-          Array.from(
-            subjectMap.values()
-          ),
-
-        subjectCount:
-          subjectMap.size,
-
-        isCurrentFaculty:
-          group.teacherKey ===
-          currentKey
+        studentEvaluationCount: studentRecords.length,
+        deanEvaluationCount: deanRecords.length,
+        evaluationCount: group.evaluations.length,
+        subjects: Array.from(subjectMap.values()),
+        subjectCount: subjectMap.size
       }
     })
-    .filter(
-      faculty =>
-        faculty.evaluationCount > 0
-    )
-    .sort(
-      (a, b) => {
-        if (
-          b.overallAverage !==
-          a.overallAverage
-        ) {
-          return (
-            b.overallAverage -
-            a.overallAverage
-          )
-        }
-
-        return (
-          b.evaluationCount -
-          a.evaluationCount
-        )
+    .filter(faculty => faculty.evaluationCount > 0)
+    .sort((a, b) => {
+      if (b.overallAverage !== a.overallAverage) {
+        return b.overallAverage - a.overallAverage
       }
-    )
+
+      return b.evaluationCount - a.evaluationCount
+    })
 
   let previousScore: number | null = null
   let previousRank = 0
 
-  return ranking.map(
-    (faculty, index) => {
-      const rank =
-        previousScore !== null &&
-        faculty.overallAverage ===
-          previousScore
-          ? previousRank
-          : index + 1
+  return ranking.map((faculty, index) => {
+    const rank =
+      previousScore !== null &&
+      faculty.overallAverage === previousScore
+        ? previousRank
+        : index + 1
 
-      previousScore =
-        faculty.overallAverage
+    previousScore = faculty.overallAverage
+    previousRank = rank
 
-      previousRank = rank
-
-      return {
-        ...faculty,
-        rank
-      }
+    return {
+      ...faculty,
+      rank
     }
-  )
+  })
 })
 
 const topThree = computed(() => {
@@ -1551,65 +1243,23 @@ const totalEvaluationCount = computed(() => {
 })
 
 const institutionAverage = computed(() => {
-  const scores =
-    rankedFaculty.value
-      .map(
-        faculty =>
-          faculty.overallAverage
-      )
-      .filter(
-        score =>
-          score > 0
-      )
+  const scores = rankedFaculty.value
+    .map(faculty => faculty.overallAverage)
+    .filter(score => score > 0)
 
-  return formatScore(
-    calculateAverage(scores)
-  )
+  return formatScore(calculateAverage(scores))
 })
-
-const currentFacultyRank = computed(() => {
-  return (
-    rankedFaculty.value.find(
-      faculty =>
-        faculty.isCurrentFaculty
-    )?.rank ||
-    null
-  )
-})
-
-/* =========================================================
-   SEARCHED RANKING
-========================================================= */
 
 const filteredRanking = computed(() => {
-  const query =
-    searchQuery.value
-      .trim()
-      .toLowerCase()
+  const query = searchQuery.value.trim().toLowerCase()
 
-  return rankedFaculty.value.filter(
-    faculty => {
-      const matchesSearch =
-        !query ||
-        faculty.name
-          .toLowerCase()
-          .includes(query) ||
-        faculty.department
-          .toLowerCase()
-          .includes(query)
-
-      const matchesDepartment =
-        selectedDepartment.value ===
-          'all' ||
-        faculty.department ===
-          selectedDepartment.value
-
-      return (
-        matchesSearch &&
-        matchesDepartment
-      )
-    }
-  )
+  return rankedFaculty.value.filter(faculty => {
+    return (
+      !query ||
+      faculty.name.toLowerCase().includes(query) ||
+      faculty.department.toLowerCase().includes(query)
+    )
+  })
 })
 
 const totalPages = computed(() => {
@@ -1634,9 +1284,7 @@ const paginatedRanking = computed(() => {
 })
 
 const paginationStart = computed(() => {
-  if (!filteredRanking.value.length) {
-    return 0
-  }
+  if (!filteredRanking.value.length) return 0
 
   return (
     (currentPage.value - 1) *
@@ -1647,8 +1295,7 @@ const paginationStart = computed(() => {
 
 const paginationEnd = computed(() => {
   return Math.min(
-    currentPage.value *
-    itemsPerPage,
+    currentPage.value * itemsPerPage,
     filteredRanking.value.length
   )
 })
@@ -1656,44 +1303,27 @@ const paginationEnd = computed(() => {
 const hasActiveFilters = computed(() => {
   return Boolean(
     searchQuery.value ||
-    selectedDepartment.value !== 'all' ||
     selectedSemester.value !== 'all' ||
     selectedSchoolYear.value !== 'all'
   )
 })
 
-/* =========================================================
-   HELPERS
-========================================================= */
-
-const createInitials = (
-  value: string
-) => {
+const createInitials = (value: string) => {
   return String(value || '')
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map(
-      part =>
-        part
-          .charAt(0)
-          .toUpperCase()
+    .map(part =>
+      part.charAt(0).toUpperCase()
     )
     .join('')
 }
 
-const getFacultyInitials = (
-  faculty: any
-) => {
-  return createInitials(
-    faculty?.name ||
-    'Faculty'
-  )
+const getFacultyInitials = (faculty: any) => {
+  return createInitials(faculty?.name || 'Faculty')
 }
 
-const getTeacherKey = (
-  teacher: any
-) => {
+const getTeacherKey = (teacher: any) => {
   return String(
     teacher?.documentId ||
     teacher?.id ||
@@ -1702,9 +1332,7 @@ const getTeacherKey = (
   )
 }
 
-const getEvaluationCode = (
-  evaluation: any
-) => {
+const getEvaluationCode = (evaluation: any) => {
   return (
     evaluation?.batch
       ?.evaluation_type
@@ -1715,11 +1343,8 @@ const getEvaluationCode = (
   )
 }
 
-const getSourceType = (
-  evaluation: any
-) => {
-  const code =
-    getEvaluationCode(evaluation)
+const getSourceType = (evaluation: any) => {
+  const code = getEvaluationCode(evaluation)
 
   if (
     code === 'dean-faculty' ||
@@ -1731,9 +1356,7 @@ const getSourceType = (
   return 'student'
 }
 
-const getSemester = (
-  evaluation: any
-) => {
+const getSemester = (evaluation: any) => {
   return (
     evaluation?.batch?.semester ||
     evaluation?.semester ||
@@ -1741,9 +1364,7 @@ const getSemester = (
   )
 }
 
-const getSchoolYear = (
-  evaluation: any
-) => {
+const getSchoolYear = (evaluation: any) => {
   return (
     evaluation?.batch?.school_year ||
     evaluation?.school_year ||
@@ -1751,45 +1372,30 @@ const getSchoolYear = (
   )
 }
 
-const getResponses = (
-  evaluation: any
-) => {
-  const rawResponses =
-    evaluation?.responses
+const getResponses = (evaluation: any) => {
+  const rawResponses = evaluation?.responses
 
-  if (!rawResponses) {
-    return []
-  }
+  if (!rawResponses) return []
 
   if (Array.isArray(rawResponses)) {
     return rawResponses.map(
-      (
-        response: any,
-        index: number
-      ) => ({
+      (response: any, index: number) => ({
         criterionId:
           response.criterion_id ||
           response.criterionId ||
           response.id ||
           index,
-
-        score:
-          Number(
-            response.score ??
-            response.value ??
-            response.rating
-          )
+        score: Number(
+          response.score ??
+          response.value ??
+          response.rating
+        )
       })
     )
   }
 
-  if (
-    typeof rawResponses ===
-    'object'
-  ) {
-    return Object.entries(
-      rawResponses
-    ).map(
+  if (typeof rawResponses === 'object') {
+    return Object.entries(rawResponses).map(
       ([criterionId, score]) => ({
         criterionId,
         score: Number(score)
@@ -1800,15 +1406,12 @@ const getResponses = (
   return []
 }
 
-const getRawAverageScore = (
-  evaluation: any
-) => {
-  const directScore =
-    Number(
-      evaluation?.average_score ??
-      evaluation?.average ??
-      evaluation?.score
-    )
+const getRawAverageScore = (evaluation: any) => {
+  const directScore = Number(
+    evaluation?.average_score ??
+    evaluation?.average ??
+    evaluation?.score
+  )
 
   if (
     Number.isFinite(directScore) &&
@@ -1817,137 +1420,74 @@ const getRawAverageScore = (
     return directScore
   }
 
-  const scores =
-    getResponses(evaluation)
-      .map(
-        response =>
-          Number(response.score)
-      )
-      .filter(
-        score =>
-          Number.isFinite(score)
-      )
+  const scores = getResponses(evaluation)
+    .map(response => Number(response.score))
+    .filter(score => Number.isFinite(score))
 
-  if (!scores.length) {
-    return 0
-  }
+  if (!scores.length) return 0
 
   return (
     scores.reduce(
-      (sum, score) =>
-        sum + score,
+      (sum, score) => sum + score,
       0
     ) / scores.length
   )
 }
 
-const getNormalisedScore = (
-  evaluation: any
-) => {
-  const score =
-    getRawAverageScore(evaluation)
+const getNormalisedScore = (evaluation: any) => {
+  const score = getRawAverageScore(evaluation)
 
-  if (!score) {
-    return 0
-  }
+  if (!score) return 0
 
-  /*
-    Dean-based evaluation forms may use a 4-point scale.
-    Convert them to the common 5-point ranking scale.
-  */
   if (
-    getSourceType(evaluation) ===
-      'dean' &&
+    getSourceType(evaluation) === 'dean' &&
     score <= 4
   ) {
-    return (
-      score / 4
-    ) * 5
+    return (score / 4) * 5
   }
 
   return score
 }
 
-const calculateAverage = (
-  scores: number[]
-) => {
-  const validScores =
-    scores.filter(
-      score =>
-        Number.isFinite(score) &&
-        score > 0
-    )
+const calculateAverage = (scores: number[]) => {
+  const validScores = scores.filter(
+    score =>
+      Number.isFinite(score) &&
+      score > 0
+  )
 
-  if (!validScores.length) {
-    return 0
-  }
+  if (!validScores.length) return 0
 
   return (
     validScores.reduce(
-      (sum, score) =>
-        sum + score,
+      (sum, score) => sum + score,
       0
     ) / validScores.length
   )
 }
 
-/* =========================================================
-   DISPLAY HELPERS
-========================================================= */
-
-const formatScore = (
-  score: number
-) => {
-  if (!score) {
-    return '0.00'
-  }
+const formatScore = (score: number) => {
+  if (!score) return '0.00'
 
   return Number(score).toFixed(2)
 }
 
-const getScoreLabel = (
-  score: number
-) => {
-  if (score >= 4.5) {
-    return 'Outstanding'
-  }
-
-  if (score >= 3.5) {
-    return 'Excellent'
-  }
-
-  if (score >= 2.5) {
-    return 'Satisfactory'
-  }
-
-  if (score > 0) {
-    return 'Needs Improvement'
-  }
-
+const getScoreLabel = (score: number) => {
+  if (score >= 4.5) return 'Outstanding'
+  if (score >= 3.5) return 'Excellent'
+  if (score >= 2.5) return 'Satisfactory'
+  if (score > 0) return 'Needs Improvement'
   return 'No Score'
 }
 
-const getScoreColour = (
-  score: number
-) => {
-  if (score >= 4.5) {
-    return 'success'
-  }
-
-  if (score >= 3.5) {
-    return 'primary'
-  }
-
-  if (score >= 2.5) {
-    return 'warning'
-  }
-
+const getScoreColor = (score: number) => {
+  if (score >= 4.5) return 'success'
+  if (score >= 3.5) return 'primary'
+  if (score >= 2.5) return 'warning'
   return 'error'
 }
 
-const getScoreContainerClass = (
-  score: number
-) => {
+const getScoreContainerClass = (score: number) => {
   if (score >= 4.5) {
     return [
       'border-emerald-100',
@@ -1983,31 +1523,15 @@ const getScoreContainerClass = (
   ]
 }
 
-const getScoreIconClass = (
-  score: number
-) => {
-  if (score >= 4.5) {
-    return 'text-emerald-500'
-  }
-
-  if (score >= 3.5) {
-    return 'text-blue-500'
-  }
-
-  if (score >= 2.5) {
-    return 'text-amber-500'
-  }
-
+const getScoreIconClass = (score: number) => {
+  if (score >= 4.5) return 'text-emerald-500'
+  if (score >= 3.5) return 'text-blue-500'
+  if (score >= 2.5) return 'text-amber-500'
   return 'text-red-500'
 }
 
-/* =========================================================
-   ACTIONS
-========================================================= */
-
 const clearFilters = () => {
   searchQuery.value = ''
-  selectedDepartment.value = 'all'
   selectedSemester.value = 'all'
   selectedSchoolYear.value = 'all'
   currentPage.value = 1
@@ -2016,9 +1540,7 @@ const clearFilters = () => {
 const scrollToTop = async () => {
   await nextTick()
 
-  if (!import.meta.client) {
-    return
-  }
+  if (!import.meta.client) return
 
   window.scrollTo({
     top: 0,
@@ -2027,161 +1549,137 @@ const scrollToTop = async () => {
 }
 
 const previousPage = async () => {
-  if (currentPage.value <= 1) {
-    return
-  }
+  if (currentPage.value <= 1) return
 
   currentPage.value -= 1
   await scrollToTop()
 }
 
 const nextPage = async () => {
-  if (
-    currentPage.value >=
-    totalPages.value
-  ) {
-    return
-  }
+  if (currentPage.value >= totalPages.value) return
 
   currentPage.value += 1
   await scrollToTop()
 }
 
-const openFacultyDetails = (
-  faculty: any
-) => {
-  selectedFaculty.value =
-    faculty
-
+const openFacultyDetails = (faculty: any) => {
+  selectedFaculty.value = faculty
   detailsOpen.value = true
 }
 
-/* =========================================================
-   API
-========================================================= */
-
 const getActiveSchoolYear = async () => {
   try {
-    const response = await $api(
-      '/school-years',
-      {
-        query: {
-          'filters[active_sy][$eq]':
-            true,
-
-          'pagination[pageSize]':
-            1
-        }
+    const response = await $api('/school-years', {
+      query: {
+        'filters[active_sy][$eq]': true,
+        'pagination[pageSize]': 1
       }
-    )
+    })
 
     activeSchoolYear.value =
       response.data?.[0] || null
   } catch (error) {
-    console.error(
-      'Active school year error:',
-      error
-    )
-
+    console.error('Active school year error:', error)
     activeSchoolYear.value = null
   }
 }
 
-const getCurrentFaculty = async () => {
+const getCurrentDean = async () => {
   if (!user.value?.id) {
-    currentFaculty.value = null
+    currentDean.value = null
     return
   }
 
-  const response = await $api(
-    '/teachers',
-    {
-      query: {
-        'filters[user][id][$eq]':
-          user.value.id,
-
-        'populate[department]':
-          true,
-
-        'populate[user]':
-          true,
-
-        'pagination[pageSize]':
-          1
-      }
+  const response = await $api('/teachers', {
+    query: {
+      'filters[user][id][$eq]':
+        user.value.id,
+      'populate[department]':
+        true,
+      'populate[user]':
+        true,
+      'pagination[pageSize]':
+        1
     }
-  )
+  })
 
-  currentFaculty.value =
+  currentDean.value =
     response.data?.[0] || null
 }
 
 const getTeachers = async () => {
-  const response = await $api(
-    '/teachers',
-    {
-      query: {
-        'populate[department]':
-          true,
+  const departmentId =
+    currentDean.value?.department?.id
 
-        'populate[user][populate][0]':
-          'role',
+  if (!departmentId) {
+    teachers.value = []
+    return
+  }
 
-        'filters[user][role][name][$eq]':
-          'Faculty',
-
-        'sort[0]':
-          'name:asc',
-
-        'pagination[pageSize]':
-          500
-      }
+  const response = await $api('/teachers', {
+    query: {
+      'filters[user][role][name][$eq]':
+        'Faculty',
+      'filters[department][id][$eq]':
+        departmentId,
+      'populate[department]':
+        true,
+      'populate[user][populate][0]':
+        'role',
+      'sort[0]':
+        'name:asc',
+      'pagination[pageSize]':
+        500
     }
-  )
+  })
 
   teachers.value =
     response.data || []
 }
 
 const getEvaluations = async () => {
-  const response = await $api(
-    '/evaluations',
-    {
-      query: {
-        'filters[batch][evaluation_type][code][$in][0]':
-          'student-faculty',
+  const departmentId =
+    currentDean.value?.department?.id
 
-        'filters[batch][evaluation_type][code][$in][1]':
-          'dean-faculty',
+  if (!departmentId) {
+    evaluations.value = []
+    return
+  }
 
-        'populate[teacher][populate][department]':
-          true,
+  const response = await $api('/evaluations', {
+    query: {
+      'filters[teacher][department][id][$eq]':
+        departmentId,
 
-        'populate[subject][populate][course]':
-          true,
+      'filters[batch][evaluation_type][code][$in][0]':
+        'student-faculty',
 
-        'populate[dean_coordinator]':
-          true,
+      'filters[batch][evaluation_type][code][$in][1]':
+        'dean-faculty',
 
-        'populate[batch][populate][evaluation_type]':
-          true,
+      'populate[teacher][populate][department]':
+        true,
 
-        'sort[0]':
-          'createdAt:desc',
+      'populate[subject][populate][course]':
+        true,
 
-        'pagination[pageSize]':
-          1000
-      }
+      'populate[dean_coordinator]':
+        true,
+
+      'populate[batch][populate][evaluation_type]':
+        true,
+
+      'sort[0]':
+        'createdAt:desc',
+
+      'pagination[pageSize]':
+        1000
     }
-  )
+  })
 
   evaluations.value =
     response.data || []
 }
-
-/* =========================================================
-   LOAD
-========================================================= */
 
 const loadData = async () => {
   try {
@@ -2190,7 +1688,22 @@ const loadData = async () => {
 
     await Promise.all([
       getActiveSchoolYear(),
-      getCurrentFaculty(),
+      getCurrentDean()
+    ])
+
+    if (!currentDean.value) {
+      throw new Error(
+        'The logged-in Dean profile could not be found.'
+      )
+    }
+
+    if (!currentDean.value?.department?.id) {
+      throw new Error(
+        'The logged-in Dean is not assigned to a department.'
+      )
+    }
+
+    await Promise.all([
       getTeachers(),
       getEvaluations()
     ])
@@ -2198,7 +1711,7 @@ const loadData = async () => {
     currentPage.value = 1
   } catch (error: any) {
     console.error(
-      'Faculty ranking loading error:',
+      'Department faculty ranking loading error:',
       error
     )
 
@@ -2206,7 +1719,7 @@ const loadData = async () => {
       error?.data?.error?.message ||
       error?.data?.message ||
       error?.message ||
-      'Failed to load faculty rankings.'
+      'Failed to load department faculty rankings.'
 
     toast.add({
       title: 'Unable to load rankings',
@@ -2219,14 +1732,9 @@ const loadData = async () => {
   }
 }
 
-/* =========================================================
-   WATCHERS
-========================================================= */
-
 watch(
   [
     searchQuery,
-    selectedDepartment,
     selectedSemester,
     selectedSchoolYear
   ],
@@ -2238,10 +1746,7 @@ watch(
 watch(
   () => totalPages.value,
   value => {
-    if (
-      currentPage.value >
-      value
-    ) {
+    if (currentPage.value > value) {
       currentPage.value = value
     }
   }

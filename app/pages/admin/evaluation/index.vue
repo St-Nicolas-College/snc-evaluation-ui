@@ -1,485 +1,1656 @@
 <template>
-  <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar>
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
+  <div class="space-y-6 pb-8">
+    <!-- =====================================================
+          HERO
+        ====================================================== -->
+    <section
+      class="relative overflow-hidden rounded-[28px] border border-emerald-100 bg-gradient-to-br from-emerald-600 via-green-600 to-teal-700 px-5 py-6 text-white shadow-xl shadow-emerald-900/10 sm:px-7 sm:py-7"
+    >
+      <div
+        class="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl"
+      />
+      <div
+        class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-teal-300/15 blur-3xl"
+      />
 
-        <template #title>
-          <span class="text-sm text-gray-500 uppercase">
-            Student to Faculty Evaluation Results
-          </span>
-        </template>
-      </UDashboardNavbar>
-    </template>
+      <div
+        class="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between"
+      >
+        <div class="flex min-w-0 items-start gap-4">
+          <div
+            class="hidden size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur sm:flex"
+          >
+            <UIcon name="i-lucide-graduation-cap" class="size-7" />
+          </div>
 
-    <template #body>
-      <div class="space-y-6">
-        <!-- FILTERS -->
-        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
-            <UFormField label="Faculty">
-              <USelectMenu v-model="filters.faculty_id" :items="facultyOptions" value-key="value"
-                placeholder="Select faculty" class="w-full" />
-            </UFormField>
+          <div class="min-w-0">
+            <div
+              class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-emerald-50"
+            >
+              <span
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
+              >
+                Administrator Portal
+              </span>
 
-            <UFormField label="School Year">
-              <UInput v-model="filters.school_year" placeholder="2025-2026" class="w-full" />
-            </UFormField>
-
-            <UFormField label="Semester">
-              <USelectMenu v-model="filters.semester" :items="semesterOptions" value-key="value"
-                placeholder="Select semester" class="w-full" />
-            </UFormField>
-
-            <UFormField label="Department">
-              <UInput v-model="filters.department" placeholder="BSIT" class="w-full" />
-            </UFormField>
-
-            <div class="flex items-end gap-2">
-              <UButton label="Search" icon="i-lucide-search" :loading="pending" @click="searchResults" block />
-
-              <UButton label="Reset" icon="i-lucide-repeat" color="neutral" variant="outline" @click="resetFilters"
-                block />
+              <span
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
+              >
+                Grouped by Faculty
+              </span>
             </div>
+
+            <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
+              Student – Faculty Results
+            </h1>
+
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
+              Review consolidated student evaluations in a scalable table
+              designed for large faculty datasets.
+            </p>
           </div>
         </div>
 
-        <!-- TABLE CARD -->
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-800">
-                Evaluation Results
-              </h2>
-              <p class="text-sm text-gray-500">
-                Showing {{ evaluations.length }} of {{ total }} records
-              </p>
-            </div>
+        <div class="grid grid-cols-3 gap-2 sm:min-w-[390px]">
+          <div
+            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
+          >
+            <p class="text-2xl font-bold">
+              {{ summary.totalFaculty }}
+            </p>
+
+            <p
+              class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100"
+            >
+              Faculty
+            </p>
           </div>
 
-          <div v-if="pending" class="py-12 text-center text-gray-500">
-            Loading results...
+          <div
+            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
+          >
+            <p class="text-2xl font-bold">
+              {{ summary.totalEvaluations }}
+            </p>
+
+            <p
+              class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100"
+            >
+              Evaluations
+            </p>
           </div>
 
-          <div v-else-if="!evaluations.length" class="py-12 text-center text-gray-500">
-            No Student to Faculty evaluation results found.
+          <div
+            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
+          >
+            <p class="text-2xl font-bold">
+              {{ summary.averageScore }}
+            </p>
+
+            <p
+              class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100"
+            >
+              Average
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+          KPI CARDS
+        ====================================================== -->
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        class="rounded-2xl border border-blue-100 bg-blue-50/70 p-5 dark:border-blue-900 dark:bg-blue-950/20"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              Faculty Groups
+            </p>
+
+            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {{ summary.totalFaculty }}
+            </p>
           </div>
 
-          <div v-else class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead class="bg-gray-50 text-xs uppercase text-gray-600">
-                <tr>
-                  <th class="px-4 py-3 text-left">Faculty</th>
-                  <th class="px-4 py-3 text-left">Subject</th>
-                  <th class="px-4 py-3 text-left">School Year</th>
-                  <th class="px-4 py-3 text-left">Semester</th>
-                  <th class="px-4 py-3 text-center">Total</th>
-                  <th class="px-4 py-3 text-center">Average</th>
-                  <th class="px-4 py-3 text-center">Rating</th>
-                  <th class="px-4 py-3 text-center">Sentiment</th>
-                  <th class="px-4 py-3 text-center">AI Score</th>
-                  <th class="px-4 py-3 text-center">Action</th>
-                </tr>
-              </thead>
+          <div
+            class="flex size-11 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+          >
+            <UIcon name="i-lucide-users-round" class="size-5" />
+          </div>
+        </div>
+      </div>
 
-              <tbody class="divide-y divide-gray-100">
-                <tr v-for="evaluation in evaluations" :key="evaluation.id" class="transition hover:bg-gray-50">
-                  <td class="px-4 py-3 font-medium text-gray-800">
-                    {{ evaluation.teacher?.name || 'Unknown Faculty' }}
-                  </td>
+      <div
+        class="rounded-2xl border border-violet-100 bg-violet-50/70 p-5 dark:border-violet-900 dark:bg-violet-950/20"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              Evaluation Records
+            </p>
 
-                  <td class="px-4 py-3 text-gray-600">
-                    {{ evaluation.subject?.name || evaluation.subject?.subject_name || 'N/A' }}
-                  </td>
-
-                  <td class="px-4 py-3 text-gray-600">
-                    {{ evaluation.batch?.school_year || 'N/A' }}
-                  </td>
-
-                  <td class="px-4 py-3 text-gray-600">
-                    {{ evaluation.batch?.semester || 'N/A' }}
-                  </td>
-
-                  <td class="px-4 py-3 text-center font-semibold">
-                    {{ evaluation.total_score || 0 }}
-                  </td>
-
-                  <td class="px-4 py-3 text-center font-semibold">
-                    {{ Number(evaluation.average_score || 0).toFixed(2) }}
-                  </td>
-
-                  <td class="px-4 py-3 text-center">
-                    <span class="rounded-full px-2 py-1 text-xs font-semibold"
-                      :class="ratingBadge(evaluation.average_score)">
-                      {{ getRatingLabel(evaluation.average_score) }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-center">
-                    <span class="rounded-full px-2 py-1 text-xs font-semibold"
-                      :class="sentimentBadge(evaluation.feedback_sentiment)">
-                      {{ evaluation.feedback_sentiment || 'Neutral' }}
-                    </span>
-                  </td>
-
-                  <td class="px-4 py-3 text-center font-semibold">
-                    {{ Number(evaluation.feedback_sentiment_score || 0).toFixed(2) }}
-                  </td>
-
-                  <td class="px-4 py-3 text-center">
-                    <UButton size="xs" color="primary" variant="soft" icon="i-lucide-eye"
-                      @click="openDetails(evaluation)">
-                      View
-                    </UButton>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {{ summary.totalEvaluations }}
+            </p>
           </div>
 
-          <!-- PAGINATION -->
-          <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4">
-            <div class="text-sm text-gray-500">
+          <div
+            class="flex size-11 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400"
+          >
+            <UIcon name="i-lucide-files" class="size-5" />
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="rounded-2xl border border-amber-100 bg-amber-50/70 p-5 dark:border-amber-900 dark:bg-amber-950/20"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              Unique Students
+            </p>
+
+            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {{ summary.totalEvaluators }}
+            </p>
+          </div>
+
+          <div
+            class="flex size-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400"
+          >
+            <UIcon name="i-lucide-user-round-check" class="size-5" />
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 dark:border-emerald-900 dark:bg-emerald-950/20"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              Overall Average
+            </p>
+
+            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {{ summary.averageScore }}
+              <span class="text-sm font-medium text-gray-400"> / 5 </span>
+            </p>
+          </div>
+
+          <div
+            class="flex size-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400"
+          >
+            <UIcon name="i-lucide-chart-no-axes-combined" class="size-5" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+          FILTERS
+        ====================================================== -->
+    <section
+      class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+    >
+      <div class="mb-4">
+        <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+          Student – Faculty Results
+        </h2>
+
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Search and filter grouped faculty evaluation results.
+        </p>
+      </div>
+
+      <div
+        class="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1.2fr)_minmax(180px,1fr)_minmax(180px,1fr)_minmax(170px,0.9fr)_minmax(170px,0.9fr)]"
+      >
+        <UInput
+          v-model="searchQuery"
+          icon="i-lucide-search"
+          placeholder="Search faculty..."
+          class="w-full"
+        />
+
+        <USelectMenu
+          v-model="selectedFaculty"
+          :items="facultyOptions"
+          value-key="value"
+          class="w-full"
+        />
+
+        <USelectMenu
+          v-model="selectedDepartment"
+          :items="departmentOptions"
+          value-key="value"
+          class="w-full"
+        />
+
+        <USelectMenu
+          v-model="selectedSemester"
+          :items="semesterOptions"
+          value-key="value"
+          class="w-full"
+        />
+
+        <USelectMenu
+          v-model="selectedSchoolYear"
+          :items="schoolYearOptions"
+          value-key="value"
+          class="w-full"
+        />
+      </div>
+
+      <div
+        v-if="hasActiveFilters"
+        class="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4 dark:border-gray-800"
+      >
+        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+          Active filters:
+        </span>
+
+        <UBadge v-if="searchQuery" color="neutral" variant="subtle">
+          Search: {{ searchQuery }}
+        </UBadge>
+
+        <UBadge
+          v-if="selectedFaculty !== 'all'"
+          color="primary"
+          variant="subtle"
+        >
+          {{ getSelectedLabel(facultyOptions, selectedFaculty) }}
+        </UBadge>
+
+        <UBadge
+          v-if="selectedDepartment !== 'all'"
+          color="info"
+          variant="subtle"
+        >
+          {{ selectedDepartment }}
+        </UBadge>
+
+        <UBadge
+          v-if="selectedSemester !== 'all'"
+          color="success"
+          variant="subtle"
+        >
+          {{ selectedSemester }}
+        </UBadge>
+
+        <UBadge
+          v-if="selectedSchoolYear !== 'all'"
+          color="warning"
+          variant="subtle"
+        >
+          {{ selectedSchoolYear }}
+        </UBadge>
+
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="xs"
+          icon="i-lucide-x"
+          @click="clearFilters"
+        >
+          Clear filters
+        </UButton>
+      </div>
+    </section>
+
+    <!-- =====================================================
+          LOADING
+        ====================================================== -->
+    <div v-if="pending" class="space-y-4">
+      <USkeleton class="h-20 w-full rounded-2xl" />
+      <USkeleton class="h-[520px] w-full rounded-2xl" />
+    </div>
+
+    <!-- =====================================================
+          ERROR
+        ====================================================== -->
+    <section
+      v-else-if="loadError"
+      class="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center dark:border-red-900 dark:bg-red-950/20"
+    >
+      <div
+        class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400"
+      >
+        <UIcon name="i-lucide-triangle-alert" class="size-7" />
+      </div>
+
+      <h2 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">
+        Unable to load results
+      </h2>
+
+      <p
+        class="mx-auto mt-2 max-w-lg text-sm leading-6 text-gray-500 dark:text-gray-400"
+      >
+        {{ loadError }}
+      </p>
+
+      <UButton class="mt-5" icon="i-lucide-refresh-cw" @click="getResults">
+        Try Again
+      </UButton>
+    </section>
+
+    <template v-else>
+      <!-- ===================================================
+            TABLE CARD
+          ==================================================== -->
+      <section
+        class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+      >
+        <div
+          class="flex flex-col gap-4 border-b border-gray-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between dark:border-gray-800"
+        >
+          <div>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+              Grouped Evaluation Results
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Showing {{ filteredGroups.length }} faculty group{{
+                filteredGroups.length === 1 ? "" : "s"
+              }}
+              from {{ evaluations.length }} evaluation record{{
+                evaluations.length === 1 ? "" : "s"
+              }}.
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <UInput
+              v-model="searchQuery"
+              icon="i-lucide-search"
+              placeholder="Search faculty or department..."
+              class="w-full sm:w-72"
+            />
+
+            <USelect
+              v-model="pageSize"
+              :items="pageSizeOptions"
+              class="w-full sm:w-28"
+            />
+          </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div v-if="!filteredGroups.length" class="px-6 py-16 text-center">
+          <div
+            class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+          >
+            <UIcon
+              :name="
+                groupedResults.length
+                  ? 'i-lucide-search-x'
+                  : 'i-lucide-file-chart-column'
+              "
+              class="size-8"
+            />
+          </div>
+
+          <h3 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
+            {{
+              groupedResults.length
+                ? "No matching faculty found"
+                : "No evaluation results available"
+            }}
+          </h3>
+
+          <p
+            class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500 dark:text-gray-400"
+          >
+            {{
+              groupedResults.length
+                ? "Try another faculty name or department."
+                : "No Student – Faculty evaluation results matched the selected filters."
+            }}
+          </p>
+        </div>
+
+        <!-- TABLE -->
+        <div v-else class="overflow-x-auto">
+          <table class="w-full min-w-[1180px] text-sm">
+            <thead
+              class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
+            >
+              <tr>
+                <th class="px-5 py-3 text-left">Faculty</th>
+                <th class="px-4 py-3 text-left">Department</th>
+                <th class="px-4 py-3 text-center">Subjects</th>
+                <th class="px-4 py-3 text-center">Evaluations</th>
+                <th class="px-4 py-3 text-center">Students</th>
+                <th class="px-4 py-3 text-center">Average</th>
+                <th class="px-4 py-3 text-center">Rating</th>
+                <th class="px-4 py-3 text-center">Positive</th>
+                <th class="px-4 py-3 text-center">Negative</th>
+                <th class="px-4 py-3 text-left">Latest</th>
+                <th class="px-5 py-3 text-center">Action</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+              <tr
+                v-for="group in paginatedGroups"
+                :key="group.key"
+                class="transition hover:bg-gray-50/80 dark:hover:bg-gray-950/30"
+              >
+                <td class="px-5 py-4">
+                  <div class="flex min-w-0 items-center gap-3">
+                    <div
+                      class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm"
+                    >
+                      {{ createInitials(group.name) }}
+                    </div>
+
+                    <div class="min-w-0">
+                      <p
+                        class="truncate font-bold text-gray-900 dark:text-white"
+                      >
+                        {{ group.name }}
+                      </p>
+
+                      <p
+                        class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400"
+                      >
+                        {{ group.schoolYears.join(", ") || "No school year" }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="px-4 py-4 text-gray-600 dark:text-gray-300">
+                  {{ group.department }}
+                </td>
+
+                <td class="px-4 py-4 text-center font-semibold">
+                  {{ group.subjectCount }}
+                </td>
+
+                <td class="px-4 py-4 text-center font-semibold">
+                  {{ group.recordCount }}
+                </td>
+
+                <td class="px-4 py-4 text-center font-semibold">
+                  {{ group.evaluatorCount }}
+                </td>
+
+                <td class="px-4 py-4 text-center">
+                  <div class="font-bold text-gray-900 dark:text-white">
+                    {{ formatNumber(group.averageScore) }}
+                  </div>
+
+                  <div class="text-[10px] text-gray-400">out of 5</div>
+                </td>
+
+                <td class="px-4 py-4 text-center">
+                  <span
+                    class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
+                    :class="ratingBadge(group.averageScore)"
+                  >
+                    {{ getRatingLabel(group.averageScore) }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-4 text-center">
+                  <span
+                    class="inline-flex min-w-8 justify-center rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                  >
+                    {{ group.sentiments.positive }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-4 text-center">
+                  <span
+                    class="inline-flex min-w-8 justify-center rounded-full bg-red-100 px-2 py-1 text-xs font-bold text-red-700 dark:bg-red-950 dark:text-red-400"
+                  >
+                    {{ group.sentiments.negative }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-4 text-gray-600 dark:text-gray-300">
+                  {{ formatDate(group.latestDate) }}
+                </td>
+
+                <td class="px-5 py-4 text-center">
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="soft"
+                    icon="i-lucide-eye"
+                    @click="openGroup(group)"
+                  >
+                    View
+                  </UButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div
+          v-if="filteredGroups.length"
+          class="flex flex-col gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
+        >
+          <p
+            class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
+          >
+            Showing {{ paginationStart }}–{{ paginationEnd }} of
+            {{ filteredGroups.length }} faculty groups
+          </p>
+
+          <div class="flex items-center justify-center gap-2">
+            <UButton
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-chevron-left"
+              square
+              :disabled="page <= 1"
+              @click="prevPage"
+            />
+
+            <div
+              class="min-w-28 rounded-xl bg-gray-100 px-3 py-2 text-center text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+            >
               Page {{ page }} of {{ totalPages }}
             </div>
 
-            <div class="flex items-center gap-2">
-              <UButton label="Previous" color="neutral" variant="outline" :disabled="page <= 1" @click="prevPage" />
-
-              <UButton label="Next" color="neutral" variant="outline" :disabled="page >= totalPages"
-                @click="nextPage" />
-            </div>
+            <UButton
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-chevron-right"
+              square
+              :disabled="page >= totalPages"
+              @click="nextPage"
+            />
           </div>
         </div>
+      </section>
+    </template>
 
-        <!-- DETAILS MODAL -->
-        <UModal v-model:open="showDetails">
-          <template #content>
-            <div v-if="selectedEvaluation" class="max-h-[85vh] overflow-y-auto p-6">
-              <div class="mb-5">
-                <h2 class="text-xl font-bold text-gray-800">
-                  {{ selectedEvaluation.teacher?.name || 'Unknown Faculty' }}
-                </h2>
-                <p class="text-sm text-gray-500">
-                  Subject:
-                  {{ selectedEvaluation.subject?.name || selectedEvaluation.subject?.subject_name || 'N/A' }}
+    <!-- =====================================================
+          DETAILS MODAL
+        ====================================================== -->
+    <UModal v-model:open="showGroupDetails">
+      <template #content>
+        <div
+          v-if="selectedGroup"
+          class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900"
+        >
+          <div
+            class="relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 px-6 py-6 text-white"
+          >
+            <div
+              class="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-white/10 blur-3xl"
+            />
+
+            <div class="relative flex items-start justify-between gap-4">
+              <div class="flex min-w-0 items-center gap-4">
+                <div
+                  class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 font-bold"
+                >
+                  {{ createInitials(selectedGroup.name) }}
+                </div>
+
+                <div class="min-w-0">
+                  <p
+                    class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200"
+                  >
+                    Faculty Evaluation Summary
+                  </p>
+
+                  <h2 class="mt-1 truncate text-xl font-bold">
+                    {{ selectedGroup.name }}
+                  </h2>
+
+                  <p class="mt-1 truncate text-xs text-slate-300">
+                    {{ selectedGroup.department }}
+                  </p>
+                </div>
+              </div>
+
+              <UButton
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-x"
+                square
+                class="text-white hover:bg-white/10"
+                @click="showGroupDetails = false"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-5 p-6">
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div
+                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
+              >
+                <p class="text-[10px] uppercase text-gray-400">Evaluations</p>
+
+                <p
+                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
+                >
+                  {{ selectedGroup.recordCount }}
                 </p>
               </div>
 
-              <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div class="rounded-lg bg-gray-50 p-3 text-center">
-                  <p class="text-xs text-gray-500">Total</p>
-                  <p class="text-lg font-bold">
+              <div
+                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
+              >
+                <p class="text-[10px] uppercase text-gray-400">Students</p>
+
+                <p
+                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
+                >
+                  {{ selectedGroup.evaluatorCount }}
+                </p>
+              </div>
+
+              <div
+                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
+              >
+                <p class="text-[10px] uppercase text-gray-400">Subjects</p>
+
+                <p
+                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
+                >
+                  {{ selectedGroup.subjectCount }}
+                </p>
+              </div>
+
+              <div
+                class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20"
+              >
+                <p class="text-[10px] uppercase text-gray-400">Average</p>
+
+                <p
+                  class="mt-1 text-sm font-bold text-emerald-700 dark:text-emerald-400"
+                >
+                  {{ formatNumber(selectedGroup.averageScore) }}/5
+                </p>
+              </div>
+            </div>
+
+            <!-- RECORD SELECTOR -->
+            <section
+              class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
+            >
+              <div
+                class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
+              >
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+                  Evaluation Records
+                </h3>
+
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Select a record to inspect its criteria, comment, and AI
+                  analysis.
+                </p>
+              </div>
+
+              <div
+                class="max-h-64 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-800"
+              >
+                <button
+                  v-for="record in selectedGroup.records"
+                  :key="getEvaluationKey(record)"
+                  type="button"
+                  class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-gray-50 dark:hover:bg-gray-950/40"
+                  :class="
+                    getEvaluationKey(selectedEvaluation) ===
+                    getEvaluationKey(record)
+                      ? 'bg-emerald-50 dark:bg-emerald-950/20'
+                      : ''
+                  "
+                  @click="selectEvaluation(record)"
+                >
+                  <div class="min-w-0">
+                    <p
+                      class="truncate text-sm font-semibold text-gray-900 dark:text-white"
+                    >
+                      {{ getSubjectName(record) }}
+                    </p>
+
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      {{ getSemester(record) }} · {{ getSchoolYear(record) }} ·
+                      {{ formatDate(getEvaluationDate(record)) }}
+                    </p>
+                  </div>
+
+                  <div class="flex shrink-0 items-center gap-2">
+                    <span
+                      class="rounded-full px-2 py-1 text-xs font-semibold"
+                      :class="sentimentBadge(record.feedback_sentiment)"
+                    >
+                      {{ record.feedback_sentiment || "Neutral" }}
+                    </span>
+
+                    <UBadge
+                      :color="ratingColor(record.average_score)"
+                      variant="subtle"
+                    >
+                      {{ formatNumber(record.average_score) }}
+                    </UBadge>
+                  </div>
+                </button>
+              </div>
+            </section>
+
+            <template v-if="selectedEvaluation">
+              <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div
+                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
+                >
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+
+                  <p
+                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
+                  >
                     {{ selectedEvaluation.total_score || 0 }}
                   </p>
                 </div>
 
-                <div class="rounded-lg bg-gray-50 p-3 text-center">
-                  <p class="text-xs text-gray-500">Average</p>
-                  <p class="text-lg font-bold">
-                    {{ Number(selectedEvaluation.average_score || 0).toFixed(2) }}
+                <div
+                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
+                >
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Average
+                  </p>
+
+                  <p
+                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
+                  >
+                    {{ formatNumber(selectedEvaluation.average_score) }}
                   </p>
                 </div>
 
-                <div class="rounded-lg bg-gray-50 p-3 text-center">
-                  <p class="text-xs text-gray-500">Rating</p>
-                  <p class="text-lg font-bold">
+                <div
+                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
+                >
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Rating</p>
+
+                  <p
+                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
+                  >
                     {{ getRatingLabel(selectedEvaluation.average_score) }}
                   </p>
                 </div>
               </div>
 
-              <div class="mb-5 overflow-x-auto rounded-lg border border-gray-200">
-                <table class="w-full text-sm">
-                  <thead class="bg-gray-50 text-xs uppercase text-gray-600">
-                    <tr>
-                      <th class="px-3 py-2 text-left">Criteria</th>
-                      <th class="px-3 py-2 text-center">Score</th>
-                    </tr>
-                  </thead>
-
-                  <tbody class="divide-y divide-gray-100">
-                    <tr v-for="item in formatResponses(selectedEvaluation.responses)" :key="item.criteria_id">
-                      <td class="px-3 py-2">
-                        {{ item.statement }}
-                      </td>
-
-                      <td class="px-3 py-2 text-center font-bold">
-                        {{ item.score }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-             
-
-              <div class="rounded-lg mb-5 border border-gray-200">
-                <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
-                  Student Comment
-                </div>
-                <div class="min-h-20 p-3 text-sm">
-                  {{ selectedEvaluation.comment || 'N/A' }}
-                </div>
-              </div>
-
-               <div class="mb-5 rounded-lg border border-gray-200">
-                <div class="border-b border-gray-200 bg-gray-50 px-3 py-2 font-bold">
-                  AI Sentiment Analysis
+              <section
+                class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
+              >
+                <div
+                  class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
+                >
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+                    Criteria Responses
+                  </h3>
                 </div>
 
-                <div class="grid grid-cols-1 gap-3 p-3 md:grid-cols-2">
-                  <div class="rounded-lg bg-gray-50 p-3 text-center">
-                    <p class="text-xs text-gray-500">Sentiment</p>
-                    <span class="mt-1 inline-block rounded-full px-2 py-1 text-xs font-semibold"
-                      :class="sentimentBadge(selectedEvaluation.feedback_sentiment)">
-                      {{ selectedEvaluation.feedback_sentiment || 'Neutral' }}
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead
+                      class="bg-gray-50 text-xs uppercase text-gray-600 dark:bg-gray-950/40 dark:text-gray-400"
+                    >
+                      <tr>
+                        <th class="px-4 py-3 text-left">Criteria</th>
+
+                        <th class="px-4 py-3 text-center">Score</th>
+                      </tr>
+                    </thead>
+
+                    <tbody
+                      class="divide-y divide-gray-100 dark:divide-gray-800"
+                    >
+                      <tr
+                        v-for="item in formatResponses(
+                          selectedEvaluation.responses,
+                        )"
+                        :key="item.criteria_id"
+                      >
+                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                          {{ item.statement }}
+                        </td>
+
+                        <td
+                          class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white"
+                        >
+                          {{ item.score }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section
+                class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
+              >
+                <div
+                  class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
+                >
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+                    Student Comment
+                  </h3>
+                </div>
+
+                <p
+                  class="min-h-24 whitespace-pre-line p-4 text-sm leading-6 text-gray-600 dark:text-gray-400"
+                >
+                  {{ selectedEvaluation.comment || "No comment provided." }}
+                </p>
+              </section>
+
+              <section
+                class="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/50 dark:border-violet-900 dark:bg-violet-950/20"
+              >
+                <div
+                  class="border-b border-violet-100 px-4 py-3 dark:border-violet-900"
+                >
+                  <h3
+                    class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
+                  >
+                    <UIcon
+                      name="i-lucide-sparkles"
+                      class="size-4 text-violet-600"
+                    />
+
+                    AI Sentiment Analysis
+                  </h3>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
+                  <div
+                    class="rounded-xl border border-white/60 bg-white/70 p-3 text-center dark:border-gray-800 dark:bg-gray-900/60"
+                  >
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      Sentiment
+                    </p>
+
+                    <span
+                      class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-semibold"
+                      :class="
+                        sentimentBadge(selectedEvaluation.feedback_sentiment)
+                      "
+                    >
+                      {{ selectedEvaluation.feedback_sentiment || "Neutral" }}
                     </span>
                   </div>
 
-                  <!-- <div class="rounded-lg bg-gray-50 p-3 text-center">
-                    <p class="text-xs text-gray-500">AI Score</p>
-                    <p class="text-lg font-bold">
-                      {{ Number(selectedEvaluation.feedback_sentiment_score || 0).toFixed(2) }}
+                  <div
+                    class="rounded-xl border border-white/60 bg-white/70 p-3 text-center dark:border-gray-800 dark:bg-gray-900/60"
+                  >
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      Keywords
                     </p>
-                  </div> -->
 
-                  <div class="rounded-lg bg-gray-50 p-3 text-center">
-                    <p class="text-xs text-gray-500">Keywords</p>
-                    <p class="text-sm font-semibold">
+                    <p
+                      class="mt-2 text-sm font-semibold text-gray-800 dark:text-gray-200"
+                    >
                       {{ formatKeywords(selectedEvaluation.feedback_keywords) }}
                     </p>
                   </div>
                 </div>
 
-                <div class="border-t border-gray-200 p-3">
-                  <p class="text-xs font-semibold text-gray-500">AI Summary</p>
-                  <p class="mt-1 text-sm text-gray-700">
-                    {{ selectedEvaluation.feedback_sentiment_summary || 'No AI summary available.' }}
+                <div
+                  class="border-t border-violet-100 p-4 dark:border-violet-900"
+                >
+                  <p
+                    class="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                  >
+                    AI Summary
                   </p>
-                </div>
-                <div class="border-t border-gray-200 p-3">
-                  <p class="text-xs font-semibold text-gray-500">AI Suggestion</p>
-                  <p class="mt-1 text-sm text-gray-700">
-                    {{ selectedEvaluation.feedback_sentiment_suggestion || 'No AI summary available.' }}
-                  </p>
-                </div>
-              </div>
 
-              <div class="mt-6 flex justify-end">
-                <UButton color="neutral" variant="outline" @click="showDetails = false">
-                  Close
-                </UButton>
-              </div>
+                  <p
+                    class="mt-1 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300"
+                  >
+                    {{
+                      selectedEvaluation.feedback_sentiment_summary ||
+                      "No AI summary available."
+                    }}
+                  </p>
+                </div>
+
+                <div
+                  class="border-t border-violet-100 p-4 dark:border-violet-900"
+                >
+                  <p
+                    class="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                  >
+                    AI Suggestion
+                  </p>
+
+                  <p
+                    class="mt-1 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300"
+                  >
+                    {{
+                      selectedEvaluation.feedback_sentiment_suggestion ||
+                      "No AI suggestion available."
+                    }}
+                  </p>
+                </div>
+              </section>
+            </template>
+
+            <div class="flex justify-end">
+              <UButton
+                color="neutral"
+                variant="outline"
+                @click="showGroupDetails = false"
+              >
+                Close
+              </UButton>
             </div>
-          </template>
-        </UModal>
-      </div>
-    </template>
-  </UDashboardPanel>
+          </div>
+        </div>
+      </template>
+    </UModal>
+  </div>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
+
 definePageMeta({
-  middleware: ['auth', 'role'],
-  role: ['Admin']
-})
+  middleware: ["auth", "role"],
+  role: ["Admin"],
+});
 
-const { $api } = useNuxtApp()
+const { $api } = useNuxtApp();
+const toast = useToast();
 
-const pending = ref(false)
-const faculties = ref([])
-const evaluations = ref([])
-const selectedEvaluation = ref(null)
-const showDetails = ref(false)
+const pending = ref(false);
+const loadError = ref("");
 
-const page = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
+const evaluations = ref<any[]>([]);
 
-const filters = reactive({
-  faculty_id: '',
-  school_year: '',
-  semester: '',
-  department: '',
-  search: ''
-})
+const selectedGroup = ref<any>(null);
+const selectedEvaluation = ref<any>(null);
+const showGroupDetails = ref(false);
 
-const semesterOptions = [
-  { label: '1st Semester', value: '1st Semester' },
-  { label: '2nd Semester', value: '2nd Semester' },
-  { label: 'Summer', value: 'Summer' }
-]
+const searchQuery = ref("");
+const selectedFaculty = ref("all");
+const selectedDepartment = ref("all");
+const selectedSemester = ref("all");
+const selectedSchoolYear = ref("all");
 
-const facultyOptions = computed(() =>
-  faculties.value.map((faculty: any) => ({
-    label: `${faculty.name}${faculty.department ? ` (${faculty.department})` : ''}`,
-    value: faculty.id
-  }))
-)
+const page = ref(1);
+const pageSize = ref(20);
+
+const pageSizeOptions = [
+  {
+    label: "10 rows",
+    value: 10,
+  },
+  {
+    label: "20 rows",
+    value: 20,
+  },
+  {
+    label: "50 rows",
+    value: 50,
+  },
+  {
+    label: "100 rows",
+    value: 100,
+  },
+];
+
+const makeOptions = (values: any[], allLabel: string) => {
+  const uniqueValues = Array.from(
+    new Set(
+      values.filter(
+        (value) => value && value !== "N/A" && value !== "Not specified",
+      ),
+    ),
+  ).sort((a, b) => String(a).localeCompare(String(b)));
+
+  return [
+    {
+      label: allLabel,
+      value: "all",
+    },
+    ...uniqueValues.map((value) => ({
+      label: String(value),
+      value,
+    })),
+  ];
+};
+
+const facultyOptions = computed(() => {
+  const facultyMap = new Map<string, string>();
+
+  evaluations.value.forEach((evaluation: any) => {
+    const value = String(
+      evaluation?.teacher?.documentId ||
+        evaluation?.teacher?.id ||
+        evaluation?.teacher?.name ||
+        "",
+    );
+
+    const label = evaluation?.teacher?.name || "Unknown Faculty";
+
+    if (value) {
+      facultyMap.set(value, label);
+    }
+  });
+
+  return [
+    {
+      label: "All Faculty",
+      value: "all",
+    },
+    ...Array.from(facultyMap.entries())
+      .map(([value, label]) => ({
+        label,
+        value,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)),
+  ];
+});
+
+const departmentOptions = computed(() =>
+  makeOptions(
+    evaluations.value.map((evaluation) => getEvaluationDepartment(evaluation)),
+    "All Departments",
+  ),
+);
+
+const semesterOptions = computed(() =>
+  makeOptions(
+    evaluations.value.map((evaluation) => getSemester(evaluation)),
+    "All Semesters",
+  ),
+);
+
+const schoolYearOptions = computed(() => {
+  const options = makeOptions(
+    evaluations.value.map((evaluation) => getSchoolYear(evaluation)),
+    "All School Years",
+  );
+
+  return [
+    options[0],
+    ...options
+      .slice(1)
+      .sort((a, b) => String(b.value).localeCompare(String(a.value))),
+  ];
+});
+
+const groupedResults = computed(() => {
+  const groups = new Map<string, any>();
+
+  evaluations.value.forEach((evaluation: any) => {
+    const teacherKey = String(
+      evaluation?.teacher?.documentId ||
+        evaluation?.teacher?.id ||
+        evaluation?.teacher?.name ||
+        "unknown-faculty",
+    );
+
+    if (!groups.has(teacherKey)) {
+      groups.set(teacherKey, {
+        key: teacherKey,
+        teacherId:
+          evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
+        name: evaluation?.teacher?.name || "Unknown Faculty",
+        department: getEvaluationDepartment(evaluation),
+        records: [],
+        evaluatorKeys: new Set<string>(),
+        subjectKeys: new Set<string>(),
+        semesterValues: new Set<string>(),
+        schoolYearValues: new Set<string>(),
+      });
+    }
+
+    const group = groups.get(teacherKey);
+    group.records.push(evaluation);
+
+    const evaluatorKey = String(
+      evaluation?.evaluator_user?.documentId ||
+        evaluation?.evaluator_user?.id ||
+        "",
+    );
+
+    if (evaluatorKey) {
+      group.evaluatorKeys.add(evaluatorKey);
+    }
+
+    const subjectKey = String(
+      evaluation?.subject?.documentId ||
+        evaluation?.subject?.id ||
+        evaluation?.subject?.name ||
+        evaluation?.subject?.subject_name ||
+        "",
+    );
+
+    if (subjectKey) {
+      group.subjectKeys.add(subjectKey);
+    }
+
+    const semester = getSemester(evaluation);
+    const schoolYear = getSchoolYear(evaluation);
+
+    if (semester !== "N/A") {
+      group.semesterValues.add(semester);
+    }
+
+    if (schoolYear !== "N/A") {
+      group.schoolYearValues.add(schoolYear);
+    }
+  });
+
+  return Array.from(groups.values())
+    .map((group) => {
+      const validScores = group.records
+        .map((record: any) => Number(record.average_score))
+        .filter((score: number) => Number.isFinite(score) && score > 0);
+
+      const sentiments = group.records.reduce(
+        (result: any, record: any) => {
+          const sentiment = String(
+            record?.feedback_sentiment || "Neutral",
+          ).toLowerCase();
+
+          if (sentiment === "positive") {
+            result.positive += 1;
+          } else if (sentiment === "negative") {
+            result.negative += 1;
+          } else {
+            result.neutral += 1;
+          }
+
+          return result;
+        },
+        {
+          positive: 0,
+          negative: 0,
+          neutral: 0,
+        },
+      );
+
+      const sortedRecords = [...group.records].sort(
+        (a: any, b: any) =>
+          new Date(getEvaluationDate(b) || 0).getTime() -
+          new Date(getEvaluationDate(a) || 0).getTime(),
+      );
+
+      return {
+        ...group,
+        records: sortedRecords,
+        recordCount: group.records.length,
+        evaluatorCount: group.evaluatorKeys.size,
+        subjectCount: group.subjectKeys.size,
+        semesters: Array.from(group.semesterValues),
+        schoolYears: Array.from(group.schoolYearValues),
+        averageScore: validScores.length
+          ? validScores.reduce((sum: number, score: number) => sum + score, 0) /
+            validScores.length
+          : 0,
+        sentiments,
+        latestDate: getEvaluationDate(sortedRecords[0]),
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+});
+
+const filteredGroups = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+
+  return groupedResults.value.filter((group) => {
+    const searchable = [
+      group.name,
+      group.department,
+      ...group.schoolYears,
+      ...group.semesters,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    const matchesSearch = !query || searchable.includes(query);
+
+    const matchesFaculty =
+      selectedFaculty.value === "all" ||
+      group.key === selectedFaculty.value ||
+      group.teacherId === selectedFaculty.value;
+
+    const matchesDepartment =
+      selectedDepartment.value === "all" ||
+      group.department === selectedDepartment.value;
+
+    const matchesSemester =
+      selectedSemester.value === "all" ||
+      group.semesters.includes(selectedSemester.value);
+
+    const matchesSchoolYear =
+      selectedSchoolYear.value === "all" ||
+      group.schoolYears.includes(selectedSchoolYear.value);
+
+    return (
+      matchesSearch &&
+      matchesFaculty &&
+      matchesDepartment &&
+      matchesSemester &&
+      matchesSchoolYear
+    );
+  });
+});
+
+const hasActiveFilters = computed(() =>
+  Boolean(
+    searchQuery.value ||
+    selectedFaculty.value !== "all" ||
+    selectedDepartment.value !== "all" ||
+    selectedSemester.value !== "all" ||
+    selectedSchoolYear.value !== "all",
+  ),
+);
+
+const getSelectedLabel = (options: any[], value: any) => {
+  return (
+    options.find((option) => option.value === value)?.label ||
+    String(value || "")
+  );
+};
+
+const summary = computed(() => {
+  const evaluationScores = evaluations.value
+    .map((evaluation) => Number(evaluation.average_score))
+    .filter((score) => Number.isFinite(score) && score > 0);
+
+  const evaluatorKeys = new Set(
+    evaluations.value
+      .map(
+        (evaluation) =>
+          evaluation?.evaluator_user?.documentId ||
+          evaluation?.evaluator_user?.id ||
+          "",
+      )
+      .filter(Boolean),
+  );
+
+  return {
+    totalFaculty: groupedResults.value.length,
+    totalEvaluations: evaluations.value.length,
+    totalEvaluators: evaluatorKeys.size,
+    averageScore: evaluationScores.length
+      ? (
+          evaluationScores.reduce((sum, score) => sum + score, 0) /
+          evaluationScores.length
+        ).toFixed(2)
+      : "0.00",
+  };
+});
 
 const totalPages = computed(() =>
-  Math.max(1, Math.ceil(total.value / pageSize.value))
-)
+  Math.max(1, Math.ceil(filteredGroups.value.length / Number(pageSize.value))),
+);
 
-const getFaculties = async () => {
-  try {
-    const res = await $api('/teachers', {
-      query: {
-        'populate[user][populate][0]': 'role',
-        'filters[user][role][name][$eq]': 'Faculty',
-        'sort[0]': 'name:asc',
-        'pagination[pageSize]': 100
-      }
-    })
+const paginatedGroups = computed(() => {
+  const size = Number(pageSize.value);
+  const start = (page.value - 1) * size;
 
-    faculties.value = res.data || []
-  } catch (err) {
-    console.log(err)
+  return filteredGroups.value.slice(start, start + size);
+});
+
+const paginationStart = computed(() => {
+  if (!filteredGroups.value.length) {
+    return 0;
   }
-}
+
+  return (page.value - 1) * Number(pageSize.value) + 1;
+});
+
+const paginationEnd = computed(() =>
+  Math.min(page.value * Number(pageSize.value), filteredGroups.value.length),
+);
+
+const getEvaluationDepartment = (evaluation: any) => {
+  return (
+    evaluation?.teacher?.department?.name ||
+    evaluation?.teacher?.department ||
+    "Not specified"
+  );
+};
+
+const getSubjectName = (evaluation: any) => {
+  return (
+    evaluation?.subject?.name || evaluation?.subject?.subject_name || "N/A"
+  );
+};
+
+const getSemester = (evaluation: any) => {
+  return evaluation?.batch?.semester || "N/A";
+};
+
+const getSchoolYear = (evaluation: any) => {
+  return evaluation?.batch?.school_year || "N/A";
+};
+
+const getEvaluationDate = (evaluation: any) => {
+  return (
+    evaluation?.batch?.date || evaluation?.date || evaluation?.createdAt || null
+  );
+};
+
+const getEvaluationKey = (evaluation: any) => {
+  if (!evaluation) {
+    return "";
+  }
+
+  return (
+    evaluation?.documentId ||
+    evaluation?.id ||
+    `${evaluation?.teacher?.id || ""}-${evaluation?.subject?.id || ""}-${evaluation?.createdAt || ""}`
+  );
+};
+
+const createInitials = (value: string) => {
+  return String(value || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+};
+
+const formatNumber = (value: any) => {
+  const number = Number(value);
+
+  return Number.isFinite(number) ? number.toFixed(2) : "0.00";
+};
+
+const formatDate = (value: any) => {
+  if (!value) {
+    return "N/A";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 
 const getResults = async () => {
-  pending.value = true
+  pending.value = true;
+  loadError.value = "";
 
   try {
     const query: any = {
-      'filters[batch][evaluation_type][code][$eq]': 'student-faculty',
-      'populate[teacher]': true,
-      'populate[subject]': true,
-      'populate[evaluator_user]': true,
-      'populate[batch][populate][0]': 'evaluation_type',
-      'sort[0]': 'createdAt:desc',
-      'pagination[page]': page.value,
-      'pagination[pageSize]': pageSize.value
-    }
+      "filters[batch][evaluation_type][code][$eq]": "student-faculty",
 
-    if (filters.faculty_id) {
-      query['filters[teacher][id][$eq]'] = filters.faculty_id
-    }
+      "populate[teacher][populate][department]": true,
 
-    if (filters.school_year) {
-      query['filters[batch][school_year][$eq]'] = filters.school_year
-    }
+      "populate[subject]": true,
 
-    if (filters.semester) {
-      query['filters[batch][semester][$eq]'] = filters.semester
-    }
+      "populate[evaluator_user]": true,
 
-    if (filters.department) {
-      query['filters[teacher][department][$eq]'] = filters.department
-    }
+      "populate[batch][populate][0]": "evaluation_type",
 
-    const res: any = await $api('/evaluations', { query })
+      "sort[0]": "createdAt:desc",
 
-    evaluations.value = res.data || []
-    total.value = res.meta?.pagination?.total || 0
-  } catch (error) {
-    console.error(error)
-    evaluations.value = []
-    total.value = 0
+      /*
+       * All Student – Faculty records are loaded once.
+       * The visible filters are then applied locally,
+       * matching the filter behaviour of the previous
+       * Evaluation Results page.
+       */
+      "pagination[pageSize]": 10000,
+    };
+
+    const res: any = await $api("/evaluations", {
+      query,
+    });
+
+    evaluations.value = res.data || [];
+
+    page.value = 1;
+  } catch (error: any) {
+    console.error("Student-Faculty result loading error:", error);
+
+    evaluations.value = [];
+
+    loadError.value =
+      error?.data?.error?.message ||
+      error?.data?.message ||
+      error?.message ||
+      "Failed to load Student – Faculty evaluation results.";
+
+    toast.add({
+      title: "Unable to load results",
+      description: loadError.value,
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   } finally {
-    pending.value = false
+    pending.value = false;
   }
-}
+};
 
-const searchResults = async () => {
-  page.value = 1
-  await getResults()
-}
-
-const resetFilters = async () => {
-  filters.faculty_id = ''
-  filters.school_year = ''
-  filters.semester = ''
-  filters.department = ''
-  filters.search = ''
-
-  page.value = 1
-  await getResults()
-}
+const clearFilters = () => {
+  searchQuery.value = "";
+  selectedFaculty.value = "all";
+  selectedDepartment.value = "all";
+  selectedSemester.value = "all";
+  selectedSchoolYear.value = "all";
+  page.value = 1;
+};
 
 const prevPage = async () => {
-  if (page.value > 1) {
-    page.value--
-    await getResults()
+  if (page.value <= 1) {
+    return;
   }
-}
+
+  page.value -= 1;
+  await scrollToTable();
+};
 
 const nextPage = async () => {
-  if (page.value < totalPages.value) {
-    page.value++
-    await getResults()
+  if (page.value >= totalPages.value) {
+    return;
   }
-}
 
-const openDetails = (evaluation: any) => {
-  selectedEvaluation.value = evaluation
-  showDetails.value = true
-}
+  page.value += 1;
+  await scrollToTable();
+};
+
+const scrollToTable = async () => {
+  await nextTick();
+
+  if (!import.meta.client) {
+    return;
+  }
+
+  window.scrollTo({
+    top: 500,
+    behavior: "smooth",
+  });
+};
+
+const openGroup = (group: any) => {
+  selectedGroup.value = group;
+  selectedEvaluation.value = group.records?.[0] || null;
+
+  showGroupDetails.value = true;
+};
+
+const selectEvaluation = (evaluation: any) => {
+  selectedEvaluation.value = evaluation;
+};
 
 const formatResponses = (responses: any) => {
-  if (!responses) return []
+  if (!responses) {
+    return [];
+  }
 
   if (Array.isArray(responses)) {
     return responses.map((item: any) => ({
-      criteria_id: item.criteria_id || item.id,
-      statement: item.statement || `Criteria #${item.criteria_id || item.id}`,
-      score: item.score
-    }))
+      criteria_id: item.criteria_id || item.criteriaId || item.id,
+
+      statement:
+        item.statement ||
+        item.question ||
+        `Criteria #${item.criteria_id || item.criteriaId || item.id}`,
+
+      score: item.score ?? item.value ?? item.rating ?? 0,
+    }));
   }
 
   return Object.entries(responses).map(([criteriaId, score]) => ({
     criteria_id: criteriaId,
     statement: `Criteria #${criteriaId}`,
-    score
-  }))
-}
+    score,
+  }));
+};
 
 const getRatingLabel = (average: number) => {
-  const avg = Number(average)
+  const avg = Number(average);
 
-  if (avg >= 3.5) return 'Excellent'
-  if (avg >= 2.5) return 'Satisfactory'
-  if (avg >= 1.5) return 'Fair'
-  if (avg > 0) return 'Needs Improvement'
-
-  return 'N/A'
-}
-
-const ratingBadge = (average: number) => {
-  const avg = Number(average)
-
-  if (avg >= 3.5) return 'bg-green-100 text-green-700'
-  if (avg >= 2.5) return 'bg-blue-100 text-blue-700'
-  if (avg >= 1.5) return 'bg-yellow-100 text-yellow-700'
-  if (avg > 0) return 'bg-red-100 text-red-700'
-
-  return 'bg-gray-100 text-gray-600'
-}
-
-const sentimentBadge = (sentiment: string) => {
-  if (sentiment === 'Positive') return 'bg-green-100 text-green-700'
-  if (sentiment === 'Negative') return 'bg-red-100 text-red-700'
-  return 'bg-gray-100 text-gray-700'
-}
-
-const formatKeywords = (keywords: any) => {
-  if (!keywords) return 'N/A'
-
-  if (Array.isArray(keywords)) {
-    return keywords.length ? keywords.join(', ') : 'N/A'
+  if (avg >= 4.5) {
+    return "Outstanding";
   }
 
-  return 'N/A'
-}
+  if (avg >= 3.5) {
+    return "Excellent";
+  }
 
-onMounted(async () => {
-  await Promise.all([
-    getFaculties(),
-    getResults()
-  ])
-})
+  if (avg >= 2.5) {
+    return "Satisfactory";
+  }
+
+  if (avg >= 1.5) {
+    return "Fair";
+  }
+
+  if (avg > 0) {
+    return "Needs Improvement";
+  }
+
+  return "N/A";
+};
+
+const ratingBadge = (average: number) => {
+  const avg = Number(average);
+
+  if (avg >= 4.5) {
+    return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400";
+  }
+
+  if (avg >= 3.5) {
+    return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
+  }
+
+  if (avg >= 2.5) {
+    return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
+  }
+
+  if (avg >= 1.5) {
+    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
+  }
+
+  if (avg > 0) {
+    return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
+  }
+
+  return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+};
+
+const ratingColor = (average: number) => {
+  const avg = Number(average);
+
+  if (avg >= 4.5) {
+    return "success";
+  }
+
+  if (avg >= 3.5) {
+    return "primary";
+  }
+
+  if (avg >= 2.5) {
+    return "info";
+  }
+
+  if (avg >= 1.5) {
+    return "warning";
+  }
+
+  return "error";
+};
+
+const sentimentBadge = (sentiment: string) => {
+  const value = String(sentiment || "Neutral").toLowerCase();
+
+  if (value === "positive") {
+    return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
+  }
+
+  if (value === "negative") {
+    return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
+  }
+
+  return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+};
+
+const formatKeywords = (keywords: any) => {
+  if (!keywords) {
+    return "N/A";
+  }
+
+  if (Array.isArray(keywords)) {
+    return keywords.length ? keywords.join(", ") : "N/A";
+  }
+
+  if (typeof keywords === "string") {
+    return keywords.trim() || "N/A";
+  }
+
+  return "N/A";
+};
+
+watch(
+  [
+    searchQuery,
+    selectedFaculty,
+    selectedDepartment,
+    selectedSemester,
+    selectedSchoolYear,
+    pageSize,
+  ],
+  () => {
+    page.value = 1;
+  },
+);
+
+watch(
+  () => totalPages.value,
+  (value) => {
+    if (page.value > value) {
+      page.value = value;
+    }
+  },
+);
+
+onMounted(() => {
+  getResults();
+});
 </script>
+
+<style scoped>
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+</style>

@@ -1,69 +1,59 @@
 <script setup lang="ts">
 // @ts-nocheck
 
-import type {
-  DropdownMenuItem,
-  NavigationMenuItem
-} from '@nuxt/ui'
+import type { DropdownMenuItem, NavigationMenuItem } from "@nuxt/ui";
 
-const route = useRoute()
-const colorMode = useColorMode()
-const toast = useToast()
+const route = useRoute();
+const colorMode = useColorMode();
+const toast = useToast();
 
-const { user, logout } = useAuth()
+const { user, logout } = useAuth();
 
-const collapsed = ref(false)
-const mobileOpen = ref(false)
-const logoutOpen = ref(false)
+const collapsed = ref(false);
+const mobileOpen = ref(false);
+const logoutOpen = ref(false);
 
-const openGroups = ref<string[]>([
-  'Evaluation',
-  'Management'
-])
+const openGroups = ref<string[]>(["Evaluation", "Management"]);
 
 /* =========================================================
    USER INFORMATION
 ========================================================= */
 
 const currentRole = computed(() => {
-  return user.value?.role || 'Student'
-})
+  return user.value?.role || "Student";
+});
 
 const displayName = computed(() => {
   return (
     user.value?.full_name ||
     user.value?.name ||
     user.value?.username ||
-    'System User'
-  )
-})
+    "System User"
+  );
+});
 
 const userEmail = computed(() => {
-  return user.value?.email || 'No email address'
-})
+  return user.value?.email || "No email address";
+});
 
 const userAvatar = computed(() => {
-  const avatar =
-    user.value?.avatar ||
-    user.value?.profile_picture
+  const avatar = user.value?.avatar || user.value?.profile_picture;
 
-  if (typeof avatar === 'string') {
-    return avatar
+  if (typeof avatar === "string") {
+    return avatar;
   }
 
-  return avatar?.url || undefined
-})
+  return avatar?.url || undefined;
+});
 
 const userInitials = computed(() => {
   return displayName.value
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((part: string) =>
-      part.charAt(0).toUpperCase()
-    )
-    .join('')
-})
+    .map((part: string) => part.charAt(0).toUpperCase())
+    .join("");
+});
 
 /* =========================================================
    ROLE INFORMATION
@@ -71,249 +61,269 @@ const userInitials = computed(() => {
 
 const roleInformationMap: Record<string, any> = {
   Admin: {
-    label: 'Administrator',
-    description: 'System-wide management',
-    icon: 'i-lucide-shield-check',
-    color: 'primary'
+    label: "Administrator",
+    description: "System-wide management",
+    icon: "i-lucide-shield-check",
+    color: "primary",
   },
 
   Dean: {
-    label: 'Dean',
-    description: 'Department management',
-    icon: 'i-lucide-building-2',
-    color: 'success'
+    label: "Dean",
+    description: "Department management",
+    icon: "i-lucide-building-2",
+    color: "success",
   },
 
   Faculty: {
-    label: 'Faculty',
-    description: 'Faculty evaluation portal',
-    icon: 'i-lucide-presentation',
-    color: 'primary'
+    label: "Faculty",
+    description: "Faculty evaluation portal",
+    icon: "i-lucide-presentation",
+    color: "primary",
   },
 
   Student: {
-    label: 'Student',
-    description: 'Student evaluation portal',
-    icon: 'i-lucide-graduation-cap',
-    color: 'info'
-  }
-}
+    label: "Student",
+    description: "Student evaluation portal",
+    icon: "i-lucide-graduation-cap",
+    color: "info",
+  },
+};
 
 const roleInformation = computed(() => {
-  return (
-    roleInformationMap[currentRole.value] ||
-    roleInformationMap.Student
-  )
-})
+  return roleInformationMap[currentRole.value] || roleInformationMap.Student;
+});
 
 /* =========================================================
    ROLE-BASED NAVIGATION
 ========================================================= */
 
-const roleMenus: Record<
-  string,
-  NavigationMenuItem[]
-> = {
+const roleMenus: Record<string, NavigationMenuItem[]> = {
   Admin: [
     {
-      label: 'Dashboard',
-      icon: 'i-lucide-layout-dashboard',
-      to: '/',
-      exact: true
+      label: "Dashboard",
+      icon: "i-lucide-layout-dashboard",
+      to: "/",
+      exact: true,
     },
     {
-      label: 'Evaluation',
-      icon: 'i-lucide-clipboard-check',
+      label: "Evaluation",
+      icon: "i-lucide-clipboard-check",
       children: [
         {
-          label: 'Student – Faculty',
-          icon: 'i-lucide-graduation-cap',
-          to: '/admin/evaluation',
-          exact: true
+          label: "Student – Faculty",
+          icon: "i-lucide-graduation-cap",
+          to: "/admin/evaluation",
+          exact: true,
         },
         {
-          label: 'Faculty – Dean',
-          icon: 'i-lucide-building-2',
-          to: '/admin/evaluation/faculty-dean'
+          label: "Faculty – Dean",
+          icon: "i-lucide-building-2",
+          to: "/admin/evaluation/faculty-dean",
+          exact: true,
         },
         {
-          label: 'Dean – Faculty',
-          icon: 'i-lucide-presentation',
-          to: '/admin/evaluation/dean-faculty'
+          label: "Dean – Faculty",
+          icon: "i-lucide-presentation",
+          to: "/admin/evaluation/dean-faculty",
+          exact: true,
         },
         {
-          label: 'Overall Feedback',
-          icon: 'i-lucide-message-square-text',
-          to: '/admin/evaluation/overall-feedback'
-        }
-      ]
+          label: "Overall Feedback",
+          icon: "i-lucide-message-square-text",
+          to: "/admin/evaluation/overall-feedback",
+          exact: true,
+        },
+        // {
+        //   label: "Evaluation Results",
+        //   icon: "i-lucide-chart-no-axes-combined",
+        //   to: "/admin/evaluation/results",
+        //   exact: true,
+        // },
+      ],
     },
     {
-      label: 'Management',
-      icon: 'i-lucide-settings-2',
+      label: "Management",
+      icon: "i-lucide-settings-2",
       children: [
         {
-          label: 'Faculty',
-          icon: 'i-lucide-users-round',
-          to: '/admin/management/faculty'
+          label: "Faculty",
+          icon: "i-lucide-users-round",
+          to: "/admin/management/faculty",
+          exact: true,
         },
         {
-          label: 'Students',
-          icon: 'i-lucide-graduation-cap',
-          to: '/admin/management/student'
+          label: "Students",
+          icon: "i-lucide-graduation-cap",
+          to: "/admin/management/student",
+          exact: true,
         },
         {
-          label: 'Courses',
-          icon: 'i-lucide-book-copy',
-          to: '/admin/management/course'
+          label: "Departments",
+          icon: "i-lucide-building-2",
+          to: "/admin/management/department",
+          exact: true,
         },
         {
-          label: 'Subjects',
-          icon: 'i-lucide-book-open',
-          to: '/admin/management/subjects'
+          label: "Courses",
+          icon: "i-lucide-book-copy",
+          to: "/admin/management/course",
+          exact: true,
         },
         {
-          label: 'Sections',
-          icon: 'i-lucide-panels-top-left',
-          to: '/admin/management/section'
+          label: "Subjects",
+          icon: "i-lucide-book-open",
+          to: "/admin/management/subjects",
+          exact: true,
         },
         {
-          label: 'Criteria',
-          icon: 'i-lucide-list-checks',
-          to: '/admin/management/criteria'
-        }
-      ]
-    }
+          label: "Evaluation Sections",
+          icon: "i-lucide-panels-top-left",
+          to: "/admin/management/section",
+          exact: true,
+        },
+        {
+          label: "Evaluation Criteria",
+          icon: "i-lucide-list-checks",
+          to: "/admin/management/criteria",
+          exact: true,
+        },
+      ],
+    },
   ],
 
   Dean: [
     {
-      label: 'Dashboard',
-      icon: 'i-lucide-layout-dashboard',
-      to: '/',
-      exact: true
+      label: "Dashboard",
+      icon: "i-lucide-layout-dashboard",
+      to: "/",
+      exact: true,
     },
     {
-      label: 'Evaluate Faculty',
-      icon: 'i-lucide-clipboard-pen-line',
-      to: '/dean/evaluation'
+      label: "Evaluate Faculty",
+      icon: "i-lucide-clipboard-pen-line",
+      to: "/dean/evaluation",
     },
     {
-      label: 'My Evaluations',
-      icon: 'i-lucide-file-chart-column',
-      to: '/dean/my-evaluations'
+      label: "My Evaluations",
+      icon: "i-lucide-file-chart-column",
+      to: "/dean/my-evaluations",
     },
     {
-      label: 'Department Faculty',
-      icon: 'i-lucide-users-round',
-      to: '/dean/faculty'
-    }
+      label: "Department Faculty",
+      icon: "i-lucide-users-round",
+      to: "/dean/faculty",
+      exact: true,
+    },
+    {
+      label: "Faculty Ranking",
+      icon: "i-lucide-trophy",
+      to: "/dean/faculty-ranking",
+      exact: true,
+    },
   ],
 
   Faculty: [
     {
-      label: 'Dashboard',
-      icon: 'i-lucide-layout-dashboard',
-      to: '/',
-      exact: true
+      label: "Dashboard",
+      icon: "i-lucide-layout-dashboard",
+      to: "/",
+      exact: true,
     },
     {
-      label: 'Evaluate Dean',
-      icon: 'i-lucide-clipboard-pen-line',
-      to: '/faculty/evaluation'
+      label: "Evaluate Dean",
+      icon: "i-lucide-clipboard-pen-line",
+      to: "/faculty/evaluation",
     },
     {
-      label: 'My Results',
-      icon: 'i-lucide-chart-column-big',
-      to: '/faculty/results'
+      label: "My Results",
+      icon: "i-lucide-chart-column-big",
+      to: "/faculty/results",
     },
     {
-      label: 'Faculty Ranking',
-      icon: 'i-lucide-ranking',
-      to: '/faculty/rank'
-    }
+      label: "My Dean Evaluations",
+      icon: "i-lucide-file-clock",
+      to: "/faculty/dean-evaluation-records",
+    },
   ],
 
   Student: [
     {
-      label: 'Dashboard',
-      icon: 'i-lucide-layout-dashboard',
-      to: '/',
-      exact: true
+      label: "Dashboard",
+      icon: "i-lucide-layout-dashboard",
+      to: "/",
+      exact: true,
     },
     {
-      label: 'Evaluation',
-      icon: 'i-lucide-clipboard-check',
+      label: "Evaluation",
+      icon: "i-lucide-clipboard-check",
       children: [
         {
-          label: 'Evaluate Faculty',
-          icon: 'i-lucide-presentation',
-          to: '/student/evaluate',
-          exact: true
+          label: "Evaluate Faculty",
+          icon: "i-lucide-presentation",
+          to: "/student/evaluate",
+          exact: true,
         },
         {
-          label: 'Overall Performance',
-          icon: 'i-lucide-school',
-          to: '/student/overall-performance'
-        }
-      ]
+          label: "Overall Performance",
+          icon: "i-lucide-school",
+          to: "/student/overall-performance",
+        },
+      ],
     },
     {
-      label: 'My Evaluations',
-      icon: 'i-lucide-history',
-      to: '/student/my-evaluations'
-    }
-  ]
-}
+      label: "My Evaluations",
+      icon: "i-lucide-history",
+      to: "/student/my-evaluations",
+    },
+  ],
+};
 
 const navigationItems = computed(() => {
-  return (
-    roleMenus[currentRole.value] ||
-    roleMenus.Student
-  )
-})
+  return roleMenus[currentRole.value] || roleMenus.Student;
+});
 
 /* =========================================================
    ACTIVE ROUTE HELPERS
 ========================================================= */
 
-const isActive = (
-  path?: string,
-  exact = false
-) => {
-  if (!path) return false
+const normalizePath = (path: string) => {
+  if (path === "/") return "/";
 
-  if (exact || path === '/') {
-    return route.path === path
+  return path.replace(/\/+$/, "");
+};
+
+const isActive = (path?: string, exact = false) => {
+  if (!path) return false;
+
+  const currentPath = normalizePath(route.path);
+  const targetPath = normalizePath(path);
+
+  if (exact || targetPath === "/") {
+    return currentPath === targetPath;
   }
 
-  return route.path.startsWith(path)
-}
+  return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
+};
 
 const isGroupActive = (item: any) => {
-  return item.children?.some((child: any) =>
-    isActive(child.to, child.exact)
-  )
-}
+  return item.children?.some((child: any) => isActive(child.to, child.exact));
+};
 
 const isGroupOpen = (label: string) => {
-  return openGroups.value.includes(label)
-}
+  return openGroups.value.includes(label);
+};
 
 const toggleGroup = (label: string) => {
   if (isGroupOpen(label)) {
-    openGroups.value =
-      openGroups.value.filter(
-        item => item !== label
-      )
+    openGroups.value = openGroups.value.filter((item) => item !== label);
   } else {
-    openGroups.value.push(label)
+    openGroups.value.push(label);
   }
-}
+};
 
 const closeMobileSidebar = () => {
-  mobileOpen.value = false
-}
+  mobileOpen.value = false;
+};
 
 /* =========================================================
    PAGE INFORMATION
@@ -321,206 +331,199 @@ const closeMobileSidebar = () => {
 
 const dashboardPageInformation: Record<string, any> = {
   Admin: {
-    title: 'Administrator Dashboard',
-    description:
-      'Monitor evaluation activity and manage the system.',
-    icon: 'i-lucide-shield-check'
+    title: "Administrator Dashboard",
+    description: "Monitor evaluation activity and manage the system.",
+    icon: "i-lucide-shield-check",
   },
 
   Dean: {
-    title: 'Dean Dashboard',
-    description:
-      'Review faculty evaluations and departmental performance.',
-    icon: 'i-lucide-building-2'
+    title: "Dean Dashboard",
+    description: "Review faculty evaluations and departmental performance.",
+    icon: "i-lucide-building-2",
   },
 
   Faculty: {
-    title: 'Faculty Dashboard',
-    description:
-      'Review your evaluations and performance insights.',
-    icon: 'i-lucide-presentation'
+    title: "Faculty Dashboard",
+    description: "Review your evaluations and performance insights.",
+    icon: "i-lucide-presentation",
   },
 
   Student: {
-    title: 'Student Dashboard',
-    description:
-      'Complete and monitor your assigned evaluations.',
-    icon: 'i-lucide-graduation-cap'
-  }
-}
+    title: "Student Dashboard",
+    description: "Complete and monitor your assigned evaluations.",
+    icon: "i-lucide-graduation-cap",
+  },
+};
 
 const pageInformationMap: Record<string, any> = {
-  '/admin/evaluation': {
-    title: 'Student – Faculty Evaluations',
-    description: 'Manage student evaluation records.',
-    icon: 'i-lucide-clipboard-check'
+  "/admin/evaluation": {
+    title: "Student – Faculty Evaluations",
+    description: "Manage student evaluation records.",
+    icon: "i-lucide-clipboard-check",
   },
 
-  '/admin/evaluation/faculty-dean': {
-    title: 'Faculty – Dean Evaluations',
-    description: 'Review faculty feedback for deans.',
-    icon: 'i-lucide-building-2'
+  "/admin/evaluation/faculty-dean": {
+    title: "Faculty – Dean Evaluations",
+    description: "Review faculty feedback for deans.",
+    icon: "i-lucide-building-2",
   },
 
-  '/admin/evaluation/dean-faculty': {
-    title: 'Dean – Faculty Evaluations',
-    description: 'Review dean evaluations of faculty.',
-    icon: 'i-lucide-presentation'
+  "/admin/evaluation/dean-faculty": {
+    title: "Dean – Faculty Evaluations",
+    description: "Review dean evaluations of faculty.",
+    icon: "i-lucide-presentation",
   },
 
-  '/admin/evaluation/overall-feedback': {
-    title: 'Overall Feedback',
-    description: 'Review institution-wide feedback.',
-    icon: 'i-lucide-message-square-text'
+  "/admin/evaluation/overall-feedback": {
+    title: "Overall Feedback",
+    description: "Review institution-wide feedback.",
+    icon: "i-lucide-message-square-text",
   },
 
-  '/admin/management/faculty': {
-    title: 'Faculty Management',
-    description: 'Manage faculty records and accounts.',
-    icon: 'i-lucide-users-round'
+  "/admin/management/faculty": {
+    title: "Faculty Management",
+    description: "Manage faculty records and accounts.",
+    icon: "i-lucide-users-round",
   },
 
-  '/admin/management/student': {
-    title: 'Student Management',
-    description: 'Manage student records and accounts.',
-    icon: 'i-lucide-graduation-cap'
+  "/admin/management/student": {
+    title: "Student Management",
+    description: "Manage student records and accounts.",
+    icon: "i-lucide-graduation-cap",
   },
 
-  '/admin/management/course': {
-    title: 'Course Management',
-    description: 'Manage academic courses.',
-    icon: 'i-lucide-book-copy'
+  "/admin/management/course": {
+    title: "Course Management",
+    description: "Manage academic courses.",
+    icon: "i-lucide-book-copy",
   },
 
-  '/admin/management/subjects': {
-    title: 'Subject Management',
-    description: 'Manage academic subjects.',
-    icon: 'i-lucide-book-open'
+  "/admin/management/subjects": {
+    title: "Subject Management",
+    description: "Manage academic subjects.",
+    icon: "i-lucide-book-open",
   },
 
-  '/admin/management/section': {
-    title: 'Section Management',
-    description: 'Manage academic sections.',
-    icon: 'i-lucide-panels-top-left'
+  "/admin/management/section": {
+    title: "Evaluation Section Management",
+    description: "Manage evaluation sections.",
+    icon: "i-lucide-panels-top-left",
   },
 
-  '/admin/management/criteria': {
-    title: 'Evaluation Criteria',
-    description: 'Manage evaluation sections and criteria.',
-    icon: 'i-lucide-list-checks'
+  "/admin/management/criteria": {
+    title: "Evaluation Criteria",
+    description: "Manage evaluation sections and criteria.",
+    icon: "i-lucide-list-checks",
   },
 
-  '/dean/evaluation': {
-    title: 'Evaluate Faculty',
-    description: 'Complete faculty performance evaluations.',
-    icon: 'i-lucide-clipboard-pen-line'
+  "/admin/evaluation/results": {
+    title: "Evaluation Results",
+    description: "Review and analyse all evaluation results.",
+    icon: "i-lucide-chart-no-axes-combined",
   },
 
-  '/dean/my-evaluations': {
-    title: 'My Evaluations',
-    description: 'Review evaluations submitted for you.',
-    icon: 'i-lucide-file-chart-column'
+  "/dean/evaluation": {
+    title: "Evaluate Faculty",
+    description: "Complete faculty performance evaluations.",
+    icon: "i-lucide-clipboard-pen-line",
   },
 
-  '/dean/faculty': {
-    title: 'Department Faculty',
-    description: 'View faculty members in your department.',
-    icon: 'i-lucide-users-round'
+  "/dean/my-evaluations": {
+    title: "My Evaluations",
+    description: "Review evaluations submitted for you.",
+    icon: "i-lucide-file-chart-column",
   },
 
-  '/faculty/evaluation': {
-    title: 'Evaluate Dean',
-    description: 'Complete your dean evaluation.',
-    icon: 'i-lucide-clipboard-pen-line'
+  "/dean/faculty": {
+    title: "Department Faculty",
+    description: "Manage faculty members in your department.",
+    icon: "i-lucide-users-round",
   },
 
-  '/faculty/results': {
-    title: 'My Results',
-    description: 'Review your evaluation results.',
-    icon: 'i-lucide-chart-column-big'
+  "/dean/faculty-ranking": {
+    title: "Faculty Ranking",
+    description: "Review department faculty performance rankings.",
+    icon: "i-lucide-trophy",
   },
 
-  '/faculty/rank': {
-    title: 'Faculty Ranking',
-    description: 'View faculty performance rankings.',
-    icon: 'i-lucide-ranking'
+  "/faculty/evaluation": {
+    title: "Evaluate Dean",
+    description: "Complete your dean evaluation.",
+    icon: "i-lucide-clipboard-pen-line",
   },
 
-  '/student/evaluate': {
-    title: 'Evaluate Faculty',
-    description: 'Submit your faculty evaluations.',
-    icon: 'i-lucide-clipboard-pen-line'
+  "/faculty/results": {
+    title: "My Results",
+    description: "Review your evaluation results.",
+    icon: "i-lucide-chart-column-big",
   },
 
-  '/student/overall-performance': {
-    title: 'Overall Performance',
-    description: 'Submit feedback about school services.',
-    icon: 'i-lucide-school'
+  "/faculty/dean-evaluation-records": {
+    title: "My Dean Evaluations",
+    description: "Review evaluations you submitted for your Dean.",
+    icon: "i-lucide-file-clock",
   },
 
-  '/student/my-evaluations': {
-    title: 'My Evaluations',
-    description: 'Review your completed evaluations.',
-    icon: 'i-lucide-history'
-  }
-}
+  "/student/evaluate": {
+    title: "Evaluate Faculty",
+    description: "Submit your faculty evaluations.",
+    icon: "i-lucide-clipboard-pen-line",
+  },
+
+  "/student/overall-performance": {
+    title: "Overall Performance",
+    description: "Submit feedback about school services.",
+    icon: "i-lucide-school",
+  },
+
+  "/student/my-evaluations": {
+    title: "My Evaluations",
+    description: "Review your completed evaluations.",
+    icon: "i-lucide-history",
+  },
+};
 
 const currentPage = computed(() => {
-  if (route.path === '/') {
+  if (route.path === "/") {
     return (
       dashboardPageInformation[currentRole.value] ||
       dashboardPageInformation.Student
-    )
+    );
   }
 
-  const page = pageInformationMap[route.path]
+  const page = pageInformationMap[route.path];
 
-  if (page) return page
+  if (page) return page;
 
-  const segment =
-    route.path
-      .split('/')
-      .filter(Boolean)
-      .at(-1) || 'Dashboard'
+  const segment = route.path.split("/").filter(Boolean).at(-1) || "Dashboard";
 
   const title = segment
-    .split('-')
-    .map(
-      (word: string) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
-    .join(' ')
+    .split("-")
+    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   return {
     title,
-    description:
-      `${roleInformation.value.label} evaluation portal.`,
-    icon: 'i-lucide-panel-top'
-  }
-})
+    description: `${roleInformation.value.label} evaluation portal.`,
+    icon: "i-lucide-panel-top",
+  };
+});
 
 const todayLabel = computed(() => {
-  return new Date().toLocaleDateString(
-    'en-PH',
-    {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    }
-  )
-})
+  return new Date().toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+});
 
 /* =========================================================
    THEME
 ========================================================= */
 
 const toggleColorMode = () => {
-  colorMode.preference =
-    colorMode.value === 'dark'
-      ? 'light'
-      : 'dark'
-}
+  colorMode.preference = colorMode.value === "dark" ? "light" : "dark";
+};
 
 /* =========================================================
    LOGOUT
@@ -528,19 +531,19 @@ const toggleColorMode = () => {
 
 const confirmLogout = async () => {
   try {
-    logoutOpen.value = false
-    await logout()
+    logoutOpen.value = false;
+    await logout();
   } catch (error) {
-    console.error('Logout error:', error)
+    console.error("Logout error:", error);
 
     toast.add({
-      title: 'Unable to sign out',
-      description: 'Please try again.',
-      icon: 'i-lucide-triangle-alert',
-      color: 'error'
-    })
+      title: "Unable to sign out",
+      description: "Please try again.",
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   }
-}
+};
 
 /* =========================================================
    ROUTE WATCHER
@@ -549,24 +552,18 @@ const confirmLogout = async () => {
 watch(
   () => route.path,
   () => {
-    mobileOpen.value = false
+    mobileOpen.value = false;
 
-    navigationItems.value.forEach(
-      (item: any) => {
-        if (
-          item.children &&
-          isGroupActive(item) &&
-          !isGroupOpen(item.label)
-        ) {
-          openGroups.value.push(item.label)
-        }
+    navigationItems.value.forEach((item: any) => {
+      if (item.children && isGroupActive(item) && !isGroupOpen(item.label)) {
+        openGroups.value.push(item.label);
       }
-    )
+    });
   },
   {
-    immediate: true
-  }
-)
+    immediate: true,
+  },
+);
 </script>
 
 <template>
@@ -598,9 +595,7 @@ watch(
       class="fixed inset-y-0 left-0 z-50 overflow-hidden border-r border-white/10 bg-[#0f172a]/98 shadow-2xl backdrop-blur-2xl transition-all duration-300"
       :class="[
         collapsed ? 'w-20' : 'w-64 xl:w-68',
-        mobileOpen
-          ? 'translate-x-0'
-          : '-translate-x-full lg:translate-x-0'
+        mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       ]"
     >
       <div class="flex h-full flex-col">
@@ -623,7 +618,7 @@ watch(
                   src="/logo.png"
                   alt="St. Nicolas College"
                   class="size-9 object-contain"
-                >
+                />
               </div>
             </div>
 
@@ -635,19 +630,14 @@ watch(
               leave-from-class="opacity-100"
               leave-to-class="-translate-x-2 opacity-0"
             >
-              <div
-                v-if="!collapsed"
-                class="min-w-0"
-              >
+              <div v-if="!collapsed" class="min-w-0">
                 <h1
                   class="truncate text-sm font-semibold tracking-tight text-white"
                 >
                   SNC Evaluation System
                 </h1>
 
-                <p
-                  class="mt-0.5 truncate text-[11px] text-slate-400"
-                >
+                <p class="mt-0.5 truncate text-[11px] text-slate-400">
                   Performance & Feedback
                 </p>
               </div>
@@ -668,11 +658,7 @@ watch(
         <!-- COLLAPSE BUTTON -->
         <div class="hidden shrink-0 px-3 py-3 lg:block">
           <UTooltip
-            :text="
-              collapsed
-                ? 'Expand sidebar'
-                : 'Collapse sidebar'
-            "
+            :text="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
             :delay-duration="0"
           >
             <UButton
@@ -687,18 +673,13 @@ watch(
               class="rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
               @click="collapsed = !collapsed"
             >
-              <span v-if="!collapsed">
-                Collapse Sidebar
-              </span>
+              <span v-if="!collapsed"> Collapse Sidebar </span>
             </UButton>
           </UTooltip>
         </div>
 
         <!-- ROLE CARD -->
-        <div
-          v-if="!collapsed"
-          class="shrink-0 px-3 pb-3"
-        >
+        <div v-if="!collapsed" class="shrink-0 px-3 pb-3">
           <div
             class="relative overflow-hidden rounded-2xl border border-emerald-400/15 bg-white/[0.06] p-3 backdrop-blur-xl"
           >
@@ -710,22 +691,15 @@ watch(
               <div
                 class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300"
               >
-                <UIcon
-                  :name="roleInformation.icon"
-                  class="size-4.5"
-                />
+                <UIcon :name="roleInformation.icon" class="size-4.5" />
               </div>
 
               <div class="min-w-0">
-                <p
-                  class="truncate text-xs font-semibold text-white"
-                >
+                <p class="truncate text-xs font-semibold text-white">
                   {{ roleInformation.label }} Portal
                 </p>
 
-                <p
-                  class="mt-0.5 truncate text-[10px] text-slate-400"
-                >
+                <p class="mt-0.5 truncate text-[10px] text-slate-400">
                   {{ roleInformation.description }}
                 </p>
               </div>
@@ -734,9 +708,7 @@ watch(
         </div>
 
         <!-- NAVIGATION -->
-        <nav
-          class="min-h-0 flex-1 overflow-y-auto px-3 pb-4"
-        >
+        <nav class="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
           <p
             v-if="!collapsed"
             class="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500"
@@ -745,10 +717,7 @@ watch(
           </p>
 
           <div class="space-y-1">
-            <template
-              v-for="item in navigationItems"
-              :key="item.label"
-            >
+            <template v-for="item in navigationItems" :key="item.label">
               <!-- NORMAL LINK -->
               <UTooltip
                 v-if="!item.children"
@@ -763,15 +732,12 @@ watch(
                     isActive(item.to, item.exact)
                       ? 'bg-white/10 text-white shadow-lg backdrop-blur'
                       : 'text-slate-400 hover:bg-white/5 hover:text-white',
-                    collapsed ? 'justify-center' : ''
+                    collapsed ? 'justify-center' : '',
                   ]"
                   @click="closeMobileSidebar"
                 >
                   <span
-                    v-if="
-                      isActive(item.to, item.exact) &&
-                      !collapsed
-                    "
+                    v-if="isActive(item.to, item.exact) && !collapsed"
                     class="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-emerald-400"
                   />
 
@@ -783,16 +749,10 @@ watch(
                         : 'bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-white'
                     "
                   >
-                    <UIcon
-                      :name="item.icon"
-                      class="size-4"
-                    />
+                    <UIcon :name="item.icon" class="size-4" />
                   </div>
 
-                  <span
-                    v-if="!collapsed"
-                    class="truncate"
-                  >
+                  <span v-if="!collapsed" class="truncate">
                     {{ item.label }}
                   </span>
                 </NuxtLink>
@@ -804,21 +764,14 @@ watch(
                 :content="{
                   side: 'right',
                   align: 'start',
-                  sideOffset: 10
+                  sideOffset: 10,
                 }"
               >
-                <UTooltip
-                  :text="item.label"
-                  :delay-duration="0"
-                >
+                <UTooltip :text="item.label" :delay-duration="0">
                   <button
                     type="button"
                     class="group relative flex w-full items-center justify-center rounded-2xl px-3 py-2.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
-                    :class="
-                      isGroupActive(item)
-                        ? 'bg-white/10 text-white'
-                        : ''
-                    "
+                    :class="isGroupActive(item) ? 'bg-white/10 text-white' : ''"
                   >
                     <div
                       class="flex size-9 items-center justify-center rounded-xl transition-all"
@@ -828,10 +781,7 @@ watch(
                           : 'bg-white/5 group-hover:bg-white/10'
                       "
                     >
-                      <UIcon
-                        :name="item.icon"
-                        class="size-4"
-                      />
+                      <UIcon :name="item.icon" class="size-4" />
                     </div>
                   </button>
                 </UTooltip>
@@ -857,10 +807,7 @@ watch(
                           : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                       "
                     >
-                      <UIcon
-                        :name="child.icon"
-                        class="size-4"
-                      />
+                      <UIcon :name="child.icon" class="size-4" />
 
                       {{ child.label }}
                     </NuxtLink>
@@ -893,10 +840,7 @@ watch(
                         : 'bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-white'
                     "
                   >
-                    <UIcon
-                      :name="item.icon"
-                      class="size-4"
-                    />
+                    <UIcon :name="item.icon" class="size-4" />
                   </div>
 
                   <span class="min-w-0 flex-1 truncate text-left">
@@ -906,11 +850,7 @@ watch(
                   <UIcon
                     name="i-lucide-chevron-down"
                     class="size-4 shrink-0 transition-transform duration-200"
-                    :class="
-                      isGroupOpen(item.label)
-                        ? 'rotate-180'
-                        : ''
-                    "
+                    :class="isGroupOpen(item.label) ? 'rotate-180' : ''"
                   />
                 </button>
 
@@ -938,10 +878,7 @@ watch(
                       "
                       @click="closeMobileSidebar"
                     >
-                      <UIcon
-                        :name="child.icon"
-                        class="size-3.5 shrink-0"
-                      />
+                      <UIcon :name="child.icon" class="size-3.5 shrink-0" />
 
                       <span class="truncate">
                         {{ child.label }}
@@ -955,20 +892,14 @@ watch(
         </nav>
 
         <!-- USER FOOTER -->
-        <div
-          class="shrink-0 border-t border-white/10 p-3"
-        >
+        <div class="shrink-0 border-t border-white/10 p-3">
           <div
             class="rounded-3xl border border-white/10 bg-white/5 p-3 text-white backdrop-blur-xl"
             :class="collapsed ? 'px-2' : ''"
           >
             <div
               class="flex items-center"
-              :class="
-                collapsed
-                  ? 'justify-center'
-                  : 'gap-3'
-              "
+              :class="collapsed ? 'justify-center' : 'gap-3'"
             >
               <UAvatar
                 :src="userAvatar"
@@ -978,26 +909,15 @@ watch(
                 class="shrink-0 ring-2 ring-emerald-500/20"
               />
 
-              <div
-                v-if="!collapsed"
-                class="min-w-0 flex-1"
-              >
-                <p
-                  class="truncate text-sm font-semibold"
-                >
+              <div v-if="!collapsed" class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold">
                   {{ displayName }}
                 </p>
 
-                <div
-                  class="mt-0.5 flex items-center gap-1.5"
-                >
-                  <span
-                    class="size-1.5 rounded-full bg-emerald-400"
-                  />
+                <div class="mt-0.5 flex items-center gap-1.5">
+                  <span class="size-1.5 rounded-full bg-emerald-400" />
 
-                  <p
-                    class="truncate text-xs text-slate-400"
-                  >
+                  <p class="truncate text-xs text-slate-400">
                     {{ currentRole }}
                   </p>
                 </div>
@@ -1018,9 +938,7 @@ watch(
                 :square="collapsed"
                 @click="logoutOpen = true"
               >
-                <span v-if="!collapsed">
-                  Sign Out
-                </span>
+                <span v-if="!collapsed"> Sign Out </span>
               </UButton>
             </UTooltip>
           </div>
@@ -1033,11 +951,7 @@ watch(
     ========================================================== -->
     <div
       class="min-h-screen min-w-0 transition-[padding] duration-300"
-      :class="
-        collapsed
-          ? 'lg:pl-20'
-          : 'lg:pl-64 xl:pl-68'
-      "
+      :class="collapsed ? 'lg:pl-20' : 'lg:pl-64 xl:pl-68'"
     >
       <!-- MOBILE HEADER -->
       <header
@@ -1051,7 +965,7 @@ watch(
               src="/logo.png"
               alt="SNC"
               class="size-8 rounded-lg bg-white object-contain p-0.5"
-            >
+            />
           </div>
 
           <div class="min-w-0">
@@ -1061,9 +975,7 @@ watch(
               SNC Evaluation System
             </p>
 
-            <p
-              class="truncate text-xs text-slate-500 dark:text-slate-400"
-            >
+            <p class="truncate text-xs text-slate-500 dark:text-slate-400">
               {{ currentPage.title }}
             </p>
           </div>
@@ -1072,9 +984,7 @@ watch(
         <div class="flex items-center gap-1">
           <UButton
             :icon="
-              colorMode.value === 'dark'
-                ? 'i-lucide-sun'
-                : 'i-lucide-moon'
+              colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'
             "
             color="neutral"
             variant="ghost"
@@ -1100,10 +1010,7 @@ watch(
           <div
             class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
           >
-            <UIcon
-              :name="currentPage.icon"
-              class="size-5"
-            />
+            <UIcon :name="currentPage.icon" class="size-5" />
           </div>
 
           <div class="min-w-0">
@@ -1114,11 +1021,7 @@ watch(
                 {{ currentPage.title }}
               </h2>
 
-              <UBadge
-                :color="roleInformation.color"
-                variant="subtle"
-                size="sm"
-              >
+              <UBadge :color="roleInformation.color" variant="subtle" size="sm">
                 {{ currentRole }}
               </UBadge>
             </div>
@@ -1135,10 +1038,7 @@ watch(
           <div
             class="hidden items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-xs text-emerald-700 xl:flex dark:border-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-400"
           >
-            <UIcon
-              name="i-lucide-calendar-days"
-              class="size-4"
-            />
+            <UIcon name="i-lucide-calendar-days" class="size-4" />
 
             {{ todayLabel }}
           </div>
@@ -1152,9 +1052,7 @@ watch(
           >
             <UButton
               :icon="
-                colorMode.value === 'dark'
-                  ? 'i-lucide-sun'
-                  : 'i-lucide-moon'
+                colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'
               "
               color="neutral"
               variant="ghost"
@@ -1164,13 +1062,9 @@ watch(
             />
           </UTooltip>
 
-          <div
-            class="mx-1 h-6 w-px bg-gray-200 dark:bg-gray-800"
-          />
+          <div class="mx-1 h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
-          <div
-            class="flex items-center gap-3 rounded-xl px-2 py-1.5"
-          >
+          <div class="flex items-center gap-3 rounded-xl px-2 py-1.5">
             <UAvatar
               :src="userAvatar"
               :alt="displayName"
@@ -1186,9 +1080,7 @@ watch(
                 {{ displayName }}
               </p>
 
-              <p
-                class="mt-0.5 text-[10px] text-slate-400"
-              >
+              <p class="mt-0.5 text-[10px] text-slate-400">
                 {{ currentRole }}
               </p>
             </div>
@@ -1197,9 +1089,7 @@ watch(
       </header>
 
       <!-- SCROLLABLE CONTENT -->
-      <main
-        class="min-w-0 overflow-x-hidden bg-[#f4f8f6] dark:bg-gray-950"
-      >
+      <main class="min-w-0 overflow-x-hidden bg-[#f4f8f6] dark:bg-gray-950">
         <div
           class="mx-auto w-full max-w-[1680px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
         >
@@ -1232,10 +1122,7 @@ watch(
             <div
               class="mx-auto flex size-20 items-center justify-center rounded-[28px] bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_40px_rgba(239,68,68,0.35)]"
             >
-              <UIcon
-                name="i-lucide-log-out"
-                class="size-10"
-              />
+              <UIcon name="i-lucide-log-out" class="size-10" />
             </div>
 
             <div class="mt-5 text-center">
@@ -1248,8 +1135,8 @@ watch(
               <p
                 class="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400"
               >
-                You are about to leave the SNC Evaluation System.
-                You can sign in again at any time.
+                You are about to leave the SNC Evaluation System. You can sign
+                in again at any time.
               </p>
             </div>
 

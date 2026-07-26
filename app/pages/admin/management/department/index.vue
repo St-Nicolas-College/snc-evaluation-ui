@@ -4,13 +4,13 @@
       HERO
     ====================================================== -->
     <section
-      class="relative overflow-hidden rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 px-5 py-6 text-white shadow-xl shadow-orange-900/10 sm:px-7 sm:py-7"
+      class="relative overflow-hidden rounded-[28px] border border-cyan-100 bg-gradient-to-br from-cyan-600 via-sky-600 to-blue-700 px-5 py-6 text-white shadow-xl shadow-cyan-900/10 sm:px-7 sm:py-7"
     >
       <div
         class="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl"
       />
       <div
-        class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-yellow-300/15 blur-3xl"
+        class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-blue-300/15 blur-3xl"
       />
 
       <div
@@ -20,12 +20,12 @@
           <div
             class="hidden size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur sm:flex"
           >
-            <UIcon name="i-lucide-book-open" class="size-7" />
+            <UIcon name="i-lucide-building-2" class="size-7" />
           </div>
 
           <div class="min-w-0">
             <div
-              class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-amber-50"
+              class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-cyan-50"
             >
               <span
                 class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
@@ -36,17 +36,17 @@
               <span
                 class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
               >
-                Subject Management
+                Department Management
               </span>
             </div>
 
             <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
-              Subject Management
+              Department Management
             </h1>
 
-            <p class="mt-2 max-w-3xl text-sm leading-6 text-amber-50/90">
-              Create and maintain subjects, assign them to academic programmes,
-              and keep subject records organised.
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-cyan-50/90">
+              Create and maintain academic departments used across courses,
+              faculty records, and evaluation workflows.
             </p>
           </div>
         </div>
@@ -56,8 +56,8 @@
             class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
           >
             <p class="text-2xl font-bold">{{ summary.total }}</p>
-            <p class="mt-1 text-[10px] uppercase tracking-wide text-amber-100">
-              Subjects
+            <p class="mt-1 text-[10px] uppercase tracking-wide text-cyan-100">
+              Departments
             </p>
           </div>
 
@@ -65,7 +65,7 @@
             class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
           >
             <p class="text-2xl font-bold">{{ summary.courses }}</p>
-            <p class="mt-1 text-[10px] uppercase tracking-wide text-amber-100">
+            <p class="mt-1 text-[10px] uppercase tracking-wide text-cyan-100">
               Courses
             </p>
           </div>
@@ -73,9 +73,9 @@
           <div
             class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
           >
-            <p class="text-2xl font-bold">{{ summary.unassigned }}</p>
-            <p class="mt-1 text-[10px] uppercase tracking-wide text-amber-100">
-              Unassigned
+            <p class="text-2xl font-bold">{{ summary.faculty }}</p>
+            <p class="mt-1 text-[10px] uppercase tracking-wide text-cyan-100">
+              Faculty
             </p>
           </div>
         </div>
@@ -87,10 +87,10 @@
     ====================================================== -->
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard
-        label="Total Subjects"
+        label="Total Departments"
         :value="summary.total"
-        icon="i-lucide-book-open"
-        tone="amber"
+        icon="i-lucide-building-2"
+        tone="cyan"
       />
 
       <StatCard
@@ -101,17 +101,17 @@
       />
 
       <StatCard
-        label="Assigned Subjects"
-        :value="summary.assigned"
-        icon="i-lucide-link-2"
+        label="Linked Faculty"
+        :value="summary.faculty"
+        icon="i-lucide-users-round"
         tone="emerald"
       />
 
       <StatCard
-        label="Unassigned Subjects"
-        :value="summary.unassigned"
-        icon="i-lucide-unlink"
-        tone="red"
+        label="Unused Departments"
+        :value="summary.unused"
+        icon="i-lucide-circle-minus"
+        tone="amber"
       />
     </section>
 
@@ -122,23 +122,14 @@
       class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
       <div
-        class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
-        <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
-          <UInput
-            v-model="globalFilter"
-            icon="i-lucide-search"
-            placeholder="Search code, subject, course, or department..."
-            class="w-full"
-          />
-
-          <USelectMenu
-            v-model="selectedCourse"
-            :items="courseFilterOptions"
-            value-key="value"
-            class="w-full"
-          />
-        </div>
+        <UInput
+          v-model="globalFilter"
+          icon="i-lucide-search"
+          placeholder="Search department..."
+          class="w-full sm:max-w-md"
+        />
 
         <div class="flex flex-wrap items-center gap-2">
           <UButton
@@ -156,40 +147,9 @@
           </UButton>
 
           <UButton icon="i-lucide-plus" @click="openCreateModal">
-            New Subject
+            New Department
           </UButton>
         </div>
-      </div>
-
-      <div
-        v-if="hasActiveFilters"
-        class="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4 dark:border-gray-800"
-      >
-        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-          Active filters:
-        </span>
-
-        <UBadge v-if="globalFilter" color="neutral" variant="subtle">
-          Search: {{ globalFilter }}
-        </UBadge>
-
-        <UBadge
-          v-if="selectedCourse !== 'all'"
-          color="primary"
-          variant="subtle"
-        >
-          {{ selectedCourseLabel }}
-        </UBadge>
-
-        <UButton
-          size="xs"
-          color="neutral"
-          variant="ghost"
-          icon="i-lucide-x"
-          @click="clearFilters"
-        >
-          Clear filters
-        </UButton>
       </div>
     </section>
 
@@ -204,12 +164,12 @@
       >
         <div>
           <h2 class="text-lg font-bold text-gray-900 dark:text-white">
-            Subject Directory
+            Department Directory
           </h2>
 
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Showing {{ filteredSubjects.length }} of {{ subjects.length }}
-            subject{{ subjects.length === 1 ? '' : 's' }}.
+            Showing {{ filteredDepartments.length }} of {{ departments.length }}
+            department{{ departments.length === 1 ? '' : 's' }}.
           </p>
         </div>
 
@@ -236,7 +196,7 @@
         </div>
 
         <h3 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">
-          Unable to load subjects
+          Unable to load departments
         </h3>
 
         <p
@@ -245,26 +205,33 @@
           {{ loadError }}
         </p>
 
-        <UButton class="mt-5" icon="i-lucide-refresh-cw" @click="getSubjects">
+        <UButton class="mt-5" icon="i-lucide-refresh-cw" @click="loadData">
           Try Again
         </UButton>
       </div>
 
-      <div v-else-if="!filteredSubjects.length" class="px-6 py-16 text-center">
+      <div
+        v-else-if="!filteredDepartments.length"
+        class="px-6 py-16 text-center"
+      >
         <div
-          class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
+          class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600 dark:bg-cyan-950/30 dark:text-cyan-400"
         >
           <UIcon
-            :name="subjects.length ? 'i-lucide-search-x' : 'i-lucide-book-open'"
+            :name="
+              departments.length
+                ? 'i-lucide-search-x'
+                : 'i-lucide-building-2'
+            "
             class="size-8"
           />
         </div>
 
         <h3 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
           {{
-            subjects.length
-              ? 'No matching subjects found'
-              : 'No subject records yet'
+            departments.length
+              ? 'No matching departments found'
+              : 'No department records yet'
           }}
         </h3>
 
@@ -272,15 +239,15 @@
           class="mx-auto mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400"
         >
           {{
-            subjects.length
-              ? 'Try changing or clearing the current filters.'
-              : 'Create the first subject to begin organising curriculum records.'
+            departments.length
+              ? 'Try changing or clearing the current search.'
+              : 'Create the first department to begin organising courses and faculty.'
           }}
         </p>
       </div>
 
       <div v-else class="overflow-x-auto">
-        <table class="w-full min-w-[900px] text-sm">
+        <table class="w-full min-w-[840px] text-sm">
           <thead
             class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
           >
@@ -293,77 +260,74 @@
                 />
               </th>
 
-              <th class="px-4 py-3 text-left">Code</th>
-              <th class="px-4 py-3 text-left">Subject</th>
-              <th class="px-4 py-3 text-left">Course</th>
               <th class="px-4 py-3 text-left">Department</th>
+              <th class="px-4 py-3 text-center">Courses</th>
+              <th class="px-4 py-3 text-center">Faculty</th>
+              <th class="px-4 py-3 text-center">Status</th>
               <th class="w-20 px-4 py-3 text-center">Action</th>
             </tr>
           </thead>
 
           <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
             <tr
-              v-for="subject in paginatedSubjects"
-              :key="getSubjectKey(subject)"
+              v-for="department in paginatedDepartments"
+              :key="getDepartmentKey(department)"
               class="transition hover:bg-gray-50/80 dark:hover:bg-gray-950/30"
             >
               <td class="px-4 py-4 text-center">
                 <UCheckbox
-                  :model-value="isRowSelected(subject)"
-                  @update:model-value="toggleRowSelection(subject, !!$event)"
+                  :model-value="isRowSelected(department)"
+                  @update:model-value="toggleRowSelection(department, !!$event)"
                 />
-              </td>
-
-              <td class="px-4 py-4">
-                <UBadge color="warning" variant="subtle">
-                  {{ formatSubjectCode(subject.code) }}
-                </UBadge>
               </td>
 
               <td class="px-4 py-4">
                 <div class="flex min-w-0 items-center gap-3">
                   <div
-                    class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm"
+                    class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm"
                   >
-                    <UIcon name="i-lucide-book-open-text" class="size-5" />
+                    <UIcon name="i-lucide-building-2" class="size-5" />
                   </div>
 
                   <div class="min-w-0">
                     <p class="font-bold text-gray-900 dark:text-white">
-                      {{ subject.name || 'Unnamed Subject' }}
+                      {{ department.name || 'Unnamed Department' }}
                     </p>
 
                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      Curriculum subject
+                      Academic department
                     </p>
                   </div>
                 </div>
               </td>
 
-              <td class="px-4 py-4">
-                <div v-if="subject.course">
-                  <p class="font-medium text-gray-800 dark:text-gray-200">
-                    {{ subject.course.code?.toUpperCase() || '—' }}
-                  </p>
-
-                  <p
-                    class="mt-0.5 max-w-[240px] truncate text-xs text-gray-500 dark:text-gray-400"
-                  >
-                    {{ subject.course.name }}
-                  </p>
-                </div>
-
-                <UBadge v-else color="warning" variant="subtle">
-                  Not assigned
+              <td class="px-4 py-4 text-center">
+                <UBadge color="primary" variant="subtle">
+                  {{ getDepartmentCourseCount(department) }}
                 </UBadge>
               </td>
 
-              <td class="px-4 py-4 text-gray-600 dark:text-gray-300">
-                {{ subject.course?.department?.name || '—' }}
+              <td class="px-4 py-4 text-center">
+                <UBadge color="success" variant="subtle">
+                  {{ getDepartmentFacultyCount(department) }}
+                </UBadge>
               </td>
 
               <td class="px-4 py-4 text-center">
-                <UDropdownMenu :items="getDropdownActions(subject)">
+                <UBadge
+                  :color="getDepartmentUsageCount(department) ? 'success' : 'warning'"
+                  variant="subtle"
+                >
+                  {{
+                    getDepartmentUsageCount(department)
+                      ? 'In Use'
+                      : 'Unused'
+                  }}
+                </UBadge>
+              </td>
+
+              <td class="px-4 py-4 text-center">
+                <UDropdownMenu :items="getDropdownActions(department)">
                   <UButton
                     icon="i-lucide-ellipsis-vertical"
                     color="neutral"
@@ -378,14 +342,14 @@
       </div>
 
       <div
-        v-if="filteredSubjects.length"
+        v-if="filteredDepartments.length"
         class="flex flex-col gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
       >
         <div
           class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
         >
           Showing {{ paginationStart }}–{{ paginationEnd }} of
-          {{ filteredSubjects.length }} records
+          {{ filteredDepartments.length }} records
           <span v-if="selectedCount">• {{ selectedCount }} selected</span>
         </div>
 
@@ -422,48 +386,30 @@
     ====================================================== -->
     <UModal
       v-model:open="createModal"
-      title="Add Subject"
-      description="Create a new subject and assign it to a course."
-      :ui="{ content: 'max-w-2xl' }"
+      title="Add Department"
+      description="Create a new academic department."
+      :ui="{ content: 'max-w-xl' }"
     >
       <template #content>
         <div
           class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900"
         >
           <ModalHeader
-            title="Add Subject"
-            description="Create a new curriculum subject."
-            icon="i-lucide-book-plus"
+            title="Add Department"
+            description="Create a new academic department."
+            icon="i-lucide-building-2"
             @close="createModal = false"
           />
 
           <UForm
             :state="createForm"
             class="space-y-5 p-6"
-            @submit="createSubject"
+            @submit="createDepartment"
           >
-            <UFormField label="Subject Code" name="code" required>
-              <UInput
-                v-model="createForm.code"
-                placeholder="Example: IT101"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField label="Subject Name" name="name" required>
+            <UFormField label="Department Name" name="name" required>
               <UInput
                 v-model="createForm.name"
-                placeholder="Example: Programming 1"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField label="Course" name="course" required>
-              <USelectMenu
-                v-model="createForm.course"
-                :items="courseOptions"
-                value-key="value"
-                placeholder="Select course"
+                placeholder="Example: College of Information Technology"
                 class="w-full"
               />
             </UFormField>
@@ -486,7 +432,7 @@
                 :loading="loadingCreate"
                 :disabled="loadingCreate"
               >
-                Save Subject
+                Save Department
               </UButton>
             </div>
           </UForm>
@@ -499,18 +445,18 @@
     ====================================================== -->
     <UModal
       v-model:open="editModal"
-      title="Edit Subject"
-      description="Update the selected subject and course assignment."
-      :ui="{ content: 'max-w-2xl' }"
+      title="Edit Department"
+      description="Update the selected department."
+      :ui="{ content: 'max-w-xl' }"
     >
       <template #content>
         <div
           class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900"
         >
           <ModalHeader
-            title="Edit Subject"
-            description="Update subject details and course assignment."
-            icon="i-lucide-book-marked"
+            title="Edit Department"
+            description="Update the department name."
+            icon="i-lucide-building-2"
             tone="blue"
             @close="editModal = false"
           />
@@ -518,24 +464,10 @@
           <UForm
             :state="editForm"
             class="space-y-5 p-6"
-            @submit="updateSubject"
+            @submit="updateDepartment"
           >
-            <UFormField label="Subject Code" name="code" required>
-              <UInput v-model="editForm.code" class="w-full" />
-            </UFormField>
-
-            <UFormField label="Subject Name" name="name" required>
+            <UFormField label="Department Name" name="name" required>
               <UInput v-model="editForm.name" class="w-full" />
-            </UFormField>
-
-            <UFormField label="Course" name="course" required>
-              <USelectMenu
-                v-model="editForm.course"
-                :items="courseOptions"
-                value-key="value"
-                placeholder="Select course"
-                class="w-full"
-              />
             </UFormField>
 
             <div
@@ -569,8 +501,8 @@
     ====================================================== -->
     <UModal
       v-model:open="deleteModal"
-      title="Confirm Subject Deletion"
-      description="Confirm deletion of the selected subject record or records."
+      title="Confirm Department Deletion"
+      description="Confirm deletion of the selected department record or records."
       :ui="{ content: 'max-w-md' }"
     >
       <template #content>
@@ -586,8 +518,8 @@
           >
             {{
               deleteTargetType === 'multiple'
-                ? 'Delete selected subjects?'
-                : 'Delete subject?'
+                ? 'Delete selected departments?'
+                : 'Delete department?'
             }}
           </h2>
 
@@ -596,10 +528,20 @@
           >
             {{
               deleteTargetType === 'multiple'
-                ? `This will permanently delete ${selectedCount} selected subject record${selectedCount === 1 ? '' : 's'}.`
-                : `This will permanently delete ${deleteTarget?.name || 'this subject'}.`
+                ? `This will permanently delete ${selectedCount} selected department record${selectedCount === 1 ? '' : 's'}.`
+                : `This will permanently delete ${deleteTarget?.name || 'this department'}.`
             }}
           </p>
+
+          <div
+            v-if="deleteWarning"
+            class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-400"
+          >
+            <div class="flex items-start gap-2">
+              <UIcon name="i-lucide-triangle-alert" class="mt-0.5 size-4 shrink-0" />
+              <p>{{ deleteWarning }}</p>
+            </div>
+          </div>
 
           <div class="mt-6 flex gap-2">
             <UButton
@@ -616,6 +558,7 @@
               icon="i-lucide-trash-2"
               class="flex-1 justify-center"
               :loading="loadingDelete"
+              :disabled="Boolean(deleteWarning)"
               @click="confirmDelete"
             >
               Delete
@@ -647,38 +590,38 @@ const StatCard = defineComponent({
     icon: String,
     tone: {
       type: String,
-      default: 'amber'
+      default: 'cyan'
     }
   },
 
   setup(props) {
     const tones: Record<string, string> = {
-      amber:
-        'border-amber-100 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/20',
+      cyan:
+        'border-cyan-100 bg-cyan-50/70 dark:border-cyan-900 dark:bg-cyan-950/20',
       violet:
         'border-violet-100 bg-violet-50/70 dark:border-violet-900 dark:bg-violet-950/20',
       emerald:
         'border-emerald-100 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/20',
-      red:
-        'border-red-100 bg-red-50/70 dark:border-red-900 dark:bg-red-950/20'
+      amber:
+        'border-amber-100 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/20'
     }
 
     const iconTones: Record<string, string> = {
-      amber:
-        'bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400',
+      cyan:
+        'bg-cyan-100 text-cyan-600 dark:bg-cyan-950 dark:text-cyan-400',
       violet:
         'bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400',
       emerald:
         'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
-      red:
-        'bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400'
+      amber:
+        'bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400'
     }
 
     return () =>
       h(
         'div',
         {
-          class: `rounded-2xl border p-5 ${tones[props.tone] || tones.amber}`
+          class: `rounded-2xl border p-5 ${tones[props.tone] || tones.cyan}`
         },
         [
           h('div', { class: 'flex items-center justify-between' }, [
@@ -706,7 +649,7 @@ const StatCard = defineComponent({
               'div',
               {
                 class: `flex size-11 items-center justify-center rounded-2xl ${
-                  iconTones[props.tone] || iconTones.amber
+                  iconTones[props.tone] || iconTones.cyan
                 }`
               },
               [
@@ -731,7 +674,7 @@ const ModalHeader = defineComponent({
     icon: String,
     tone: {
       type: String,
-      default: 'amber'
+      default: 'cyan'
     }
   },
 
@@ -743,7 +686,7 @@ const ModalHeader = defineComponent({
           class:
             props.tone === 'blue'
               ? 'relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 px-6 py-6 text-white'
-              : 'relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-amber-950 px-6 py-6 text-white'
+              : 'relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-950 px-6 py-6 text-white'
         },
         [
           h('div', {
@@ -812,7 +755,11 @@ const ModalHeader = defineComponent({
   }
 })
 
-const loading = ref(false)
+const departments = ref<any[]>([])
+const courses = ref<any[]>([])
+const teachers = ref<any[]>([])
+
+const loading = ref(true)
 const loadError = ref('')
 const loadingCreate = ref(false)
 const loadingUpdate = ref(false)
@@ -822,18 +769,13 @@ const createModal = ref(false)
 const editModal = ref(false)
 const deleteModal = ref(false)
 
-const subjects = ref<any[]>([])
-const courses = ref<any[]>([])
-
-const selectedSubjectId = ref<any>(null)
 const selectedRows = ref<Record<string | number, boolean>>({})
+const selectedId = ref<any>(null)
 
 const deleteTarget = ref<any>(null)
 const deleteTargetType = ref<'single' | 'multiple'>('single')
 
 const globalFilter = ref('')
-const selectedCourse = ref('all')
-
 const page = ref(1)
 const itemsPerPage = ref(10)
 
@@ -845,112 +787,86 @@ const pageSizeOptions = [
 ]
 
 const createForm = reactive({
-  code: '',
-  name: '',
-  course: null as any
+  name: ''
 })
 
 const editForm = reactive({
-  code: '',
-  name: '',
-  course: null as any
+  name: ''
 })
 
+const getDepartmentKey = (department: any) =>
+  department?.documentId || department?.id
+
+const getDepartmentCourseCount = (department: any) =>
+  courses.value.filter(
+    course =>
+      String(course?.department?.id) ===
+      String(department?.id)
+  ).length
+
+const getDepartmentFacultyCount = (department: any) =>
+  teachers.value.filter(
+    teacher =>
+      String(teacher?.department?.id) ===
+      String(department?.id)
+  ).length
+
+const getDepartmentUsageCount = (department: any) =>
+  getDepartmentCourseCount(department) +
+  getDepartmentFacultyCount(department)
+
 const summary = computed(() => ({
-  total: subjects.value.length,
+  total: departments.value.length,
+  courses: courses.value.length,
+  faculty: teachers.value.length,
 
-  courses: new Set(
-    subjects.value
-      .map(subject => subject.course?.id)
-      .filter(Boolean)
-  ).size,
-
-  assigned: subjects.value.filter(
-    subject => Boolean(subject.course)
-  ).length,
-
-  unassigned: subjects.value.filter(
-    subject => !subject.course
+  unused: departments.value.filter(
+    department =>
+      getDepartmentUsageCount(department) === 0
   ).length
 }))
 
-const courseOptions = computed(() =>
-  courses.value.map(course => ({
-    label: `${course.code?.toUpperCase() || 'NO CODE'} - ${course.name} (${course.department?.name || 'No Department'})`,
-    value: course.id
-  }))
-)
-
-const courseFilterOptions = computed(() => [
-  {
-    label: 'All Courses',
-    value: 'all'
-  },
-
-  ...courses.value.map(course => ({
-    label: `${course.code?.toUpperCase() || 'NO CODE'} - ${course.name}`,
-    value: String(course.id)
-  }))
-])
-
-const selectedCourseLabel = computed(() =>
-  courseFilterOptions.value.find(
-    option => option.value === selectedCourse.value
-  )?.label || 'Course'
-)
-
-const filteredSubjects = computed(() => {
+const filteredDepartments = computed(() => {
   const keyword =
     globalFilter.value
       .trim()
       .toLowerCase()
 
-  return subjects.value.filter(subject => {
-    const searchable = [
-      subject.code,
-      subject.name,
-      subject.course?.code,
-      subject.course?.name,
-      subject.course?.department?.name
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase()
+  if (!keyword) {
+    return departments.value
+  }
 
-    const matchesSearch =
-      !keyword || searchable.includes(keyword)
-
-    const matchesCourse =
-      selectedCourse.value === 'all' ||
-      String(subject.course?.id) === selectedCourse.value
-
-    return matchesSearch && matchesCourse
-  })
+  return departments.value.filter(
+    department =>
+      String(department?.name || '')
+        .toLowerCase()
+        .includes(keyword)
+  )
 })
 
 const totalPages = computed(() =>
   Math.max(
     1,
     Math.ceil(
-      filteredSubjects.value.length /
+      filteredDepartments.value.length /
         Number(itemsPerPage.value)
     )
   )
 )
 
-const paginatedSubjects = computed(() => {
+const paginatedDepartments = computed(() => {
   const start =
     (page.value - 1) *
     Number(itemsPerPage.value)
 
-  return filteredSubjects.value.slice(
+  return filteredDepartments.value.slice(
     start,
     start + Number(itemsPerPage.value)
   )
 })
 
 const paginationStart = computed(() =>
-  filteredSubjects.value.length
+  filteredDepartments.value.length
     ? (page.value - 1) *
         Number(itemsPerPage.value) +
       1
@@ -961,7 +877,7 @@ const paginationEnd = computed(() =>
   Math.min(
     page.value *
       Number(itemsPerPage.value),
-    filteredSubjects.value.length
+    filteredDepartments.value.length
   )
 )
 
@@ -969,45 +885,61 @@ const selectedCount = computed(() =>
   Object.values(selectedRows.value).filter(Boolean).length
 )
 
-const hasActiveFilters = computed(() =>
-  Boolean(
-    globalFilter.value ||
-    selectedCourse.value !== 'all'
-  )
-)
-
 const isCurrentPageSelected = computed(() =>
-  paginatedSubjects.value.length > 0 &&
-  paginatedSubjects.value.every(isRowSelected)
+  paginatedDepartments.value.length > 0 &&
+  paginatedDepartments.value.every(isRowSelected)
 )
 
 const isCurrentPagePartiallySelected = computed(() => {
   const selectedOnPage =
-    paginatedSubjects.value.filter(isRowSelected).length
+    paginatedDepartments.value.filter(isRowSelected).length
 
   return (
     selectedOnPage > 0 &&
-    selectedOnPage < paginatedSubjects.value.length
+    selectedOnPage < paginatedDepartments.value.length
   )
 })
 
-const getSubjectKey = (subject: any) =>
-  subject?.documentId || subject?.id
+const selectedDepartments = computed(() =>
+  departments.value.filter(
+    department =>
+      selectedRows.value[
+        getDepartmentKey(department)
+      ]
+  )
+)
 
-const formatSubjectCode = (value: any) =>
-  String(value || 'NO CODE').toUpperCase()
+const deleteWarning = computed(() => {
+  const targets =
+    deleteTargetType.value === 'multiple'
+      ? selectedDepartments.value
+      : deleteTarget.value
+        ? [deleteTarget.value]
+        : []
+
+  const usedDepartments = targets.filter(
+    department =>
+      getDepartmentUsageCount(department) > 0
+  )
+
+  if (!usedDepartments.length) {
+    return ''
+  }
+
+  const names = usedDepartments
+    .map(department => department.name)
+    .join(', ')
+
+  return `Deletion is blocked because the following department${usedDepartments.length === 1 ? ' is' : 's are'} still linked to courses or faculty: ${names}. Reassign those records first.`
+})
 
 const resetCreateForm = () => {
-  createForm.code = ''
   createForm.name = ''
-  createForm.course = null
 }
 
 const resetEditForm = () => {
-  editForm.code = ''
   editForm.name = ''
-  editForm.course = null
-  selectedSubjectId.value = null
+  selectedId.value = null
 }
 
 const openCreateModal = () => {
@@ -1015,26 +947,14 @@ const openCreateModal = () => {
   createModal.value = true
 }
 
-const openEditModal = (subject: any) => {
-  selectedSubjectId.value =
-    subject.documentId || subject.id
-
-  editForm.code =
-    subject.code || ''
+const openEditModal = (row: any) => {
+  selectedId.value =
+    row.documentId || row.id
 
   editForm.name =
-    subject.name || ''
-
-  editForm.course =
-    subject.course?.id || null
+    row.name || ''
 
   editModal.value = true
-}
-
-const clearFilters = () => {
-  globalFilter.value = ''
-  selectedCourse.value = 'all'
-  page.value = 1
 }
 
 const toggleRowSelection = (
@@ -1043,14 +963,14 @@ const toggleRowSelection = (
 ) => {
   selectedRows.value = {
     ...selectedRows.value,
-    [getSubjectKey(row)]: value
+    [getDepartmentKey(row)]: value
   }
 }
 
 const isRowSelected = (row: any) =>
   Boolean(
     selectedRows.value[
-      getSubjectKey(row)
+      getDepartmentKey(row)
     ]
   )
 
@@ -1061,15 +981,15 @@ const toggleCurrentPageSelection = (
     ...selectedRows.value
   }
 
-  paginatedSubjects.value.forEach(row => {
-    next[getSubjectKey(row)] = value
+  paginatedDepartments.value.forEach(row => {
+    next[getDepartmentKey(row)] = value
   })
 
   selectedRows.value = next
 }
 
 const getDropdownActions = (
-  subject: any
+  row: any
 ): DropdownMenuItem[][] => [
   [
     {
@@ -1082,80 +1002,69 @@ const getDropdownActions = (
     },
 
     {
-      label: 'Edit Subject',
+      label: 'Edit Department',
       icon: 'i-lucide-edit-3',
 
       onSelect() {
-        openEditModal(subject)
+        openEditModal(row)
       }
     },
 
     {
-      label: 'Delete Subject',
+      label: 'Delete Department',
       icon: 'i-lucide-trash-2',
       color: 'error',
 
       onSelect() {
-        requestDeleteOne(subject)
+        requestDeleteOne(row)
       }
     }
   ]
 ]
 
-const getCourses = async () => {
-  try {
-    const res: any = await $api(
-      '/courses',
-      {
-        query: {
-          'populate[department]':
-            true,
-
-          'sort[0]':
-            'name:asc',
-
-          'pagination[pageSize]':
-            10000
-        }
-      }
-    )
-
-    courses.value = res.data || []
-  } catch (error) {
-    console.error(
-      'Course loading error:',
-      error
-    )
-
-    courses.value = []
-  }
-}
-
-const getSubjects = async () => {
+const loadData = async () => {
   loading.value = true
   loadError.value = ''
 
   try {
-    const res: any = await $api(
-      '/subjects',
-      {
+    const [
+      departmentsResponse,
+      coursesResponse,
+      teachersResponse
+    ] = await Promise.all([
+      $api('/departments', {
         query: {
-          'populate[course][populate][0]':
-            'department',
-
-          'sort[0]':
-            'name:asc',
-
-          'pagination[pageSize]':
-            10000
+          'sort[0]': 'name:asc',
+          'pagination[pageSize]': 10000
         }
-      }
-    )
+      }),
 
-    subjects.value = res.data || []
+      $api('/courses', {
+        query: {
+          'populate[department]': true,
+          'pagination[pageSize]': 10000
+        }
+      }),
+
+      $api('/teachers', {
+        query: {
+          'populate[department]': true,
+          'pagination[pageSize]': 10000
+        }
+      })
+    ])
+
+    departments.value =
+      departmentsResponse?.data || []
+
+    courses.value =
+      coursesResponse?.data || []
+
+    teachers.value =
+      teachersResponse?.data || []
 
     const availableKeys = new Set(
-      subjects.value.map(getSubjectKey)
+      departments.value.map(getDepartmentKey)
     )
 
     selectedRows.value =
@@ -1172,34 +1081,32 @@ const getSubjects = async () => {
     }
   } catch (error: any) {
     console.error(
-      'Subject loading error:',
+      'Department management loading error:',
       error
     )
 
-    subjects.value = []
+    departments.value = []
+    courses.value = []
+    teachers.value = []
 
     loadError.value =
       error?.data?.error?.message ||
       error?.data?.message ||
       error?.message ||
-      'Failed to load subject records.'
+      'Failed to load department management data.'
   } finally {
     loading.value = false
   }
 }
 
-const validateForm = (
-  form: typeof createForm | typeof editForm
+const validateDepartmentName = (
+  name: string
 ) => {
-  if (
-    !form.code.trim() ||
-    !form.name.trim() ||
-    !form.course
-  ) {
+  if (!name.trim()) {
     toast.add({
-      title: 'Incomplete information',
+      title: 'Department name required',
       description:
-        'Enter the subject code, subject name, and assigned course.',
+        'Enter a department name before saving.',
       icon: 'i-lucide-circle-alert',
       color: 'warning'
     })
@@ -1210,52 +1117,48 @@ const validateForm = (
   return true
 }
 
-const subjectCodeExists = (
-  code: string,
-  courseId: any,
+const departmentNameExists = (
+  name: string,
   excludeKey?: any
 ) => {
-  const normalisedCode =
-    code.trim().toLowerCase()
+  const normalisedName =
+    name.trim().toLowerCase()
 
-  return subjects.value.some(subject => {
-    const sameCode =
-      String(subject.code || '')
-        .trim()
-        .toLowerCase() === normalisedCode
+  return departments.value.some(
+    department => {
+      const sameName =
+        String(department?.name || '')
+          .trim()
+          .toLowerCase() === normalisedName
 
-    const sameCourse =
-      String(subject.course?.id) ===
-      String(courseId)
+      const isExcluded =
+        excludeKey &&
+        getDepartmentKey(department) ===
+          excludeKey
 
-    const isExcluded =
-      excludeKey &&
-      getSubjectKey(subject) ===
-        excludeKey
-
-    return (
-      sameCode &&
-      sameCourse &&
-      !isExcluded
-    )
-  })
+      return sameName && !isExcluded
+    }
+  )
 }
 
-const createSubject = async () => {
-  if (!validateForm(createForm)) {
+const createDepartment = async () => {
+  if (
+    !validateDepartmentName(
+      createForm.name
+    )
+  ) {
     return
   }
 
   if (
-    subjectCodeExists(
-      createForm.code,
-      createForm.course
+    departmentNameExists(
+      createForm.name
     )
   ) {
     toast.add({
-      title: 'Duplicate subject code',
+      title: 'Duplicate department',
       description:
-        'This course already has a subject using the same code.',
+        'A department with this name already exists.',
       icon: 'i-lucide-circle-alert',
       color: 'warning'
     })
@@ -1266,29 +1169,21 @@ const createSubject = async () => {
   loadingCreate.value = true
 
   try {
-    await $api('/subjects', {
+    await $api('/departments', {
       method: 'POST',
 
       body: {
         data: {
-          code:
-            createForm.code
-              .trim()
-              .toLowerCase(),
-
           name:
-            createForm.name.trim(),
-
-          course:
-            createForm.course
+            createForm.name.trim()
         }
       }
     })
 
     toast.add({
-      title: 'Subject created',
+      title: 'Department created',
       description:
-        'The subject was created successfully.',
+        'The department was created successfully.',
       icon: 'i-lucide-circle-check',
       color: 'success'
     })
@@ -1296,20 +1191,20 @@ const createSubject = async () => {
     createModal.value = false
     resetCreateForm()
 
-    await getSubjects()
+    await loadData()
   } catch (error: any) {
     console.error(
-      'Subject creation error:',
+      'Department creation error:',
       error
     )
 
     toast.add({
-      title: 'Unable to create subject',
+      title: 'Unable to create department',
       description:
         error?.data?.error?.message ||
         error?.data?.message ||
         error?.message ||
-        'Failed to create the subject.',
+        'Failed to create the department.',
       icon: 'i-lucide-triangle-alert',
       color: 'error'
     })
@@ -1318,22 +1213,25 @@ const createSubject = async () => {
   }
 }
 
-const updateSubject = async () => {
-  if (!validateForm(editForm)) {
+const updateDepartment = async () => {
+  if (
+    !validateDepartmentName(
+      editForm.name
+    )
+  ) {
     return
   }
 
   if (
-    subjectCodeExists(
-      editForm.code,
-      editForm.course,
-      selectedSubjectId.value
+    departmentNameExists(
+      editForm.name,
+      selectedId.value
     )
   ) {
     toast.add({
-      title: 'Duplicate subject code',
+      title: 'Duplicate department',
       description:
-        'Another subject in this course already uses the same code.',
+        'Another department already uses this name.',
       icon: 'i-lucide-circle-alert',
       color: 'warning'
     })
@@ -1345,31 +1243,23 @@ const updateSubject = async () => {
 
   try {
     await $api(
-      `/subjects/${selectedSubjectId.value}`,
+      `/departments/${selectedId.value}`,
       {
         method: 'PUT',
 
         body: {
           data: {
-            code:
-              editForm.code
-                .trim()
-                .toLowerCase(),
-
             name:
-              editForm.name.trim(),
-
-            course:
-              editForm.course
+              editForm.name.trim()
           }
         }
       }
     )
 
     toast.add({
-      title: 'Subject updated',
+      title: 'Department updated',
       description:
-        'The subject was updated successfully.',
+        'The department was updated successfully.',
       icon: 'i-lucide-circle-check',
       color: 'success'
     })
@@ -1377,20 +1267,20 @@ const updateSubject = async () => {
     editModal.value = false
     resetEditForm()
 
-    await getSubjects()
+    await loadData()
   } catch (error: any) {
     console.error(
-      'Subject update error:',
+      'Department update error:',
       error
     )
 
     toast.add({
-      title: 'Unable to update subject',
+      title: 'Unable to update department',
       description:
         error?.data?.error?.message ||
         error?.data?.message ||
         error?.message ||
-        'Failed to update the subject.',
+        'Failed to update the department.',
       icon: 'i-lucide-triangle-alert',
       color: 'error'
     })
@@ -1399,8 +1289,8 @@ const updateSubject = async () => {
   }
 }
 
-const requestDeleteOne = (subject: any) => {
-  deleteTarget.value = subject
+const requestDeleteOne = (row: any) => {
+  deleteTarget.value = row
   deleteTargetType.value = 'single'
   deleteModal.value = true
 }
@@ -1421,9 +1311,9 @@ const closeDeleteModal = () => {
   deleteTargetType.value = 'single'
 }
 
-const deleteOne = async (subject: any) => {
+const deleteOne = async (row: any) => {
   await $api(
-    `/subjects/${getSubjectKey(subject)}`,
+    `/departments/${getDepartmentKey(row)}`,
     {
       method: 'DELETE'
     }
@@ -1433,26 +1323,20 @@ const deleteOne = async (subject: any) => {
     ...selectedRows.value
   }
 
-  delete next[getSubjectKey(subject)]
+  delete next[getDepartmentKey(row)]
   selectedRows.value = next
 }
 
 const deleteSelected = async () => {
-  const selected =
-    subjects.value.filter(subject =>
-      selectedRows.value[
-        getSubjectKey(subject)
-      ]
-    )
-
   await Promise.all(
-    selected.map(subject =>
-      $api(
-        `/subjects/${getSubjectKey(subject)}`,
-        {
-          method: 'DELETE'
-        }
-      )
+    selectedDepartments.value.map(
+      department =>
+        $api(
+          `/departments/${getDepartmentKey(department)}`,
+          {
+            method: 'DELETE'
+          }
+        )
     )
   )
 
@@ -1460,6 +1344,10 @@ const deleteSelected = async () => {
 }
 
 const confirmDelete = async () => {
+  if (deleteWarning.value) {
+    return
+  }
+
   loadingDelete.value = true
 
   try {
@@ -1470,9 +1358,9 @@ const confirmDelete = async () => {
       await deleteSelected()
 
       toast.add({
-        title: 'Subjects deleted',
+        title: 'Departments deleted',
         description:
-          'The selected subject records were deleted successfully.',
+          'The selected department records were deleted successfully.',
         icon: 'i-lucide-circle-check',
         color: 'success'
       })
@@ -1482,29 +1370,29 @@ const confirmDelete = async () => {
       )
 
       toast.add({
-        title: 'Subject deleted',
+        title: 'Department deleted',
         description:
-          'The subject was deleted successfully.',
+          'The department was deleted successfully.',
         icon: 'i-lucide-circle-check',
         color: 'success'
       })
     }
 
     closeDeleteModal()
-    await getSubjects()
+    await loadData()
   } catch (error: any) {
     console.error(
-      'Subject deletion error:',
+      'Department deletion error:',
       error
     )
 
     toast.add({
-      title: 'Unable to delete subject',
+      title: 'Unable to delete department',
       description:
         error?.data?.error?.message ||
         error?.data?.message ||
         error?.message ||
-        'Failed to delete the selected subject record.',
+        'Failed to delete the selected department record.',
       icon: 'i-lucide-triangle-alert',
       color: 'error'
     })
@@ -1516,7 +1404,6 @@ const confirmDelete = async () => {
 watch(
   [
     globalFilter,
-    selectedCourse,
     itemsPerPage
   ],
   () => {
@@ -1533,12 +1420,7 @@ watch(
   }
 )
 
-onMounted(async () => {
-  await Promise.all([
-    getSubjects(),
-    getCourses()
-  ])
-})
+onMounted(loadData)
 </script>
 
 <style scoped>
