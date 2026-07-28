@@ -19,7 +19,7 @@ ENV NITRO_HOST=0.0.0.0
 # ENV STRAPI_BASEURL=STRAPI_BASEURL
 
 # Build the production Version of the Application
-RUN yarn build
+RUN npm run build
 
 
 # Expose the Port Outside the container to the localhost

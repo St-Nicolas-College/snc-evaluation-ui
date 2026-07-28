@@ -11,14 +11,14 @@ services:
 
       # Nitro
       NITRO_HOST: 0.0.0.0
-      NITRO_PORT: ${PORT}
+      NITRO_PORT: 3004
 
       # Application
       BASE_URL: ${BASE_URL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
 
     ports:
-      - "${PORT}:${PORT}"
+      - "3004"
 
     healthcheck:
       disable: true
