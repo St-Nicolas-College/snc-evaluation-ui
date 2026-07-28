@@ -1,9 +1,24 @@
 services:
-  snc-payroll-ui:
+  snc-evaluation-ui:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - ${PORT}:${PORT}
+
+    restart: unless-stopped
+
     environment:
-      - BASE_URL=${BASE_URL}
+      NODE_ENV: production
+
+      # Nitro
+      NITRO_HOST: 0.0.0.0
+      NITRO_PORT: ${PORT}
+
+      # Application
+      BASE_URL: ${BASE_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+    ports:
+      - "${PORT}:${PORT}"
+
+    healthcheck:
+      disable: true
