@@ -2,26 +2,29 @@ FROM node:20-alpine
 
 WORKDIR /usr/src/myapp
 
-# Install git if needed by dependencies
+# update and install dependency
 RUN apk add --no-cache git
 
 COPY package.json package-lock.json ./
-
-# Install dependencies
 RUN npm ci
 
 COPY . .
 
-# Production Environment
+
+# Assign ENV variables
+# Bind the App to any IP
 ENV NODE_ENV=production
-ENV NITRO_HOST=0.0.0.0
 ENV NITRO_PORT=3004
+ENV NITRO_HOST=0.0.0.0
+# ENV STRAPI_BASEURL=STRAPI_BASEURL
 
-# Build Nuxt
-RUN npm run build
+# Build the production Version of the Application
+RUN yarn build
 
-# Expose Nitro Port
-EXPOSE 3004
 
-# Start Nuxt
-CMD ["node", ".output/server/index.mjs"]
+# Expose the Port Outside the container to the localhost
+EXPOSE 3000
+
+# Run Command after building the container
+ENTRYPOINT [ "node", ".output/server/index.mjs" ]
+# CMD [ "yarn", "run", "dev" ]  # Use CMD for running the app
