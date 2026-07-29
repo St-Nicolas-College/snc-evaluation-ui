@@ -112,26 +112,26 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
         {
           label: "Student – Faculty",
           icon: "i-lucide-graduation-cap",
-          to: "/admin/evaluation",
-          exact: true,
+          to: "/admin/evaluation/student-faculty",
+          
         },
         {
           label: "Faculty – Dean",
           icon: "i-lucide-building-2",
           to: "/admin/evaluation/faculty-dean",
-          exact: true,
+         
         },
         {
           label: "Dean – Faculty",
           icon: "i-lucide-presentation",
           to: "/admin/evaluation/dean-faculty",
-          exact: true,
+          
         },
         {
           label: "Overall Feedback",
           icon: "i-lucide-message-square-text",
           to: "/admin/evaluation/overall-feedback",
-          exact: true,
+          
         },
         // {
         //   label: "Evaluation Results",

@@ -205,6 +205,26 @@
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Search and filter grouped faculty evaluation results.
         </p>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <UBadge
+            v-if="activeSemester !== 'all'"
+            color="success"
+            variant="subtle"
+            icon="i-lucide-calendar-range"
+          >
+            Current Semester: {{ activeSemester }}
+          </UBadge>
+
+          <UBadge
+            v-if="activeSchoolYear !== 'all'"
+            color="warning"
+            variant="subtle"
+            icon="i-lucide-graduation-cap"
+          >
+            Current School Year: {{ activeSchoolYear }}
+          </UBadge>
+        </div>
       </div>
 
       <div
@@ -518,9 +538,9 @@
                     color="neutral"
                     variant="soft"
                     icon="i-lucide-eye"
-                    @click="openGroup(group)"
+                    @click="viewFacultySummary(group)"
                   >
-                    View
+                    View Summary
                   </UButton>
                 </td>
               </tr>
@@ -568,583 +588,6 @@
         </div>
       </section>
     </template>
-
-    <!-- =====================================================
-          DETAILS MODAL
-        ====================================================== -->
-    <UModal
-      id="student-faculty-result-details"
-      v-model:open="showGroupDetails"
-      title="Faculty Evaluation Summary"
-      description="View the consolidated student evaluation summary, criteria averages, rating distribution, and individual records."
-    >
-      <template #content>
-        <div
-          v-if="selectedGroup"
-          class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900"
-        >
-          <div
-            class="relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 px-6 py-6 text-white"
-          >
-            <div
-              class="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-white/10 blur-3xl"
-            />
-
-            <div class="relative flex items-start justify-between gap-4">
-              <div class="flex min-w-0 items-center gap-4">
-                <div
-                  class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 font-bold"
-                >
-                  {{ createInitials(selectedGroup.name) }}
-                </div>
-
-                <div class="min-w-0">
-                  <p
-                    class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200"
-                  >
-                    Faculty Evaluation Summary
-                  </p>
-
-                  <h2 class="mt-1 truncate text-xl font-bold">
-                    {{ selectedGroup.name }}
-                  </h2>
-
-                  <p class="mt-1 truncate text-xs text-slate-300">
-                    {{ selectedGroup.department }}
-                  </p>
-                </div>
-              </div>
-
-              <UButton
-                color="neutral"
-                variant="ghost"
-                icon="i-lucide-x"
-                square
-                class="text-white hover:bg-white/10"
-                @click="showGroupDetails = false"
-              />
-            </div>
-          </div>
-
-          <div class="space-y-5 p-6">
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div
-                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Evaluations</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
-                >
-                  {{ selectedGroup.recordCount }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Students</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
-                >
-                  {{ selectedGroup.evaluatorCount }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Criteria</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
-                >
-                  {{ selectedGroup.criteriaCount }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Average</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-emerald-700 dark:text-emerald-400"
-                >
-                  {{ formatNumber(selectedGroup.averageScore) }}/5
-                </p>
-              </div>
-            </div>
-
-
-            <!-- CONSOLIDATED FACULTY SUMMARY -->
-            <section
-              class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-            >
-              <div
-                class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <div
-                  class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                      Consolidated Faculty Summary
-                    </h3>
-
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Combined result from
-                      {{ selectedGroup.evaluatorCount }}
-                      student respondent{{
-                        selectedGroup.evaluatorCount === 1 ? "" : "s"
-                      }}.
-                    </p>
-                  </div>
-
-                  <UBadge
-                    :color="ratingColor(selectedGroup.averageScore)"
-                    variant="subtle"
-                    size="lg"
-                  >
-                    {{ formatNumber(selectedGroup.averageScore) }}/5 ·
-                    {{ getRatingLabel(selectedGroup.averageScore) }}
-                  </UBadge>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
-                <div
-                  class="rounded-xl bg-gray-50 p-3 text-center dark:bg-gray-950/40"
-                >
-                  <p class="text-[10px] uppercase text-gray-400">Students</p>
-                  <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
-                    {{ selectedGroup.evaluatorCount }}
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-xl bg-gray-50 p-3 text-center dark:bg-gray-950/40"
-                >
-                  <p class="text-[10px] uppercase text-gray-400">Criteria</p>
-                  <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
-                    {{ selectedGroup.criteriaCount }}
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-xl bg-gray-50 p-3 text-center dark:bg-gray-950/40"
-                >
-                  <p class="text-[10px] uppercase text-gray-400">
-                    Ratings Received
-                  </p>
-                  <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
-                    {{ selectedGroup.totalRatingResponses }}
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-xl bg-emerald-50 p-3 text-center dark:bg-emerald-950/20"
-                >
-                  <p class="text-[10px] uppercase text-gray-400">Completion</p>
-                  <p
-                    class="mt-1 text-lg font-bold text-emerald-700 dark:text-emerald-400"
-                  >
-                    {{ selectedGroup.completionRate }}%
-                  </p>
-                </div>
-              </div>
-
-              <div
-                class="grid grid-cols-5 gap-2 border-t border-gray-200 p-4 dark:border-gray-800"
-              >
-                <div
-                  v-for="score in [5, 4, 3, 2, 1]"
-                  :key="score"
-                  class="rounded-xl bg-gray-50 p-2 text-center dark:bg-gray-950/40"
-                >
-                  <p class="text-[10px] font-semibold uppercase text-gray-400">
-                    Rating {{ score }}
-                  </p>
-                  <p class="mt-1 text-sm font-bold text-gray-900 dark:text-white">
-                    {{ selectedGroup.ratingDistribution[score] || 0 }}
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <!-- CRITERIA SUMMARY -->
-            <section
-              class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-            >
-              <div
-                class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                  Criteria Summary
-                </h3>
-
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Consolidated average and rating distribution for every
-                  evaluation criterion.
-                </p>
-              </div>
-
-              <div class="overflow-x-auto">
-                <table class="w-full min-w-[900px] text-sm">
-                  <thead
-                    class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
-                  >
-                    <tr>
-                      <th class="px-4 py-3 text-left">Criterion</th>
-                      <th class="px-3 py-3 text-center">Responses</th>
-                      <th class="px-3 py-3 text-center">Average</th>
-                      <th class="px-3 py-3 text-center">5</th>
-                      <th class="px-3 py-3 text-center">4</th>
-                      <th class="px-3 py-3 text-center">3</th>
-                      <th class="px-3 py-3 text-center">2</th>
-                      <th class="px-3 py-3 text-center">1</th>
-                      <th class="px-4 py-3 text-center">Rating</th>
-                    </tr>
-                  </thead>
-
-                  <tbody
-                    class="divide-y divide-gray-100 dark:divide-gray-800"
-                  >
-                    <tr
-                      v-for="criterion in selectedGroup.criteriaSummary"
-                      :key="criterion.criteriaId"
-                    >
-                      <td
-                        class="max-w-md px-4 py-3 text-gray-700 dark:text-gray-300"
-                      >
-                        {{ criterion.statement }}
-                      </td>
-
-                      <td class="px-3 py-3 text-center font-semibold">
-                        {{ criterion.responseCount }}
-                      </td>
-
-                      <td
-                        class="px-3 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400"
-                      >
-                        {{ formatNumber(criterion.averageScore) }}
-                      </td>
-
-                      <td class="px-3 py-3 text-center">
-                        {{ criterion.distribution[5] || 0 }}
-                      </td>
-                      <td class="px-3 py-3 text-center">
-                        {{ criterion.distribution[4] || 0 }}
-                      </td>
-                      <td class="px-3 py-3 text-center">
-                        {{ criterion.distribution[3] || 0 }}
-                      </td>
-                      <td class="px-3 py-3 text-center">
-                        {{ criterion.distribution[2] || 0 }}
-                      </td>
-                      <td class="px-3 py-3 text-center">
-                        {{ criterion.distribution[1] || 0 }}
-                      </td>
-
-                      <td class="px-4 py-3 text-center">
-                        <span
-                          class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
-                          :class="ratingBadge(criterion.averageScore)"
-                        >
-                          {{ getRatingLabel(criterion.averageScore) }}
-                        </span>
-                      </td>
-                    </tr>
-
-                    <tr v-if="!selectedGroup.criteriaSummary.length">
-                      <td
-                        colspan="9"
-                        class="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
-                      >
-                        No criterion responses are available.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <!-- RECORD SELECTOR -->
-            <section
-              class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-            >
-              <div
-                class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                  Evaluation Records
-                </h3>
-
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Select a record to inspect its criteria, comment, and AI
-                  analysis.
-                </p>
-              </div>
-
-              <div
-                class="max-h-64 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-800"
-              >
-                <button
-                  v-for="record in selectedGroup.records"
-                  :key="getEvaluationKey(record)"
-                  type="button"
-                  class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-gray-50 dark:hover:bg-gray-950/40"
-                  :class="
-                    getEvaluationKey(selectedEvaluation) ===
-                    getEvaluationKey(record)
-                      ? 'bg-emerald-50 dark:bg-emerald-950/20'
-                      : ''
-                  "
-                  @click="selectEvaluation(record)"
-                >
-                  <div class="min-w-0">
-                    <p
-                      class="truncate text-sm font-semibold text-gray-900 dark:text-white"
-                    >
-                      {{ getRecordLabel(record) }}
-                    </p>
-
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      {{ getSemester(record) }} · {{ getSchoolYear(record) }} ·
-                      {{ formatDate(getEvaluationDate(record)) }}
-                    </p>
-                  </div>
-
-                  <div class="flex shrink-0 items-center gap-2">
-                    <span
-                      class="rounded-full px-2 py-1 text-xs font-semibold"
-                      :class="sentimentBadge(record.feedback_sentiment)"
-                    >
-                      {{ record.feedback_sentiment || "Neutral" }}
-                    </span>
-
-                    <UBadge
-                      :color="ratingColor(record.average_score)"
-                      variant="subtle"
-                    >
-                      {{ formatNumber(record.average_score) }}
-                    </UBadge>
-                  </div>
-                </button>
-              </div>
-            </section>
-
-            <template v-if="selectedEvaluation">
-              <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div
-                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
-
-                  <p
-                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ selectedEvaluation.total_score || 0 }}
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Average
-                  </p>
-
-                  <p
-                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ formatNumber(selectedEvaluation.average_score) }}
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Rating</p>
-
-                  <p
-                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ getRatingLabel(selectedEvaluation.average_score) }}
-                  </p>
-                </div>
-              </div>
-
-              <section
-                class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-              >
-                <div
-                  class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                    Criteria Responses
-                  </h3>
-                </div>
-
-                <div class="overflow-x-auto">
-                  <table class="w-full text-sm">
-                    <thead
-                      class="bg-gray-50 text-xs uppercase text-gray-600 dark:bg-gray-950/40 dark:text-gray-400"
-                    >
-                      <tr>
-                        <th class="px-4 py-3 text-left">Criteria</th>
-
-                        <th class="px-4 py-3 text-center">Score</th>
-                      </tr>
-                    </thead>
-
-                    <tbody
-                      class="divide-y divide-gray-100 dark:divide-gray-800"
-                    >
-                      <tr
-                        v-for="item in formatResponses(
-                          selectedEvaluation.responses,
-                        )"
-                        :key="item.criteria_id"
-                      >
-                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
-                          {{ item.statement }}
-                        </td>
-
-                        <td
-                          class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white"
-                        >
-                          {{ item.score }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section
-                class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-              >
-                <div
-                  class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                    Student Comment
-                  </h3>
-                </div>
-
-                <p
-                  class="min-h-24 whitespace-pre-line p-4 text-sm leading-6 text-gray-600 dark:text-gray-400"
-                >
-                  {{ selectedEvaluation.comment || "No comment provided." }}
-                </p>
-              </section>
-
-              <section
-                class="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/50 dark:border-violet-900 dark:bg-violet-950/20"
-              >
-                <div
-                  class="border-b border-violet-100 px-4 py-3 dark:border-violet-900"
-                >
-                  <h3
-                    class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
-                  >
-                    <UIcon
-                      name="i-lucide-sparkles"
-                      class="size-4 text-violet-600"
-                    />
-
-                    AI Sentiment Analysis
-                  </h3>
-                </div>
-
-                <div class="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
-                  <div
-                    class="rounded-xl border border-white/60 bg-white/70 p-3 text-center dark:border-gray-800 dark:bg-gray-900/60"
-                  >
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      Sentiment
-                    </p>
-
-                    <span
-                      class="mt-2 inline-block rounded-full px-2 py-1 text-xs font-semibold"
-                      :class="
-                        sentimentBadge(selectedEvaluation.feedback_sentiment)
-                      "
-                    >
-                      {{ selectedEvaluation.feedback_sentiment || "Neutral" }}
-                    </span>
-                  </div>
-
-                  <div
-                    class="rounded-xl border border-white/60 bg-white/70 p-3 text-center dark:border-gray-800 dark:bg-gray-900/60"
-                  >
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      Keywords
-                    </p>
-
-                    <p
-                      class="mt-2 text-sm font-semibold text-gray-800 dark:text-gray-200"
-                    >
-                      {{ formatKeywords(selectedEvaluation.feedback_keywords) }}
-                    </p>
-                  </div>
-                </div>
-
-                <div
-                  class="border-t border-violet-100 p-4 dark:border-violet-900"
-                >
-                  <p
-                    class="text-xs font-semibold text-gray-500 dark:text-gray-400"
-                  >
-                    AI Summary
-                  </p>
-
-                  <p
-                    class="mt-1 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300"
-                  >
-                    {{
-                      selectedEvaluation.feedback_sentiment_summary ||
-                      "No AI summary available."
-                    }}
-                  </p>
-                </div>
-
-                <div
-                  class="border-t border-violet-100 p-4 dark:border-violet-900"
-                >
-                  <p
-                    class="text-xs font-semibold text-gray-500 dark:text-gray-400"
-                  >
-                    AI Suggestion
-                  </p>
-
-                  <p
-                    class="mt-1 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300"
-                  >
-                    {{
-                      selectedEvaluation.feedback_sentiment_suggestion ||
-                      "No AI suggestion available."
-                    }}
-                  </p>
-                </div>
-              </section>
-            </template>
-
-            <div class="flex justify-end">
-              <UButton
-                color="neutral"
-                variant="outline"
-                @click="showGroupDetails = false"
-              >
-                Close
-              </UButton>
-            </div>
-          </div>
-        </div>
-      </template>
-    </UModal>
   </div>
 </template>
 
@@ -1164,9 +607,8 @@ const loadError = ref("");
 
 const evaluations = ref<any[]>([]);
 
-const selectedGroup = ref<any>(null);
-const selectedEvaluation = ref<any>(null);
-const showGroupDetails = ref(false);
+const activeSchoolYear = ref("all");
+const activeSemester = ref("all");
 
 const searchQuery = ref("");
 const selectedFaculty = ref("all");
@@ -1467,8 +909,16 @@ const groupedResults = computed(() => {
     if (!groups.has(teacherKey)) {
       groups.set(teacherKey, {
         key: teacherKey,
+        teacherDocumentId:
+          evaluation?.teacher?.documentId || "",
         teacherId:
-          evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
+          evaluation?.teacher?.documentId ||
+          evaluation?.teacher?.id ||
+          "",
+        documentId:
+          evaluation?.teacher?.documentId ||
+          evaluation?.teacher?.id ||
+          "",
         name: evaluation?.teacher?.name || "Unknown Faculty",
         department: getEvaluationDepartment(evaluation),
         records: [],
@@ -1809,8 +1259,72 @@ const formatDate = (value: any) => {
   });
 };
 
-const getResults = async () => {
+const loadActiveAcademicPeriod = async () => {
+  try {
+    const response: any = await $api("/school-years", {
+      query: {
+        "filters[active_sy][$eq]": true,
+        "sort[0]": "updatedAt:desc",
+        "pagination[pageSize]": 1,
+      },
+    });
+
+    const activeRecord = response?.data?.[0] || null;
+
+    activeSchoolYear.value = String(
+      activeRecord?.school_year || "all",
+    ).trim();
+
+    activeSemester.value = String(
+      activeRecord?.semester || "all",
+    ).trim();
+
+    selectedSchoolYear.value =
+      activeSchoolYear.value || "all";
+
+    selectedSemester.value =
+      activeSemester.value || "all";
+  } catch (error) {
+    console.error(
+      "Active academic period loading error:",
+      error,
+    );
+
+    activeSchoolYear.value = "all";
+    activeSemester.value = "all";
+
+    selectedSchoolYear.value = "all";
+    selectedSemester.value = "all";
+
+    toast.add({
+      title: "Current academic period unavailable",
+      description:
+        "The active school year and semester could not be loaded.",
+      icon: "i-lucide-info",
+      color: "warning",
+    });
+  }
+};
+
+const initializePage = async () => {
   pending.value = true;
+  loadError.value = "";
+
+  try {
+    await loadActiveAcademicPeriod();
+    await getResults();
+  } finally {
+    pending.value = false;
+  }
+};
+
+const getResults = async () => {
+  const shouldManagePending = !pending.value;
+
+  if (shouldManagePending) {
+    pending.value = true;
+  }
+
   loadError.value = "";
 
   try {
@@ -1869,7 +1383,9 @@ const getResults = async () => {
       color: "error",
     });
   } finally {
-    pending.value = false;
+    if (shouldManagePending) {
+      pending.value = false;
+    }
   }
 };
 
@@ -1877,8 +1393,13 @@ const clearFilters = () => {
   searchQuery.value = "";
   selectedFaculty.value = "all";
   selectedDepartment.value = "all";
-  selectedSemester.value = "all";
-  selectedSchoolYear.value = "all";
+
+  selectedSemester.value =
+    activeSemester.value || "all";
+
+  selectedSchoolYear.value =
+    activeSchoolYear.value || "all";
+
   page.value = 1;
 };
 
@@ -1913,15 +1434,41 @@ const scrollToTable = async () => {
   });
 };
 
-const openGroup = (group: any) => {
-  selectedGroup.value = group;
-  selectedEvaluation.value = group.records?.[0] || null;
+const viewFacultySummary = async (group: any) => {
+  const documentId = String(
+    group?.teacherDocumentId ||
+      group?.teacherId ||
+      group?.documentId ||
+      group?.key ||
+      "",
+  ).trim();
 
-  showGroupDetails.value = true;
-};
+  if (
+    !documentId ||
+    ["undefined", "null", "unknown-faculty"].includes(
+      documentId.toLowerCase(),
+    )
+  ) {
+    toast.add({
+      title: "Unable to open summary",
+      description:
+        "The selected faculty record has no valid document identifier.",
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
 
-const selectEvaluation = (evaluation: any) => {
-  selectedEvaluation.value = evaluation;
+    return;
+  }
+
+  await navigateTo({
+    path: `/admin/evaluation/student-faculty/${encodeURIComponent(
+      documentId,
+    )}`,
+    query: {
+      semester: selectedSemester.value,
+      schoolYear: selectedSchoolYear.value,
+    },
+  });
 };
 
 const formatResponses = (responses: any) => {
@@ -2060,7 +1607,7 @@ watch(
 );
 
 onMounted(() => {
-  getResults();
+  initializePage();
 });
 </script>
 

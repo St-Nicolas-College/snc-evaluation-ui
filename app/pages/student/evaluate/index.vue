@@ -46,9 +46,8 @@
             </h1>
 
             <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
-              Evaluate your assigned faculty members by selecting a subject,
-              answering all evaluation criteria, and providing constructive
-              feedback.
+              Evaluate your assigned faculty members by answering all
+              evaluation criteria and providing constructive feedback.
             </p>
           </div>
         </div>
@@ -587,9 +586,9 @@
             </div>
 
             <div class="space-y-7 p-4 sm:p-6 lg:p-7">
-              <!-- FACULTY AND SUBJECT -->
+              <!-- FACULTY INFORMATION -->
               <div
-                class="grid grid-cols-1 gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-2 dark:border-gray-800 dark:bg-gray-950/40"
+                class="grid grid-cols-1 gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/40"
               >
                 <UFormField label="Faculty Member">
                   <UInput
@@ -598,18 +597,6 @@
                     "
                     disabled
                     icon="i-lucide-user-round"
-                    class="w-full"
-                    size="lg"
-                  />
-                </UFormField>
-
-                <UFormField label="Subject" required>
-                  <USelectMenu
-                    v-model="evaluation.subjectId"
-                    value-key="value"
-                    :items="getSubjectOptions(evaluation.teacherId)"
-                    placeholder="Select assigned subject"
-                    icon="i-lucide-book-open"
                     class="w-full"
                     size="lg"
                   />
@@ -997,7 +984,12 @@
     <!-- =====================================================
       SUBMISSION CONFIRMATION
     ====================================================== -->
-    <UModal v-model:open="confirmationOpen">
+    <UModal
+      id="student-faculty-submit-confirmation"
+      v-model:open="confirmationOpen"
+      title="Submit faculty evaluations"
+      description="Confirm submission of the completed faculty evaluations."
+    >
       <template #content>
         <div
           class="relative overflow-hidden rounded-[28px] border border-white/20 bg-white/95 shadow-[0_20px_80px_rgba(15,23,42,0.20)] backdrop-blur-2xl dark:border-gray-800 dark:bg-gray-900/95"
@@ -1143,12 +1135,10 @@ type Teacher = {
   name: string;
   department?: string;
   email?: string;
-  assigned_subjects?: any[];
 };
 
 type EvaluationFormItem = {
   teacherId: number;
-  subjectId: number | null;
   comment: string;
   responses: Record<number, number>;
 };
@@ -1237,38 +1227,21 @@ const form = reactive({
 
 const teacherCheckboxItems = computed(() =>
   teachers.value.map((teacher: any) => {
-    const subjects = teacher.assigned_subjects || [];
-
-    const availableSubjects = subjects.filter((subject: any) => {
-      return !existingEvaluations.value.some(
-        (evaluation: any) =>
-          evaluation.teacher?.id === teacher.id &&
-          evaluation.subject?.id === subject.id,
-      );
-    });
-
-    const hasNoSubjects = subjects.length === 0;
-    const fullyEvaluated =
-      subjects.length > 0 && availableSubjects.length === 0;
+    const alreadyEvaluated = existingEvaluations.value.some(
+      (evaluation: any) => evaluation.teacher?.id === teacher.id,
+    );
 
     return {
-      label: fullyEvaluated
-        ? `${teacher.name} (Completed)`
-        : hasNoSubjects
-          ? `${teacher.name} (No Subject Assigned)`
-          : teacher.name,
+      label: alreadyEvaluated ? `${teacher.name} (Completed)` : teacher.name,
 
-      description: fullyEvaluated
-        ? "All assigned subjects have been evaluated."
-        : hasNoSubjects
-          ? "No assigned subject is available for evaluation."
-          : `${availableSubjects.length} subject(s) available`,
+      description: alreadyEvaluated
+        ? "This faculty member has already been evaluated for the active period."
+        : teacher.department || "Available for evaluation",
 
       value: teacher.id,
 
       disabled:
-        fullyEvaluated ||
-        hasNoSubjects ||
+        alreadyEvaluated ||
         !activeSchoolYear.value ||
         checkingExistingEvaluations.value,
     };
@@ -1367,7 +1340,6 @@ const isFormValid = computed(() => {
 
 const createEvaluation = (teacherId: number | string): EvaluationFormItem => ({
   teacherId: Number(teacherId),
-  subjectId: null,
   comment: "",
   responses: {},
 });
@@ -1395,34 +1367,6 @@ const syncEvaluationsFromSelection = () => {
   }
 };
 
-const getSubjectOptions = (teacherId: number | string) => {
-  const teacher = teacherMap.value[String(teacherId)];
-
-  return (teacher?.assigned_subjects || []).map((subject: any) => {
-    const alreadyEvaluated = existingEvaluations.value.some(
-      (evaluation: any) =>
-        evaluation.teacher?.id === Number(teacherId) &&
-        evaluation.subject?.id === subject.id,
-    );
-
-    const courseCode = subject.course?.code?.toUpperCase();
-
-    const subjectLabel = subject.code
-      ? `${subject.code} - ${subject.name}`
-      : subject.name;
-
-    const label = courseCode ? `${subjectLabel} - ${courseCode}` : subjectLabel;
-
-    return {
-      label: alreadyEvaluated ? `${label} (Already Evaluated)` : label,
-
-      value: subject.id,
-
-      disabled: alreadyEvaluated,
-    };
-  });
-};
-
 const getAnsweredCount = (evaluation: EvaluationFormItem) => {
   return Object.keys(evaluation.responses).length;
 };
@@ -1447,7 +1391,6 @@ const getAverageScore = (evaluation: EvaluationFormItem) => {
 const isEvaluationComplete = (evaluation: EvaluationFormItem) => {
   return Boolean(
     evaluation.teacherId &&
-    evaluation.subjectId &&
     allCriteria.value.length > 0 &&
     getAnsweredCount(evaluation) === allCriteria.value.length,
   );
@@ -1460,11 +1403,10 @@ const getEvaluationProgress = (evaluation: EvaluationFormItem) => {
 
   const answered = getAnsweredCount(evaluation);
 
-  const criteriaProgress = (answered / allCriteria.value.length) * 90;
-
-  const subjectProgress = evaluation.subjectId ? 10 : 0;
-
-  return Math.min(100, Math.round(criteriaProgress + subjectProgress));
+  return Math.min(
+    100,
+    Math.round((answered / allCriteria.value.length) * 100),
+  );
 };
 
 const getSectionAnsweredCount = (
@@ -1596,8 +1538,7 @@ const getTeachers = async () => {
     query: {
       "filters[user][id][$eq]": user.value.id,
 
-      "populate[assigned_teachers][populate][assigned_subjects][populate][0]":
-        "course",
+      "populate[assigned_teachers]": true,
 
       "pagination[pageSize]": 1,
     },
@@ -1631,7 +1572,6 @@ const getExistingEvaluations = async () => {
         "filters[batch][semester][$eq]": form.semester,
         "filters[batch][school_year][$eq]": form.schoolYear,
         "filters[batch][evaluation_type][code][$eq]": "student-faculty",
-        "populate[subject]": true,
         "populate[teacher]": true,
         "pagination[pageSize]": 300,
       },
@@ -1709,7 +1649,7 @@ const openSubmitConfirmation = async () => {
     }
 
     submitError.value =
-      "Please select a subject and answer all criteria for every faculty evaluation.";
+      "Please answer all criteria for every faculty evaluation.";
 
     toast.add({
       title: "Incomplete evaluations",
@@ -1759,7 +1699,7 @@ const submitEvaluation = async () => {
     currentPage.value = incompleteIndex + 1;
 
     submitError.value =
-      "Please select a subject and answer all criteria for every faculty evaluation.";
+      "Please answer all criteria for every faculty evaluation.";
 
     await scrollEvaluationPage();
 
@@ -1772,7 +1712,6 @@ const submitEvaluation = async () => {
     const evaluations = form.evaluations.map((evaluation) => ({
       teacher: evaluation.teacherId,
 
-      subject: evaluation.subjectId,
 
       comment: evaluation.comment,
 
