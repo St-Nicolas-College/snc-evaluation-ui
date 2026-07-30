@@ -558,7 +558,7 @@
                       </p>
 
                       <UButton
-                        to="/evaluations"
+                        to="/student/evaluate"
                         size="sm"
                         class="mt-3"
                         icon="i-lucide-arrow-right"
@@ -890,7 +890,7 @@
             </p>
 
             <UButton
-              to="/evaluations"
+              to="/student/evaluate"
               icon="i-lucide-clipboard-pen-line"
               size="sm"
               class="mt-4"
@@ -1137,7 +1137,7 @@ const quickActions = [
   {
     label: 'Evaluation History',
     description: 'Review your submitted evaluations',
-    to: '/evaluations/history',
+    to: '/student/my-evaluations',
     icon: 'i-lucide-history',
     iconClass:
       'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'

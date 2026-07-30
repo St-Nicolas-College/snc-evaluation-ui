@@ -4,7 +4,7 @@
           HERO
         ====================================================== -->
     <section
-      class="relative overflow-hidden rounded-[28px] border border-violet-100 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-5 py-6 text-white shadow-xl shadow-violet-900/10 sm:px-7 sm:py-7"
+      class="relative overflow-hidden rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-600 via-orange-600 to-red-700 px-5 py-6 text-white shadow-xl shadow-amber-900/10 sm:px-7 sm:py-7"
     >
       <div
         class="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl"
@@ -20,12 +20,12 @@
           <div
             class="hidden size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur sm:flex"
           >
-            <UIcon name="i-lucide-building-2" class="size-7" />
+            <UIcon name="i-lucide-presentation" class="size-7" />
           </div>
 
           <div class="min-w-0">
             <div
-              class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-violet-50"
+              class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-amber-50"
             >
               <span
                 class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
@@ -36,16 +36,16 @@
               <span
                 class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
               >
-                Grouped by Dean
+                Grouped by Faculty
               </span>
             </div>
 
             <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
-              Faculty – Dean Results
+              Dean – Faculty Results
             </h1>
 
-            <p class="mt-2 max-w-3xl text-sm leading-6 text-violet-50/90">
-              Review consolidated faculty evaluations in a scalable table designed for large Dean and Coordinator datasets.
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-amber-50/90">
+              Review consolidated Dean evaluations in a scalable table designed for large faculty datasets.
             </p>
           </div>
         </div>
@@ -55,11 +55,11 @@
             class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
           >
             <p class="text-2xl font-bold">
-              {{ summary.totalDeans }}
+              {{ summary.totalFaculty }}
             </p>
 
             <p
-              class="mt-1 text-[10px] uppercase tracking-wide text-violet-100"
+              class="mt-1 text-[10px] uppercase tracking-wide text-amber-100"
             >
               Faculty
             </p>
@@ -73,7 +73,7 @@
             </p>
 
             <p
-              class="mt-1 text-[10px] uppercase tracking-wide text-violet-100"
+              class="mt-1 text-[10px] uppercase tracking-wide text-amber-100"
             >
               Evaluations
             </p>
@@ -87,7 +87,7 @@
             </p>
 
             <p
-              class="mt-1 text-[10px] uppercase tracking-wide text-violet-100"
+              class="mt-1 text-[10px] uppercase tracking-wide text-amber-100"
             >
               Average
             </p>
@@ -106,11 +106,11 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
-              Dean Groups
+              Faculty Groups
             </p>
 
             <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-              {{ summary.totalDeans }}
+              {{ summary.totalFaculty }}
             </p>
           </div>
 
@@ -150,7 +150,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
-              Unique Faculty
+              Unique Deans
             </p>
 
             <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
@@ -198,11 +198,11 @@
     >
       <div class="mb-4">
         <h2 class="text-sm font-bold text-gray-900 dark:text-white">
-          Faculty – Dean Results
+          Dean – Faculty Results
         </h2>
 
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Search and filter grouped Dean or Coordinator evaluation results.
+          Search and filter grouped faculty evaluation results submitted by Deans.
         </p>
       </div>
 
@@ -212,13 +212,13 @@
         <UInput
           v-model="searchQuery"
           icon="i-lucide-search"
-          placeholder="Search Dean or Coordinator..."
+          placeholder="Search faculty..."
           class="w-full"
         />
 
         <USelectMenu
-          v-model="selectedDean"
-          :items="deanOptions"
+          v-model="selectedFaculty"
+          :items="facultyOptions"
           value-key="value"
           class="w-full"
         />
@@ -258,11 +258,11 @@
         </UBadge>
 
         <UBadge
-          v-if="selectedDean !== 'all'"
+          v-if="selectedFaculty !== 'all'"
           color="primary"
           variant="subtle"
         >
-          {{ getSelectedLabel(deanOptions, selectedDean) }}
+          {{ getSelectedLabel(facultyOptions, selectedFaculty) }}
         </UBadge>
 
         <UBadge
@@ -353,7 +353,7 @@
             </h2>
 
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Showing {{ filteredGroups.length }} Dean group{{
+              Showing {{ filteredGroups.length }} faculty group{{
                 filteredGroups.length === 1 ? "" : "s"
               }}
               from {{ evaluations.length }} evaluation record{{
@@ -366,7 +366,7 @@
             <UInput
               v-model="searchQuery"
               icon="i-lucide-search"
-              placeholder="Search Dean or Coordinator or department..."
+              placeholder="Search faculty or department..."
               class="w-full sm:w-72"
             />
 
@@ -396,7 +396,7 @@
           <h3 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
             {{
               groupedResults.length
-                ? "No matching Dean or Coordinator found"
+                ? "No matching faculty found"
                 : "No evaluation results available"
             }}
           </h3>
@@ -406,8 +406,8 @@
           >
             {{
               groupedResults.length
-                ? "Try another Dean, Coordinator, or department."
-                : "No Faculty – Dean evaluation results matched the selected filters."
+                ? "Try another faculty name or department."
+                : "No Dean – Faculty evaluation results matched the selected filters."
             }}
           </p>
         </div>
@@ -419,11 +419,11 @@
               class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
             >
               <tr>
-                <th class="px-5 py-3 text-left">Dean / Coordinator</th>
+                <th class="px-5 py-3 text-left">Faculty</th>
                 <th class="px-4 py-3 text-left">Department</th>
-                <th class="px-4 py-3 text-center">Periods</th>
+                <th class="px-4 py-3 text-center">Subjects</th>
                 <th class="px-4 py-3 text-center">Evaluations</th>
-                <th class="px-4 py-3 text-center">Faculty</th>
+                <th class="px-4 py-3 text-center">Deans</th>
                 <th class="px-4 py-3 text-center">Average</th>
                 <th class="px-4 py-3 text-center">Rating</th>
                 <th class="px-4 py-3 text-left">Latest</th>
@@ -466,7 +466,7 @@
                 </td>
 
                 <td class="px-4 py-4 text-center font-semibold">
-                  {{ group.periodCount }}
+                  {{ group.subjectCount }}
                 </td>
 
                 <td class="px-4 py-4 text-center font-semibold">
@@ -506,7 +506,7 @@
                     icon="i-lucide-eye"
                     @click="openGroup(group)"
                   >
-                    View
+                    View Summary
                   </UButton>
                 </td>
               </tr>
@@ -523,7 +523,7 @@
             class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
           >
             Showing {{ paginationStart }}–{{ paginationEnd }} of
-            {{ filteredGroups.length }} Dean groups
+            {{ filteredGroups.length }} faculty groups
           </p>
 
           <div class="flex items-center justify-center gap-2">
@@ -555,315 +555,6 @@
       </section>
     </template>
 
-    <!-- =====================================================
-          DETAILS MODAL
-        ====================================================== -->
-    <UModal v-model:open="showGroupDetails">
-      <template #content>
-        <div
-          v-if="selectedGroup"
-          class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900"
-        >
-          <div
-            class="relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 px-6 py-6 text-white"
-          >
-            <div
-              class="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-white/10 blur-3xl"
-            />
-
-            <div class="relative flex items-start justify-between gap-4">
-              <div class="flex min-w-0 items-center gap-4">
-                <div
-                  class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 font-bold"
-                >
-                  {{ createInitials(selectedGroup.name) }}
-                </div>
-
-                <div class="min-w-0">
-                  <p
-                    class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200"
-                  >
-                    Dean Evaluation Summary
-                  </p>
-
-                  <h2 class="mt-1 truncate text-xl font-bold">
-                    {{ selectedGroup.name }}
-                  </h2>
-
-                  <p class="mt-1 truncate text-xs text-slate-300">
-                    {{ selectedGroup.department }}
-                  </p>
-                </div>
-              </div>
-
-              <UButton
-                color="neutral"
-                variant="ghost"
-                icon="i-lucide-x"
-                square
-                class="text-white hover:bg-white/10"
-                @click="showGroupDetails = false"
-              />
-            </div>
-          </div>
-
-          <div class="space-y-5 p-6">
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div
-                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Evaluations</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
-                >
-                  {{ selectedGroup.recordCount }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Students</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
-                >
-                  {{ selectedGroup.evaluatorCount }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Subjects</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-gray-800 dark:text-gray-200"
-                >
-                  {{ selectedGroup.periodCount }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20"
-              >
-                <p class="text-[10px] uppercase text-gray-400">Average</p>
-
-                <p
-                  class="mt-1 text-sm font-bold text-emerald-700 dark:text-emerald-400"
-                >
-                  {{ formatNumber(selectedGroup.averageScore) }}/4
-                </p>
-              </div>
-            </div>
-
-            <!-- RECORD SELECTOR -->
-            <section
-              class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-            >
-              <div
-                class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-              >
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                  Evaluation Records
-                </h3>
-
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Select a faculty evaluation to inspect its criteria and written feedback.
-                </p>
-              </div>
-
-              <div
-                class="max-h-64 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-800"
-              >
-                <button
-                  v-for="record in selectedGroup.records"
-                  :key="getEvaluationKey(record)"
-                  type="button"
-                  class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-gray-50 dark:hover:bg-gray-950/40"
-                  :class="
-                    getEvaluationKey(selectedEvaluation) ===
-                    getEvaluationKey(record)
-                      ? 'bg-emerald-50 dark:bg-emerald-950/20'
-                      : ''
-                  "
-                  @click="selectEvaluation(record)"
-                >
-                  <div class="min-w-0">
-                    <p
-                      class="truncate text-sm font-semibold text-gray-900 dark:text-white"
-                    >
-                      {{ getEvaluatorName(record) }}
-                    </p>
-
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      {{ getSemester(record) }} · {{ getSchoolYear(record) }} ·
-                      {{ formatDate(getEvaluationDate(record)) }}
-                    </p>
-                  </div>
-
-                  <UBadge
-                    :color="ratingColor(record.average_score)"
-                    variant="subtle"
-                  >
-                    {{ formatNumber(record.average_score) }}
-                  </UBadge>
-                </button>
-              </div>
-            </section>
-
-            <template v-if="selectedEvaluation">
-              <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div
-                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
-
-                  <p
-                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ selectedEvaluation.total_score || 0 }}
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Average
-                  </p>
-
-                  <p
-                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ formatNumber(selectedEvaluation.average_score) }}
-                  </p>
-                </div>
-
-                <div
-                  class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Rating</p>
-
-                  <p
-                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ getRatingLabel(selectedEvaluation.average_score) }}
-                  </p>
-                </div>
-              </div>
-
-              <section
-                class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-              >
-                <div
-                  class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                    Criteria Responses
-                  </h3>
-                </div>
-
-                <div class="overflow-x-auto">
-                  <table class="w-full text-sm">
-                    <thead
-                      class="bg-gray-50 text-xs uppercase text-gray-600 dark:bg-gray-950/40 dark:text-gray-400"
-                    >
-                      <tr>
-                        <th class="px-4 py-3 text-left">Criteria</th>
-
-                        <th class="px-4 py-3 text-center">Score</th>
-                      </tr>
-                    </thead>
-
-                    <tbody
-                      class="divide-y divide-gray-100 dark:divide-gray-800"
-                    >
-                      <tr
-                        v-for="item in formatResponses(
-                          selectedEvaluation.responses,
-                        )"
-                        :key="item.criteria_id"
-                      >
-                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
-                          {{ item.statement }}
-                        </td>
-
-                        <td
-                          class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white"
-                        >
-                          {{ item.score }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section
-                class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800"
-              >
-                <div
-                  class="border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950/40"
-                >
-                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                    Additional Comment
-                  </h3>
-                </div>
-
-                <p
-                  class="min-h-24 whitespace-pre-line p-4 text-sm leading-6 text-gray-600 dark:text-gray-400"
-                >
-                  {{ selectedEvaluation.comment || "No additional comment provided." }}
-                </p>
-              </section>
-
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <section
-                  class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20"
-                >
-                  <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
-                    <UIcon name="i-lucide-thumbs-up" class="size-4" />
-                    Strengths
-                  </h3>
-
-                  <p class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-400">
-                    {{ selectedEvaluation.strengths || "No strengths provided." }}
-                  </p>
-                </section>
-
-                <section
-                  class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 dark:border-amber-900 dark:bg-amber-950/20"
-                >
-                  <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
-                    <UIcon name="i-lucide-lightbulb" class="size-4" />
-                    Areas for Improvement
-                  </h3>
-
-                  <p class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-400">
-                    {{
-                      selectedEvaluation.areas_for_improvement ||
-                      "No areas for improvement provided."
-                    }}
-                  </p>
-                </section>
-              </div>
-            </template>
-
-            <div class="flex justify-end">
-              <UButton
-                color="neutral"
-                variant="outline"
-                @click="showGroupDetails = false"
-              >
-                Close
-              </UButton>
-            </div>
-          </div>
-        </div>
-      </template>
-    </UModal>
   </div>
 </template>
 
@@ -883,15 +574,46 @@ const loadError = ref("");
 
 const evaluations = ref<any[]>([]);
 
-const selectedGroup = ref<any>(null);
-const selectedEvaluation = ref<any>(null);
-const showGroupDetails = ref(false);
-
 const searchQuery = ref("");
-const selectedDean = ref("all");
+const selectedFaculty = ref("all");
 const selectedDepartment = ref("all");
 const selectedSemester = ref("all");
 const selectedSchoolYear = ref("all");
+
+const activePeriodLoading = ref(false);
+
+const loadActiveAcademicPeriod = async () => {
+  activePeriodLoading.value = true;
+
+  try {
+    const response: any = await $api("/school-years", {
+      query: {
+        "filters[active_sy][$eq]": true,
+        "pagination[pageSize]": 1,
+        "sort[0]": "createdAt:desc",
+      },
+    });
+
+    const activeRecord = response?.data?.[0];
+
+    if (!activeRecord) {
+      return;
+    }
+
+    selectedSchoolYear.value =
+      activeRecord?.school_year || "all";
+
+    selectedSemester.value =
+      activeRecord?.semester || "all";
+  } catch (error) {
+    console.warn(
+      "Unable to load the active academic period:",
+      error,
+    );
+  } finally {
+    activePeriodLoading.value = false;
+  }
+};
 
 const page = ref(1);
 const pageSize = ref(20);
@@ -936,30 +658,30 @@ const makeOptions = (values: any[], allLabel: string) => {
   ];
 };
 
-const deanOptions = computed(() => {
-  const deanMap = new Map<string, string>();
+const facultyOptions = computed(() => {
+  const facultyMap = new Map<string, string>();
 
   evaluations.value.forEach((evaluation: any) => {
     const value = String(
-      evaluation?.dean_coordinator?.documentId ||
-        evaluation?.dean_coordinator?.id ||
-        getDeanName(evaluation) ||
+      evaluation?.teacher?.documentId ||
+        evaluation?.teacher?.id ||
+        evaluation?.teacher?.name ||
         "",
     );
 
-    const label = getDeanName(evaluation);
+    const label = evaluation?.teacher?.name || "Unknown Faculty";
 
     if (value) {
-      deanMap.set(value, label);
+      facultyMap.set(value, label);
     }
   });
 
   return [
     {
-      label: "All Deans / Coordinators",
+      label: "All Faculty",
       value: "all",
     },
-    ...Array.from(deanMap.entries())
+    ...Array.from(facultyMap.entries())
       .map(([value, label]) => ({
         label,
         value,
@@ -970,7 +692,7 @@ const deanOptions = computed(() => {
 
 const departmentOptions = computed(() =>
   makeOptions(
-    evaluations.value.map((evaluation) => getDeanDepartment(evaluation)),
+    evaluations.value.map((evaluation) => getEvaluationDepartment(evaluation)),
     "All Departments",
   ),
 );
@@ -1000,29 +722,29 @@ const groupedResults = computed(() => {
   const groups = new Map<string, any>();
 
   evaluations.value.forEach((evaluation: any) => {
-    const deanKey = String(
-      evaluation?.dean_coordinator?.documentId ||
-        evaluation?.dean_coordinator?.id ||
-        getDeanName(evaluation) ||
-        "unknown-dean",
+    const teacherKey = String(
+      evaluation?.teacher?.documentId ||
+        evaluation?.teacher?.id ||
+        evaluation?.teacher?.name ||
+        "unknown-faculty",
     );
 
-    if (!groups.has(deanKey)) {
-      groups.set(deanKey, {
-        key: deanKey,
-        deanId:
-          evaluation?.dean_coordinator?.documentId || evaluation?.dean_coordinator?.id || "",
-        name: getDeanName(evaluation),
-        department: getDeanDepartment(evaluation),
+    if (!groups.has(teacherKey)) {
+      groups.set(teacherKey, {
+        key: teacherKey,
+        teacherId:
+          evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
+        name: evaluation?.teacher?.name || "Unknown Faculty",
+        department: getEvaluationDepartment(evaluation),
         records: [],
         evaluatorKeys: new Set<string>(),
-        periodKeys: new Set<string>(),
+        subjectKeys: new Set<string>(),
         semesterValues: new Set<string>(),
         schoolYearValues: new Set<string>(),
       });
     }
 
-    const group = groups.get(deanKey);
+    const group = groups.get(teacherKey);
     group.records.push(evaluation);
 
     const evaluatorKey = String(
@@ -1035,10 +757,16 @@ const groupedResults = computed(() => {
       group.evaluatorKeys.add(evaluatorKey);
     }
 
-    const periodKey = `${getSemester(evaluation)}-${getSchoolYear(evaluation)}`;
+    const subjectKey = String(
+      evaluation?.subject?.documentId ||
+        evaluation?.subject?.id ||
+        evaluation?.subject?.name ||
+        evaluation?.subject?.subject_name ||
+        "",
+    );
 
-    if (periodKey && periodKey !== "N/A-N/A") {
-      group.periodKeys.add(periodKey);
+    if (subjectKey) {
+      group.subjectKeys.add(subjectKey);
     }
 
     const semester = getSemester(evaluation);
@@ -1070,7 +798,7 @@ const groupedResults = computed(() => {
         records: sortedRecords,
         recordCount: group.records.length,
         evaluatorCount: group.evaluatorKeys.size,
-        periodCount: group.periodKeys.size,
+        subjectCount: group.subjectKeys.size,
         semesters: Array.from(group.semesterValues),
         schoolYears: Array.from(group.schoolYearValues),
         averageScore: validScores.length
@@ -1099,9 +827,9 @@ const filteredGroups = computed(() => {
     const matchesSearch = !query || searchable.includes(query);
 
     const matchesFaculty =
-      selectedDean.value === "all" ||
-      group.key === selectedDean.value ||
-      group.deanId === selectedDean.value;
+      selectedFaculty.value === "all" ||
+      group.key === selectedFaculty.value ||
+      group.teacherId === selectedFaculty.value;
 
     const matchesDepartment =
       selectedDepartment.value === "all" ||
@@ -1128,7 +856,7 @@ const filteredGroups = computed(() => {
 const hasActiveFilters = computed(() =>
   Boolean(
     searchQuery.value ||
-    selectedDean.value !== "all" ||
+    selectedFaculty.value !== "all" ||
     selectedDepartment.value !== "all" ||
     selectedSemester.value !== "all" ||
     selectedSchoolYear.value !== "all",
@@ -1159,7 +887,7 @@ const summary = computed(() => {
   );
 
   return {
-    totalDeans: groupedResults.value.length,
+    totalFaculty: groupedResults.value.length,
     totalEvaluations: evaluations.value.length,
     totalEvaluators: evaluatorKeys.size,
     averageScore: evaluationScores.length
@@ -1194,105 +922,48 @@ const paginationEnd = computed(() =>
   Math.min(page.value * Number(pageSize.value), filteredGroups.value.length),
 );
 
-const getDeanName = (evaluation: any) => {
-  const dean = evaluation?.dean_coordinator
-
-  const firstName =
-    dean?.user?.user_info?.first_name ||
-    dean?.user_info?.first_name ||
-    dean?.first_name ||
-    ''
-
-  const middleName =
-    dean?.user?.user_info?.middle_name ||
-    dean?.user_info?.middle_name ||
-    dean?.middle_name ||
-    ''
-
-  const lastName =
-    dean?.user?.user_info?.last_name ||
-    dean?.user_info?.last_name ||
-    dean?.last_name ||
-    ''
-
-  const suffix =
-    dean?.user?.user_info?.suffix ||
-    dean?.user_info?.suffix ||
-    dean?.suffix ||
-    ''
-
-  const constructedName = [
-    firstName,
-    middleName,
-    lastName,
-    suffix
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-
+const getEvaluationDepartment = (evaluation: any) => {
   return (
-    dean?.name ||
-    dean?.full_name ||
-    dean?.display_name ||
-    constructedName ||
-    dean?.user?.name ||
-    dean?.user?.full_name ||
-    dean?.user?.username ||
-    dean?.user?.email ||
-    'Unknown Dean'
-  )
-}
+    evaluation?.teacher?.department?.name ||
+    evaluation?.teacher?.department ||
+    "Not specified"
+  );
+};
 
-const getDeanDepartment = (evaluation: any) => {
-  const dean = evaluation?.dean_coordinator
-
+const getSubjectName = (evaluation: any) => {
   return (
-    dean?.department?.name ||
-    dean?.department ||
-    dean?.user?.user_info?.department?.name ||
-    dean?.user?.user_info?.department ||
-    dean?.user_info?.department?.name ||
-    dean?.user_info?.department ||
-    evaluation?.batch?.department ||
-    'Not specified'
-  )
-}
+    evaluation?.subject?.name || evaluation?.subject?.subject_name || "N/A"
+  );
+};
 
 const getEvaluatorName = (evaluation: any) => {
-  const user = evaluation?.evaluator_user
+  const user = evaluation?.evaluator_user;
 
   const firstName =
     user?.user_info?.first_name ||
     user?.first_name ||
-    ''
+    "";
 
   const middleName =
     user?.user_info?.middle_name ||
     user?.middle_name ||
-    ''
+    "";
 
   const lastName =
     user?.user_info?.last_name ||
     user?.last_name ||
-    ''
+    "";
 
   const suffix =
     user?.user_info?.suffix ||
     user?.suffix ||
-    ''
+    "";
 
-  const constructedName = [
-    firstName,
-    middleName,
-    lastName,
-    suffix
-  ]
+  const constructedName = [firstName, middleName, lastName, suffix]
     .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   return (
     user?.name ||
@@ -1300,9 +971,9 @@ const getEvaluatorName = (evaluation: any) => {
     constructedName ||
     user?.username ||
     user?.email ||
-    'Unknown Faculty'
-  )
-}
+    "Unknown Dean"
+  );
+};
 
 const getSemester = (evaluation: any) => {
   return evaluation?.batch?.semester || "N/A";
@@ -1326,7 +997,7 @@ const getEvaluationKey = (evaluation: any) => {
   return (
     evaluation?.documentId ||
     evaluation?.id ||
-    `${evaluation?.dean_coordinator?.id || ""}-${evaluation?.evaluator_user?.id || ""}-${evaluation?.createdAt || ""}`
+    `${evaluation?.teacher?.id || ""}-${evaluation?.subject?.id || ""}-${evaluation?.createdAt || ""}`
   );
 };
 
@@ -1364,69 +1035,64 @@ const formatDate = (value: any) => {
 };
 
 const getResults = async () => {
-  pending.value = true
-  loadError.value = ''
+  pending.value = true;
+  loadError.value = "";
 
   try {
     const query: any = {
-      'filters[batch][evaluation_type][code][$eq]':
-        'faculty-dean-coordinator',
+      "filters[batch][evaluation_type][code][$eq]": "dean-to-faculty",
 
-      populate: '*',
+      "populate[teacher][populate][department]": true,
 
-      'sort[0]': 'createdAt:desc',
+      "populate[subject]": true,
 
-      'pagination[pageSize]': 10000
-    }
+      "populate[evaluator_user][populate][0]": "user_info",
 
-    const res: any = await $api('/evaluations', {
-      query
-    })
+      "populate[batch][populate][0]": "evaluation_type",
 
-    console.log(
-      'FACULTY-DEAN FULL RESPONSE:',
-      JSON.parse(JSON.stringify(res))
-    )
+      "sort[0]": "createdAt:desc",
 
-    console.log(
-      'FIRST EVALUATION:',
-      JSON.parse(
-        JSON.stringify(res?.data?.[0] || null)
-      )
-    )
+      /*
+       * All Dean – Faculty records are loaded once.
+       * The visible filters are then applied locally,
+       * matching the filter behaviour of the previous
+       * Evaluation Results page.
+       */
+      "pagination[pageSize]": 10000,
+    };
 
-    console.log(
-      'DEAN COORDINATOR:',
-      JSON.parse(
-        JSON.stringify(
-          res?.data?.[0]?.dean_coordinator || null
-        )
-      )
-    )
+    const res: any = await $api("/evaluations", {
+      query,
+    });
 
-    evaluations.value = res.data || []
-    page.value = 1
+    evaluations.value = res.data || [];
+
+    page.value = 1;
   } catch (error: any) {
-    console.error(
-      'Faculty-Dean result loading error:',
-      error
-    )
+    console.error("Dean-Faculty result loading error:", error);
 
-    evaluations.value = []
+    evaluations.value = [];
 
     loadError.value =
       error?.data?.error?.message ||
       error?.data?.message ||
       error?.message ||
-      'Failed to load Faculty – Dean evaluation results.'
+      "Failed to load Dean – Faculty evaluation results.";
+
+    toast.add({
+      title: "Unable to load results",
+      description: loadError.value,
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   } finally {
-    pending.value = false
+    pending.value = false;
   }
-}
+};
 
 const clearFilters = () => {
   searchQuery.value = "";
-  selectedDean.value = "all";
+  selectedFaculty.value = "all";
   selectedDepartment.value = "all";
   selectedSemester.value = "all";
   selectedSchoolYear.value = "all";
@@ -1464,15 +1130,31 @@ const scrollToTable = async () => {
   });
 };
 
-const openGroup = (group: any) => {
-  selectedGroup.value = group;
-  selectedEvaluation.value = group.records?.[0] || null;
+const openGroup = async (group: any) => {
+  const facultyId = String(
+    group?.teacherId ||
+      group?.key ||
+      "",
+  );
 
-  showGroupDetails.value = true;
-};
+  if (!facultyId) {
+    toast.add({
+      title: "Unable to open summary",
+      description: "The selected faculty member has no valid document ID.",
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
 
-const selectEvaluation = (evaluation: any) => {
-  selectedEvaluation.value = evaluation;
+    return;
+  }
+
+  await navigateTo({
+    path: `/admin/evaluation/dean-faculty/${encodeURIComponent(facultyId)}`,
+    query: {
+      semester: selectedSemester.value,
+      schoolYear: selectedSchoolYear.value,
+    },
+  });
 };
 
 const formatResponses = (responses: any) => {
@@ -1503,8 +1185,8 @@ const formatResponses = (responses: any) => {
 const getRatingLabel = (average: number) => {
   const avg = Number(average);
 
-  if (avg >= 3.5) return "Superior";
-  if (avg >= 2.5) return "Average";
+  if (avg >= 3.5) return "Excellent";
+  if (avg >= 2.5) return "Satisfactory";
   if (avg >= 1.5) return "Fair";
   if (avg > 0) return "Needs Improvement";
 
@@ -1546,7 +1228,7 @@ const ratingColor = (average: number) => {
 watch(
   [
     searchQuery,
-    selectedDean,
+    selectedFaculty,
     selectedDepartment,
     selectedSemester,
     selectedSchoolYear,
@@ -1566,8 +1248,9 @@ watch(
   },
 );
 
-onMounted(() => {
-  getResults();
+onMounted(async () => {
+  await loadActiveAcademicPeriod();
+  await getResults();
 });
 </script>
 

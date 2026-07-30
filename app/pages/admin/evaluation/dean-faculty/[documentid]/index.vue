@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-5 pb-10">
+    <!-- =====================================================
+         PAGE TOOLBAR
+    ====================================================== -->
     <div
       class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white/80 px-3 py-2 shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-900/80"
     >
@@ -11,7 +14,7 @@
           class="print:hidden"
           @click="goBack"
         >
-          Back to Student–Faculty Results
+          Back to Dean–Faculty Results
         </UButton>
 
         <!-- <UButton
@@ -19,7 +22,8 @@
           variant="soft"
           icon="i-lucide-printer"
           class="print:hidden"
-          @click="printEvaluationReport"
+          :disabled="pending || !selectedGroup || isGeneratingPdf"
+          @click="printReport"
         >
           Print Report
         </UButton> -->
@@ -30,8 +34,9 @@
         class="hidden text-right sm:block print:hidden"
       >
         <!-- <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
-          Faculty document ID
+          Faculty Member document ID
         </p>
+
         <p
           class="max-w-[280px] truncate text-xs font-semibold text-gray-700 dark:text-gray-300"
         >
@@ -44,10 +49,10 @@
           icon="i-lucide-file-search"
           class="print:hidden mr-2"
           :loading="isGeneratingPdf && pdfAction === 'preview'"
-          :disabled="isGeneratingPdf"
+          :disabled="pending || !selectedGroup || isGeneratingPdf"
           @click="previewPdfReport"
         >
-          Preview PDF
+          Preview Report
         </UButton>
 
         <UButton
@@ -55,14 +60,17 @@
           icon="i-lucide-download"
           class="print:hidden"
           :loading="isGeneratingPdf && pdfAction === 'download'"
-          :disabled="isGeneratingPdf"
+          :disabled="pending || !selectedGroup || isGeneratingPdf"
           @click="downloadPdfReport"
         >
-          Download PDF
+          Download Report
         </UButton>
       </div>
     </div>
 
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
     <div
       v-if="pending"
       class="flex min-h-[360px] items-center justify-center rounded-[28px] border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
@@ -70,14 +78,18 @@
       <div class="text-center">
         <UIcon
           name="i-lucide-loader-circle"
-          class="mx-auto size-8 animate-spin text-emerald-600"
+          class="mx-auto size-8 animate-spin text-violet-600"
         />
+
         <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          Loading faculty evaluation summary...
+          Loading Faculty evaluation summary...
         </p>
       </div>
     </div>
 
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
     <div
       v-else-if="loadError"
       class="rounded-[28px] border border-red-200 bg-red-50 p-8 text-center dark:border-red-900 dark:bg-red-950/20"
@@ -86,398 +98,39 @@
         name="i-lucide-triangle-alert"
         class="mx-auto size-9 text-red-600"
       />
+
       <h1 class="mt-3 text-lg font-bold text-red-900 dark:text-red-200">
-        Unable to load faculty summary
+        Unable to load Faculty evaluation summary
       </h1>
+
       <p class="mx-auto mt-2 max-w-xl text-sm text-red-700 dark:text-red-300">
         {{ loadError }}
       </p>
-      <UButton class="mt-5" color="error" variant="soft" @click="getResults">
+
+      <UButton
+        class="mt-5"
+        color="error"
+        variant="soft"
+        icon="i-lucide-refresh-cw"
+        @click="getResults"
+      >
         Try Again
       </UButton>
     </div>
 
-    <!-- FORMAL PRINT REPORT -->
-    <!-- <article
-      v-if="selectedGroup"
-      class="formal-evaluation-report hidden bg-white text-gray-950 print:block print:bg-white"
-    >
-      Institutional Header
-      <header class="report-header">
-        <div class="report-school-mark">
-          <span>SNC</span>
-        </div>
-
-        <div class="report-school-details">
-          <p class="report-republic">Republic of the Philippines</p>
-          <h1>ST. NICOLAS COLLEGE OF BUSINESS AND TECHNOLOGY</h1>
-          <p>Faculty Evaluation and Quality Assurance Office</p>
-        </div>
-
-        <div class="report-control-copy">
-          <p>OFFICIAL REPORT</p>
-          <span>CONFIDENTIAL</span>
-        </div>
-      </header>
-
-      <section class="report-document-control">
-        <table>
-          <tbody>
-            <tr>
-              <th>Document Code</th>
-              <td>{{ reportDocumentCode }}</td>
-              <th>Report Number</th>
-              <td>{{ reportNumber }}</td>
-            </tr>
-            <tr>
-              <th>Classification</th>
-              <td>Confidential – Internal Use Only</td>
-              <th>Revision</th>
-              <td>Rev. 00</td>
-            </tr>
-            <tr>
-              <th>Prepared Date</th>
-              <td>{{ generatedReportDate }}</td>
-              <th>Retention</th>
-              <td>Per institutional records policy</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <div class="report-title-block">
-        <h2>STUDENT–FACULTY EVALUATION REPORT</h2>
-        <p>
-          Consolidated performance results, written feedback, and individual
-          student evaluation records
-        </p>
-      </div>
-
-      <section class="report-section report-contents">
-        <h3 class="report-section-title">REPORT CONTENTS</h3>
-        <ol>
-          <li><span>I.</span> Report Information</li>
-          <li><span>II.</span> Executive Summary</li>
-          <li><span>III.</span> Overall Rating Distribution</li>
-          <li><span>IV.</span> Consolidated Results by Criterion</li>
-          <li><span>V.</span> Consolidated AI Sentiment Analysis</li>
-          <li><span>VI.</span> Certification and Sign-Off</li>
-        </ol>
-      </section>
-
-      Report Information
-      <section class="report-section">
-        <h3 class="report-section-title">I. REPORT INFORMATION</h3>
-
-        <table class="report-information-table">
-          <tbody>
-            <tr>
-              <th>Faculty Member</th>
-              <td>{{ selectedGroup.name }}</td>
-              <th>Department</th>
-              <td>{{ selectedGroup.department }}</td>
-            </tr>
-
-            <tr>
-              <th>Semester</th>
-              <td>{{ currentSemesterLabel }}</td>
-              <th>School Year</th>
-              <td>{{ currentSchoolYearLabel }}</td>
-            </tr>
-
-            <tr>
-              <th>Total Evaluations</th>
-              <td>{{ selectedGroup.recordCount }}</td>
-              <th>Student Evaluators</th>
-              <td>{{ selectedGroup.evaluatorCount }}</td>
-            </tr>
-
-            <tr>
-              <th>Evaluation Criteria</th>
-              <td>{{ selectedGroup.criteriaCount }}</td>
-              <th>Date Generated</th>
-              <td>{{ generatedReportDate }}</td>
-            </tr>
-            <tr>
-              <th>Report Status</th>
-              <td>For Administrative Review</td>
-              <th>System Reference</th>
-              <td>{{ reportSystemReference }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      Executive Summary
-      <section class="report-section">
-        <h3 class="report-section-title">II. EXECUTIVE SUMMARY</h3>
-
-        <div class="report-summary-grid">
-          <div class="report-summary-primary">
-            <p class="report-summary-label">Overall Rating</p>
-            <p class="report-summary-score">
-              {{ formatNumber(selectedGroup.averageScore) }}
-              <span>/ 5.00</span>
-            </p>
-            <p class="report-summary-interpretation">
-              {{ getRatingLabel(selectedGroup.averageScore) }}
-            </p>
-          </div>
-
-          <div class="report-summary-item">
-            <p>Completion Rate</p>
-            <strong>{{ selectedGroup.completionRate }}%</strong>
-          </div>
-
-          <div class="report-summary-item">
-            <p>Total Rating Responses</p>
-            <strong>{{ selectedGroup.totalRatingResponses }}</strong>
-          </div>
-
-          <div class="report-summary-item">
-            <p>Overall AI Sentiment</p>
-            <strong>
-              {{ selectedFacultySentimentAnalysis.overallSentiment }}
-            </strong>
-          </div>
-        </div>
-
-        <p class="report-narrative">
-          Based on {{ selectedGroup.recordCount }} submitted evaluation record{{
-            selectedGroup.recordCount === 1 ? "" : "s"
-          }}, the selected faculty member obtained an overall weighted average
-          of <strong>{{ formatNumber(selectedGroup.averageScore) }}</strong
-          >, interpreted as
-          <strong>{{ getRatingLabel(selectedGroup.averageScore) }}</strong
-          >. The report covers {{ selectedGroup.criteriaCount }} evaluation
-          criteria for {{ currentSemesterLabel }}, School Year
-          {{ currentSchoolYearLabel }}.
-        </p>
-      </section>
-
-      Rating Distribution
-      <section class="report-section">
-        <h3 class="report-section-title">III. OVERALL RATING DISTRIBUTION</h3>
-
-        <table class="report-standard-table report-rating-table">
-          <thead>
-            <tr>
-              <th>Rating</th>
-              <th>Interpretation</th>
-              <th>Frequency</th>
-              <th>Percentage</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr v-for="score in [5, 4, 3, 2, 1]" :key="`formal-${score}`">
-              <td>{{ score }}</td>
-              <td>{{ getRatingLabel(score) }}</td>
-              <td>{{ selectedGroup.ratingDistribution[score] || 0 }}</td>
-              <td>
-                {{
-                  formatNumber(
-                    getRatingPercentage(
-                      selectedGroup.ratingDistribution[score] || 0,
-                      selectedGroup.totalRatingResponses,
-                    ),
-                  )
-                }}%
-              </td>
-            </tr>
-
-            <tr class="report-total-row">
-              <td colspan="2">TOTAL</td>
-              <td>{{ selectedGroup.totalRatingResponses }}</td>
-              <td>100.00%</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      Criteria Results
-      <section class="report-section report-page-break-before">
-        <h3 class="report-section-title">
-          IV. CONSOLIDATED RESULTS BY CRITERION
-        </h3>
-
-        <table class="report-standard-table report-criteria-table">
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Evaluation Criterion</th>
-              <th>Responses</th>
-              <th>Mean</th>
-              <th>Interpretation</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr
-              v-for="(
-                criterion, criterionIndex
-              ) in selectedGroup.criteriaSummary"
-              :key="criterion.criteriaId"
-            >
-              <td>{{ criterionIndex + 1 }}</td>
-              <td class="report-left">
-                {{ criterion.statement }}
-              </td>
-              <td>{{ criterion.responseCount }}</td>
-              <td>{{ formatNumber(criterion.averageScore) }}</td>
-              <td>{{ getRatingLabel(criterion.averageScore) }}</td>
-            </tr>
-
-            <tr v-if="!selectedGroup.criteriaSummary.length">
-              <td colspan="5">No criterion results are available.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      AI Sentiment
-      <section class="report-section">
-        <h3 class="report-section-title">
-          V. CONSOLIDATED AI SENTIMENT ANALYSIS
-        </h3>
-
-        <table class="report-standard-table report-sentiment-table">
-          <thead>
-            <tr>
-              <th>Sentiment</th>
-              <th>Frequency</th>
-              <th>Percentage</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>Positive</td>
-              <td>{{ selectedFacultySentimentAnalysis.positive }}</td>
-              <td>
-                {{
-                  formatNumber(
-                    selectedFacultySentimentAnalysis.positivePercentage,
-                  )
-                }}%
-              </td>
-            </tr>
-
-            <tr>
-              <td>Neutral</td>
-              <td>{{ selectedFacultySentimentAnalysis.neutral }}</td>
-              <td>
-                {{
-                  formatNumber(
-                    selectedFacultySentimentAnalysis.neutralPercentage,
-                  )
-                }}%
-              </td>
-            </tr>
-
-            <tr>
-              <td>Negative</td>
-              <td>{{ selectedFacultySentimentAnalysis.negative }}</td>
-              <td>
-                {{
-                  formatNumber(
-                    selectedFacultySentimentAnalysis.negativePercentage,
-                  )
-                }}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="report-analysis-box">
-          <h4>Consolidated Interpretation</h4>
-          <p>{{ selectedFacultySentimentAnalysis.summary }}</p>
-
-          <template v-if="selectedFacultySentimentAnalysis.keywords.length">
-            <h4>Common Keywords</h4>
-            <p>
-              {{ selectedFacultySentimentAnalysis.keywords.join(", ") }}
-            </p>
-          </template>
-
-          <template v-if="selectedFacultySentimentAnalysis.suggestions.length">
-            <h4>Recommended Areas for Attention</h4>
-            <ol>
-              <li
-                v-for="(
-                  suggestion, suggestionIndex
-                ) in selectedFacultySentimentAnalysis.suggestions"
-                :key="`formal-suggestion-${suggestionIndex}`"
-              >
-                {{ suggestion }}
-              </li>
-            </ol>
-          </template>
-        </div>
-      </section>
-
-      Certification
-      <section class="report-section report-certification">
-        <h3 class="report-section-title">VI. CERTIFICATION AND SIGN-OFF</h3>
-
-        <p>
-          This report was generated from the official Student–Faculty Evaluation
-          System and reflects the records available for the stated academic
-          period. It is intended solely for authorised institutional quality
-          assurance, faculty development, academic review, and related
-          administrative purposes.
-        </p>
-
-        <div class="report-certification-note">
-          <strong>Confidentiality Notice:</strong>
-          Individual student evaluation records and written comments must be
-          handled in accordance with institutional privacy, records management,
-          and data protection policies.
-        </div>
-
-        <div class="report-signature-grid">
-          <div>
-            <span></span>
-            <strong>Prepared by</strong>
-            <p>Evaluation System Administrator</p>
-            <small>Date: __________________</small>
-          </div>
-
-          <div>
-            <span></span>
-            <strong>Reviewed by</strong>
-            <p>Department Head / Dean</p>
-            <small>Date: __________________</small>
-          </div>
-
-          <div>
-            <span></span>
-            <strong>Approved / Noted by</strong>
-            <p>Academic Administrator</p>
-            <small>Date: __________________</small>
-          </div>
-        </div>
-      </section>
-
-      <footer class="report-footer">
-        <p>
-          {{ reportDocumentCode }} · {{ reportNumber }} ·
-          {{ selectedGroup.name }} · {{ currentSemesterLabel }} ·
-          {{ currentSchoolYearLabel }}
-        </p>
-        <p>Confidential · System-generated official report</p>
-      </footer>
-    </article> -->
-
+    <!-- =====================================================
+         SUMMARY
+    ====================================================== -->
     <div
       v-if="selectedGroup"
-      class="overflow-hidden rounded-[30px] border border-gray-200/80 bg-white shadow-[0_24px_70px_-32px_rgba(15,23,42,0.35)] print:hidden dark:border-gray-800 dark:bg-gray-900"
+      class="overflow-hidden rounded-[30px] border border-gray-200/80 bg-white shadow-[0_24px_70px_-32px_rgba(15,23,42,0.35)] dark:border-gray-800 dark:bg-gray-900"
     >
+      <!-- HERO -->
       <div
-        class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 px-5 py-6 text-white sm:px-7 sm:py-7"
+        class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-violet-950 to-indigo-950 px-5 py-6 text-white sm:px-7 sm:py-7"
       >
         <div
-          class="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-emerald-400/15 blur-3xl"
+          class="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-violet-400/20 blur-3xl"
         />
         <div
           class="pointer-events-none absolute -bottom-24 left-1/3 size-56 rounded-full bg-cyan-400/10 blur-3xl"
@@ -499,12 +152,12 @@
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-2">
                 <p
-                  class="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-300"
+                  class="text-[11px] font-bold uppercase tracking-[0.2em] text-violet-300"
                 >
                   Faculty Evaluation Summary
                 </p>
 
-                <UBadge color="success" variant="subtle">
+                <UBadge color="primary" variant="subtle">
                   {{ selectedGroup.recordCount }} Responses
                 </UBadge>
               </div>
@@ -525,7 +178,7 @@
 
                 <span class="inline-flex items-center gap-1.5">
                   <UIcon name="i-lucide-users" class="size-3.5" />
-                  {{ selectedGroup.evaluatorCount }} Students
+                  {{ selectedGroup.evaluatorCount }} Dean Evaluators
                 </span>
 
                 <span class="inline-flex items-center gap-1.5">
@@ -536,11 +189,11 @@
 
               <div class="mt-4 grid max-w-xl gap-2 sm:grid-cols-2">
                 <div
-                  class="rounded-2xl border border-white/10 bg-white/8 px-3.5 py-3 backdrop-blur"
+                  class="rounded-2xl border border-white/10 bg-white/10 px-3.5 py-3 backdrop-blur"
                 >
                   <div class="flex items-center gap-2">
                     <div
-                      class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300"
+                      class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-violet-400/15 text-violet-300"
                     >
                       <UIcon name="i-lucide-calendar-range" class="size-4" />
                     </div>
@@ -560,7 +213,7 @@
                 </div>
 
                 <div
-                  class="rounded-2xl border border-white/10 bg-white/8 px-3.5 py-3 backdrop-blur"
+                  class="rounded-2xl border border-white/10 bg-white/10 px-3.5 py-3 backdrop-blur"
                 >
                   <div class="flex items-center gap-2">
                     <div
@@ -592,13 +245,14 @@
             <div class="flex items-center justify-between gap-4">
               <div>
                 <p
-                  class="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-200"
+                  class="text-[10px] font-bold uppercase tracking-[0.16em] text-violet-200"
                 >
                   Overall Rating
                 </p>
+
                 <p class="mt-1 text-4xl font-black tracking-tight">
                   {{ formatNumber(selectedGroup.averageScore) }}
-                  <span class="text-lg font-semibold text-slate-300">/5</span>
+                  <span class="text-lg font-semibold text-slate-300">/4</span>
                 </p>
               </div>
 
@@ -614,7 +268,7 @@
 
             <div class="mt-3 flex items-center gap-1">
               <UIcon
-                v-for="star in 5"
+                v-for="star in 4"
                 :key="star"
                 name="i-lucide-star"
                 class="size-4"
@@ -643,22 +297,23 @@
       </div>
 
       <div class="space-y-5 p-4 sm:p-6">
+        <!-- EVALUATION PERIOD -->
         <!-- <section
-          class="overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-amber-50 shadow-sm dark:border-emerald-900/50 dark:from-emerald-950/20 dark:via-gray-900 dark:to-amber-950/10"
+          class="overflow-hidden rounded-3xl border border-violet-100 bg-gradient-to-r from-violet-50 via-white to-amber-50 shadow-sm dark:border-violet-900/50 dark:from-violet-950/20 dark:via-gray-900 dark:to-amber-950/10"
         >
           <div
             class="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div class="flex items-start gap-3">
               <div
-                class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300"
               >
                 <UIcon name="i-lucide-calendar-days" class="size-5" />
               </div>
 
               <div>
                 <p
-                  class="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-400"
+                  class="text-[10px] font-bold uppercase tracking-[0.16em] text-violet-700 dark:text-violet-400"
                 >
                   Evaluation Period
                 </p>
@@ -670,15 +325,9 @@
                 </h2>
 
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  All ratings, comments, criteria summaries, and AI sentiment
-                  results on this page are based on this selected academic
+                  All ratings, criteria summaries, comments, strengths, and
+                  improvement areas on this page are based on this academic
                   period.
-                </p>
-
-                <p
-                  class="mt-2 hidden text-[10px] font-medium text-gray-500 print:block dark:text-gray-400"
-                >
-                  Generated: {{ generatedReportDate }}
                 </p>
               </div>
             </div>
@@ -693,9 +342,7 @@
                   Semester
                 </p>
 
-                <p
-                  class="mt-1 text-xs font-black text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-xs font-black text-gray-900 dark:text-white">
                   {{ currentSemesterLabel }}
                 </p>
               </div>
@@ -709,9 +356,7 @@
                   School Year
                 </p>
 
-                <p
-                  class="mt-1 text-xs font-black text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-xs font-black text-gray-900 dark:text-white">
                   {{ currentSchoolYearLabel }}
                 </p>
               </div>
@@ -719,118 +364,41 @@
           </div>
         </section> -->
 
+        <!-- KPI CARDS -->
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div
-            class="group rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-blue-900/50 dark:from-blue-950/30 dark:to-gray-900"
+          <article
+            v-for="card in summaryCards"
+            :key="card.label"
+            class="group rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:from-gray-900 dark:to-gray-950/60"
           >
             <div class="flex items-center justify-between gap-3">
               <div>
                 <p
-                  class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600 dark:text-blue-400"
+                  class="text-[10px] font-bold uppercase tracking-[0.14em]"
+                  :class="card.labelClass"
                 >
-                  Evaluations
+                  {{ card.label }}
                 </p>
+
                 <p
                   class="mt-2 text-2xl font-black tracking-tight text-gray-950 dark:text-white"
                 >
-                  {{ selectedGroup.recordCount }}
+                  {{ card.value }}
                 </p>
+
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Submitted records
+                  {{ card.caption }}
                 </p>
               </div>
 
               <div
-                class="flex size-11 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300"
+                class="flex size-11 items-center justify-center rounded-2xl"
+                :class="card.iconClass"
               >
-                <UIcon name="i-lucide-files" class="size-5" />
+                <UIcon :name="card.icon" class="size-5" />
               </div>
             </div>
-          </div>
-
-          <div
-            class="group rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-violet-900/50 dark:from-violet-950/30 dark:to-gray-900"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p
-                  class="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-600 dark:text-violet-400"
-                >
-                  Students
-                </p>
-                <p
-                  class="mt-2 text-2xl font-black tracking-tight text-gray-950 dark:text-white"
-                >
-                  {{ selectedGroup.evaluatorCount }}
-                </p>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Unique respondents
-                </p>
-              </div>
-
-              <div
-                class="flex size-11 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300"
-              >
-                <UIcon name="i-lucide-users-round" class="size-5" />
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="group rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-amber-900/50 dark:from-amber-950/30 dark:to-gray-900"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p
-                  class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-600 dark:text-amber-400"
-                >
-                  Criteria
-                </p>
-                <p
-                  class="mt-2 text-2xl font-black tracking-tight text-gray-950 dark:text-white"
-                >
-                  {{ selectedGroup.criteriaCount }}
-                </p>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Performance indicators
-                </p>
-              </div>
-
-              <div
-                class="flex size-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300"
-              >
-                <UIcon name="i-lucide-list-checks" class="size-5" />
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="group rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-emerald-900/50 dark:from-emerald-950/30 dark:to-gray-900"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p
-                  class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400"
-                >
-                  Completion
-                </p>
-                <p
-                  class="mt-2 text-2xl font-black tracking-tight text-gray-950 dark:text-white"
-                >
-                  {{ formatNumber(selectedGroup.completionRate) }}%
-                </p>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Response completeness
-                </p>
-              </div>
-
-              <div
-                class="flex size-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300"
-              >
-                <UIcon name="i-lucide-circle-check-big" class="size-5" />
-              </div>
-            </div>
-          </div>
+          </article>
         </div>
 
         <!-- SUMMARY NAVIGATION -->
@@ -852,8 +420,11 @@
           </div>
         </div>
 
+        <!-- =================================================
+             OVERVIEW TAB
+        ================================================== -->
         <div v-show="activeTab === 'overview'" class="space-y-5 print:block">
-          <!-- CONSOLIDATED FACULTY SUMMARY -->
+          <!-- CONSOLIDATED SUMMARY -->
           <section
             class="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
           >
@@ -871,7 +442,7 @@
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Combined result from
                     {{ selectedGroup.evaluatorCount }}
-                    student respondent{{
+                    Dean respondent{{
                       selectedGroup.evaluatorCount === 1 ? "" : "s"
                     }}.
                   </p>
@@ -882,16 +453,17 @@
                   variant="subtle"
                   size="lg"
                 >
-                  {{ formatNumber(selectedGroup.averageScore) }}/5 ·
+                  {{ formatNumber(selectedGroup.averageScore) }}/4 ·
                   {{ getRatingLabel(selectedGroup.averageScore) }}
                 </UBadge>
               </div>
             </div>
+
             <div
-              class="grid grid-cols-1 gap-3 border-t border-gray-200 p-4 sm:grid-cols-2 xl:grid-cols-5 dark:border-gray-800"
+              class="grid grid-cols-1 gap-3 border-t border-gray-200 p-4 sm:grid-cols-2 xl:grid-cols-4 dark:border-gray-800"
             >
               <div
-                v-for="score in [5, 4, 3, 2, 1]"
+                v-for="score in [4, 3, 2, 1]"
                 :key="score"
                 class="group rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:from-gray-900 dark:to-gray-950/60"
               >
@@ -906,7 +478,7 @@
                       <p
                         class="text-xs font-bold text-gray-900 dark:text-white"
                       >
-                        {{ score }} Star
+                        {{ score }} Point
                       </p>
                     </div>
 
@@ -960,6 +532,165 @@
             </div>
           </section>
 
+          <!-- WRITTEN FEEDBACK SUMMARY -->
+          <section class="grid gap-4 lg:grid-cols-2">
+            <article
+              class="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5 shadow-sm dark:border-emerald-900 dark:bg-emerald-950/20"
+            >
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                >
+                  <UIcon name="i-lucide-thumbs-up" class="size-5" />
+                </div>
+
+                <div>
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+                    Consolidated Strengths
+                  </h3>
+
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Combined faculty strengths identified by Dean evaluators.
+                  </p>
+                </div>
+              </div>
+
+              <div v-if="consolidatedStrengths.length" class="mt-4 space-y-3">
+                <div
+                  v-for="(item, index) in consolidatedStrengths"
+                  :key="`${index}-${item}`"
+                  class="flex gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-3 text-sm leading-6 text-gray-600 dark:border-emerald-900 dark:bg-gray-950/30 dark:text-gray-300"
+                >
+                  <span
+                    class="mt-2 size-1.5 shrink-0 rounded-full bg-emerald-500"
+                  />
+                  <span>{{ item }}</span>
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="mt-4 rounded-2xl border border-dashed border-emerald-200 px-4 py-7 text-center dark:border-emerald-900"
+              >
+                <UIcon
+                  name="i-lucide-message-square-off"
+                  class="mx-auto size-7 text-emerald-400"
+                />
+
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  No written strengths were submitted.
+                </p>
+              </div>
+            </article>
+
+            <article
+              class="rounded-3xl border border-amber-100 bg-amber-50/60 p-5 shadow-sm dark:border-amber-900 dark:bg-amber-950/20"
+            >
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                >
+                  <UIcon name="i-lucide-lightbulb" class="size-5" />
+                </div>
+
+                <div>
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+                    Areas for Improvement
+                  </h3>
+
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Combined areas for improvement identified by Dean
+                    evaluators.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                v-if="consolidatedImprovements.length"
+                class="mt-4 space-y-3"
+              >
+                <div
+                  v-for="(item, index) in consolidatedImprovements"
+                  :key="`${index}-${item}`"
+                  class="flex gap-3 rounded-2xl border border-amber-100 bg-white/70 p-3 text-sm leading-6 text-gray-600 dark:border-amber-900 dark:bg-gray-950/30 dark:text-gray-300"
+                >
+                  <span
+                    class="mt-2 size-1.5 shrink-0 rounded-full bg-amber-500"
+                  />
+                  <span>{{ item }}</span>
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="mt-4 rounded-2xl border border-dashed border-amber-200 px-4 py-7 text-center dark:border-amber-900"
+              >
+                <UIcon
+                  name="i-lucide-message-square-off"
+                  class="mx-auto size-7 text-amber-400"
+                />
+
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  No areas for improvement were submitted.
+                </p>
+              </div>
+            </article>
+          </section>
+
+          <!-- COMMENTS SUMMARY -->
+          <section
+            class="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+          >
+            <div
+              class="border-b border-gray-200/80 bg-gradient-to-r from-violet-50 via-white to-indigo-50 px-5 py-4 dark:border-gray-800 dark:from-violet-950/20 dark:via-gray-900 dark:to-indigo-950/20"
+            >
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300"
+                >
+                  <UIcon name="i-lucide-message-square-text" class="size-5" />
+                </div>
+
+                <div>
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+                    Consolidated Dean Comments
+                  </h3>
+
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Written comments submitted by Dean evaluators for this
+                    faculty member.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="consolidatedComments.length"
+              class="grid gap-3 p-5 lg:grid-cols-2"
+            >
+              <article
+                v-for="(comment, index) in consolidatedComments"
+                :key="`${index}-${comment}`"
+                class="rounded-2xl border border-gray-200 bg-gray-50/70 p-4 text-sm leading-6 text-gray-600 dark:border-gray-800 dark:bg-gray-950/30 dark:text-gray-300"
+              >
+                {{ comment }}
+              </article>
+            </div>
+
+            <div v-else class="px-5 py-10 text-center">
+              <UIcon
+                name="i-lucide-message-square-off"
+                class="mx-auto size-8 text-gray-400"
+              />
+
+              <p
+                class="mt-3 text-sm font-semibold text-gray-900 dark:text-white"
+              >
+                No written comments available
+              </p>
+            </div>
+          </section>
+
           <!-- OVERALL AI SENTIMENT ANALYSIS -->
           <section
             class="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
@@ -985,8 +716,8 @@
                     <p
                       class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400"
                     >
-                      Consolidated analysis of all available student comments
-                      and stored AI sentiment results for this faculty member.
+                      Consolidated analysis of Dean comments and available AI
+                      sentiment results submitted for this Dean or Coordinator.
                     </p>
                   </div>
                 </div>
@@ -1007,7 +738,7 @@
 
             <div class="space-y-5 p-5">
               <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div
+                <article
                   class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/20"
                 >
                   <div class="flex items-center justify-between gap-3">
@@ -1039,9 +770,9 @@
                       <UIcon name="i-lucide-smile" class="size-5" />
                     </div>
                   </div>
-                </div>
+                </article>
 
-                <div
+                <article
                   class="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 dark:border-gray-800 dark:bg-gray-950/30"
                 >
                   <div class="flex items-center justify-between gap-3">
@@ -1073,9 +804,9 @@
                       <UIcon name="i-lucide-meh" class="size-5" />
                     </div>
                   </div>
-                </div>
+                </article>
 
-                <div
+                <article
                   class="rounded-2xl border border-red-100 bg-red-50/70 p-4 dark:border-red-900/60 dark:bg-red-950/20"
                 >
                   <div class="flex items-center justify-between gap-3">
@@ -1107,9 +838,9 @@
                       <UIcon name="i-lucide-frown" class="size-5" />
                     </div>
                   </div>
-                </div>
+                </article>
 
-                <div
+                <article
                   class="rounded-2xl border border-violet-100 bg-violet-50/70 p-4 dark:border-violet-900/60 dark:bg-violet-950/20"
                 >
                   <div class="flex items-center justify-between gap-3">
@@ -1140,7 +871,7 @@
                       />
                     </div>
                   </div>
-                </div>
+                </article>
               </div>
 
               <div
@@ -1224,7 +955,7 @@
                     class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400"
                   >
                     No consolidated AI suggestions are available for the
-                    selected faculty.
+                    selected faculty member.
                   </p>
                 </div>
               </div>
@@ -1245,16 +976,18 @@
                 </p>
 
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  The rating summary is available, but no written student
-                  feedback was found.
+                  The rating summary is available, but no written faculty
+                  feedback or stored sentiment result was found.
                 </p>
               </div>
             </div>
           </section>
         </div>
 
+        <!-- =================================================
+             CRITERIA TAB
+        ================================================== -->
         <div v-show="activeTab === 'criteria'" class="space-y-5 print:block">
-          <!-- CRITERIA SUMMARY -->
           <section
             class="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
           >
@@ -1266,13 +999,13 @@
               </h3>
 
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Consolidated average and rating distribution for every
+                Consolidated average and rating distribution for every Dean
                 evaluation criterion.
               </p>
             </div>
 
             <div class="overflow-x-auto">
-              <table class="w-full min-w-[900px] text-sm">
+              <table class="w-full min-w-[860px] text-sm">
                 <thead
                   class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
                 >
@@ -1280,7 +1013,6 @@
                     <th class="px-4 py-3 text-left">Criterion</th>
                     <th class="px-3 py-3 text-center">Responses</th>
                     <th class="px-3 py-3 text-center">Average</th>
-                    <th class="px-3 py-3 text-center">5</th>
                     <th class="px-3 py-3 text-center">4</th>
                     <th class="px-3 py-3 text-center">3</th>
                     <th class="px-3 py-3 text-center">2</th>
@@ -1305,14 +1037,11 @@
                     </td>
 
                     <td
-                      class="px-3 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400"
+                      class="px-3 py-3 text-center font-bold text-violet-700 dark:text-violet-400"
                     >
                       {{ formatNumber(criterion.averageScore) }}
                     </td>
 
-                    <td class="px-3 py-3 text-center">
-                      {{ criterion.distribution[5] || 0 }}
-                    </td>
                     <td class="px-3 py-3 text-center">
                       {{ criterion.distribution[4] || 0 }}
                     </td>
@@ -1338,7 +1067,7 @@
 
                   <tr v-if="!selectedGroup.criteriaSummary.length">
                     <td
-                      colspan="9"
+                      colspan="8"
                       class="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
                     >
                       No criterion responses are available.
@@ -1350,6 +1079,9 @@
           </section>
         </div>
 
+        <!-- =================================================
+             RECORDS TAB
+        ================================================== -->
         <div v-show="activeTab === 'records'" class="space-y-5 print:block">
           <section
             class="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
@@ -1362,8 +1094,9 @@
               >
                 <div>
                   <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                    Evaluation Records
+                    Faculty Evaluation Records
                   </h3>
+
                   <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     {{ filteredRecordRows.length }} record{{
                       filteredRecordRows.length === 1 ? "" : "s"
@@ -1372,18 +1105,13 @@
                   </p>
                 </div>
 
-                <div class="grid gap-2 sm:grid-cols-3">
+                <div class="grid gap-2 sm:grid-cols-2">
                   <UInput
                     v-model="recordSearch"
                     icon="i-lucide-search"
-                    placeholder="Search student or comment"
+                    placeholder="Search faculty or comment"
                   />
-                  <USelect
-                    v-model="recordSentiment"
-                    :items="sentimentOptions"
-                    value-key="value"
-                    label-key="label"
-                  />
+
                   <USelect
                     v-model="recordRating"
                     :items="ratingOptions"
@@ -1400,16 +1128,17 @@
                   class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
                 >
                   <tr>
-                    <th class="px-4 py-3 text-left">Student</th>
+                    <th class="px-4 py-3 text-left">Dean Evaluator</th>
                     <th class="px-4 py-3 text-left">Submitted</th>
                     <th class="px-4 py-3 text-center">Semester</th>
                     <th class="px-4 py-3 text-center">School Year</th>
+                    <th class="px-4 py-3 text-center">Subject</th>
                     <th class="px-4 py-3 text-center">Average</th>
-                    <th class="px-4 py-3 text-center">Sentiment</th>
                     <th class="px-4 py-3 text-left">Comment</th>
-                    <th class="px-4 py-3 text-center">Action</th>
+                    <th class="px-4 py-3 text-center print:hidden">Action</th>
                   </tr>
                 </thead>
+
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                   <tr
                     v-for="record in paginatedRecordRows"
@@ -1418,49 +1147,50 @@
                   >
                     <td class="px-4 py-3">
                       <p class="font-semibold text-gray-900 dark:text-white">
-                        {{ getRecordLabel(record) }}
+                        {{ getEvaluatorName(record) }}
                       </p>
                     </td>
+
                     <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
                       {{ formatDate(getEvaluationDate(record)) }}
                     </td>
+
                     <td
                       class="px-4 py-3 text-center text-gray-600 dark:text-gray-400"
                     >
                       {{ getSemester(record) }}
                     </td>
+
                     <td
                       class="px-4 py-3 text-center text-gray-600 dark:text-gray-400"
                     >
                       {{ getSchoolYear(record) }}
                     </td>
+
+                    <td
+                      class="px-4 py-3 text-center text-gray-600 dark:text-gray-400"
+                    >
+                      {{ getSubjectName(record) }}
+                    </td>
+
                     <td class="px-4 py-3 text-center">
                       <UBadge
-                        :color="ratingColor(record.average_score)"
+                        :color="ratingColor(getRecordAverage(record))"
                         variant="subtle"
                       >
-                        {{ formatNumber(record.average_score) }}
+                        {{ formatNumber(getRecordAverage(record)) }}
                       </UBadge>
                     </td>
-                    <td class="px-4 py-3 text-center">
-                      <span
-                        class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
-                        :class="sentimentBadge(record.feedback_sentiment)"
-                      >
-                        {{ record.feedback_sentiment || "Neutral" }}
-                      </span>
-                    </td>
+
                     <td
-                      class="max-w-[280px] px-4 py-3 text-gray-600 dark:text-gray-400"
+                      class="max-w-[300px] px-4 py-3 text-gray-600 dark:text-gray-400"
                     >
-                      <p
-                        class="truncate"
-                        :title="record.comment || 'No comment provided.'"
-                      >
-                        {{ record.comment || "No comment provided." }}
+                      <p class="truncate" :title="getRecordComment(record)">
+                        {{ getRecordComment(record) }}
                       </p>
                     </td>
-                    <td class="px-4 py-3 text-center">
+
+                    <td class="px-4 py-3 text-center print:hidden">
                       <UButton
                         size="xs"
                         color="neutral"
@@ -1486,7 +1216,7 @@
             </div>
 
             <div
-              class="flex flex-col gap-3 border-t border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
+              class="flex flex-col gap-3 border-t border-gray-200 px-4 py-3 print:hidden sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
             >
               <p class="text-xs text-gray-500 dark:text-gray-400">
                 Showing
@@ -1512,6 +1242,7 @@
                   label-key="label"
                   class="w-32"
                 />
+
                 <UPagination
                   v-model:page="recordPage"
                   :items-per-page="recordPageSize"
@@ -1522,428 +1253,227 @@
           </section>
         </div>
 
-        <UModal
-          v-model:open="showEvaluationDialog"
-          id="student-faculty-evaluation-record-dialog"
-          title="Evaluation Record Details"
-          description="View the selected student's scores, comment, and AI sentiment analysis."
-        >
-          <template #content>
-            <div
-              v-if="selectedEvaluation"
-              class="max-h-[85vh] overflow-y-auto rounded-2xl bg-white dark:bg-gray-900"
-            >
-              <div
-                class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-800"
-              >
-                <div>
-                  <p
-                    class="text-xs font-semibold uppercase tracking-wide text-emerald-600"
-                  >
-                    Student Evaluation
-                  </p>
-                  <h3
-                    class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ getRecordLabel(selectedEvaluation) }}
-                  </h3>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {{ getSemester(selectedEvaluation) }} ·
-                    {{ getSchoolYear(selectedEvaluation) }} ·
-                    {{ formatDate(getEvaluationDate(selectedEvaluation)) }}
-                  </p>
-                </div>
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-lucide-x"
-                  square
-                  @click="showEvaluationDialog = false"
-                />
-              </div>
-
-              <div class="space-y-4 p-5">
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div
-                    class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                  >
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      Total
-                    </p>
-                    <p
-                      class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                    >
-                      {{ selectedEvaluation.total_score || 0 }}
-                    </p>
-                  </div>
-                  <div
-                    class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                  >
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      Average
-                    </p>
-                    <p
-                      class="mt-1 text-lg font-bold text-emerald-700 dark:text-emerald-400"
-                    >
-                      {{ formatNumber(selectedEvaluation.average_score) }}
-                    </p>
-                  </div>
-                  <div
-                    class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
-                  >
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      Rating
-                    </p>
-                    <p
-                      class="mt-1 text-lg font-bold text-gray-900 dark:text-white"
-                    >
-                      {{ getRatingLabel(selectedEvaluation.average_score) }}
-                    </p>
-                  </div>
-                </div>
-
-                <section
-                  class="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
-                >
-                  <div
-                    class="border-b border-gray-200/80 bg-gradient-to-r from-gray-50 to-white px-5 py-4 dark:border-gray-800 dark:from-gray-950/60 dark:to-gray-900"
-                  >
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                      Criteria Responses
-                    </h4>
-                  </div>
-                  <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                      <thead
-                        class="bg-gray-50 text-xs uppercase text-gray-600 dark:bg-gray-950/40 dark:text-gray-400"
-                      >
-                        <tr>
-                          <th class="px-4 py-3 text-left">Criterion</th>
-                          <th class="px-4 py-3 text-center">Score</th>
-                        </tr>
-                      </thead>
-                      <tbody
-                        class="divide-y divide-gray-100 dark:divide-gray-800"
-                      >
-                        <tr
-                          v-for="item in formatResponses(
-                            selectedEvaluation.responses,
-                          )"
-                          :key="item.criteria_id"
-                        >
-                          <td
-                            class="px-4 py-3 text-gray-700 dark:text-gray-300"
-                          >
-                            {{ item.statement }}
-                          </td>
-                          <td
-                            class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white"
-                          >
-                            {{ item.score }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-
-                <section
-                  class="rounded-2xl border border-gray-200 p-4 dark:border-gray-800"
-                >
-                  <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                    Student Comment
-                  </h4>
-                  <p
-                    class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-400"
-                  >
-                    {{ selectedEvaluation.comment || "No comment provided." }}
-                  </p>
-                </section>
-
-                <section
-                  class="overflow-hidden rounded-2xl border border-violet-100 bg-violet-50/50 dark:border-violet-900 dark:bg-violet-950/20"
-                >
-                  <div
-                    class="border-b border-violet-100 px-4 py-3 dark:border-violet-900"
-                  >
-                    <h4
-                      class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
-                    >
-                      <UIcon
-                        name="i-lucide-sparkles"
-                        class="size-4 text-violet-600"
-                      />
-                      AI Sentiment Analysis
-                    </h4>
-                  </div>
-                  <div class="grid gap-3 p-4 sm:grid-cols-2">
-                    <div
-                      class="rounded-xl bg-white/70 p-3 text-center dark:bg-gray-900/60"
-                    >
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Sentiment
-                      </p>
-                      <span
-                        class="mt-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold"
-                        :class="
-                          sentimentBadge(selectedEvaluation.feedback_sentiment)
-                        "
-                      >
-                        {{ selectedEvaluation.feedback_sentiment || "Neutral" }}
-                      </span>
-                    </div>
-                    <div
-                      class="rounded-xl bg-white/70 p-3 text-center dark:bg-gray-900/60"
-                    >
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Keywords
-                      </p>
-                      <p
-                        class="mt-2 text-sm font-semibold text-gray-800 dark:text-gray-200"
-                      >
-                        {{
-                          formatKeywords(selectedEvaluation.feedback_keywords)
-                        }}
-                      </p>
-                    </div>
-                  </div>
-                  <div
-                    class="border-t border-violet-100 p-4 dark:border-violet-900"
-                  >
-                    <p
-                      class="text-xs font-semibold text-gray-500 dark:text-gray-400"
-                    >
-                      AI Summary
-                    </p>
-                    <p
-                      class="mt-1 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300"
-                    >
-                      {{
-                        selectedEvaluation.feedback_sentiment_summary ||
-                        "No AI summary available."
-                      }}
-                    </p>
-                  </div>
-                  <div
-                    class="border-t border-violet-100 p-4 dark:border-violet-900"
-                  >
-                    <p
-                      class="text-xs font-semibold text-gray-500 dark:text-gray-400"
-                    >
-                      AI Suggestion
-                    </p>
-                    <p
-                      class="mt-1 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300"
-                    >
-                      {{
-                        selectedEvaluation.feedback_sentiment_suggestion ||
-                        "No AI suggestion available."
-                      }}
-                    </p>
-                  </div>
-                </section>
-              </div>
-            </div>
-          </template>
-        </UModal>
-
         <div class="flex justify-end print:hidden">
           <UButton color="neutral" variant="outline" @click="goBack">
             Close
           </UButton>
         </div>
+      </div>
+    </div>
 
-        <!-- PRINT-ONLY: INDIVIDUAL STUDENT RESULTS -->
-        <section
-          v-if="selectedGroup?.records?.length"
-          class="hidden print:block"
+    <!-- =====================================================
+         RECORD DETAILS MODAL
+    ====================================================== -->
+    <UModal
+      v-model:open="showEvaluationDialog"
+      id="dean-faculty-evaluation-record-dialog"
+      title="Faculty Evaluation Record Details"
+      description="View the selected Dean evaluator's scores, comments, strengths, and areas for improvement."
+      :ui="{ content: 'max-w-5xl' }"
+    >
+      <template #content>
+        <div
+          v-if="selectedEvaluation"
+          class="max-h-[88vh] overflow-y-auto rounded-2xl bg-white dark:bg-gray-900"
         >
-          <div class="mb-4 border-b-2 border-gray-900 pb-2">
-            <h2 class="text-lg font-black text-gray-950">
-              Individual Student Evaluation Results
-            </h2>
+          <div
+            class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-800"
+          >
+            <div>
+              <p
+                class="text-xs font-semibold uppercase tracking-wide text-violet-600"
+              >
+                Faculty Evaluation
+              </p>
 
-            <p class="mt-1 text-xs text-gray-600">
-              Detailed criterion ratings and written comments for every
-              submitted student evaluation.
-            </p>
+              <h3 class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                {{ getEvaluatorName(selectedEvaluation) }}
+              </h3>
+
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ getSubjectName(selectedEvaluation) }} ·
+                {{ getSemester(selectedEvaluation) }} ·
+                {{ getSchoolYear(selectedEvaluation) }} ·
+                {{ formatDate(getEvaluationDate(selectedEvaluation)) }}
+              </p>
+            </div>
+
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-x"
+              square
+              @click="showEvaluationDialog = false"
+            />
           </div>
 
-          <article
-            v-for="(record, recordIndex) in selectedGroup.records"
-            :key="getEvaluationKey(record)"
-            class="student-print-record mb-5 overflow-hidden rounded-xl border border-gray-300"
-          >
-            <header
-              class="flex items-start justify-between gap-4 border-b border-gray-300 bg-gray-100 px-4 py-3"
-            >
-              <div>
+          <div class="space-y-4 p-5">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div
+                class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
+              >
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Total Score
+                </p>
+
+                <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                  {{ selectedEvaluation.total_score || 0 }}
+                </p>
+              </div>
+
+              <div
+                class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
+              >
+                <p class="text-xs text-gray-500 dark:text-gray-400">Average</p>
+
                 <p
-                  class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500"
+                  class="mt-1 text-lg font-bold text-violet-700 dark:text-violet-400"
                 >
-                  Student Evaluation {{ recordIndex + 1 }}
+                  {{ formatNumber(getRecordAverage(selectedEvaluation)) }}
                 </p>
-
-                <h3 class="mt-1 text-sm font-black text-gray-950">
-                  {{ getRecordLabel(record) }}
-                </h3>
-
-                <div
-                  class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-gray-600"
-                >
-                  <span>
-                    Submitted: {{ formatDate(getEvaluationDate(record)) }}
-                  </span>
-
-                  <span>Semester: {{ getSemester(record) }}</span>
-
-                  <span>School Year: {{ getSchoolYear(record) }}</span>
-                </div>
               </div>
 
-              <div class="text-right">
-                <p class="text-[10px] font-bold uppercase text-gray-500">
-                  Average Rating
-                </p>
+              <div
+                class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-950/40"
+              >
+                <p class="text-xs text-gray-500 dark:text-gray-400">Rating</p>
 
-                <p class="mt-1 text-xl font-black text-gray-950">
-                  {{ formatNumber(getRecordAverage(record)) }}/5
-                </p>
-
-                <p class="text-[10px] font-semibold text-gray-600">
-                  {{ getRatingLabel(getRecordAverage(record)) }}
+                <p class="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                  {{ getRatingLabel(getRecordAverage(selectedEvaluation)) }}
                 </p>
               </div>
-            </header>
+            </div>
 
-            <div class="space-y-4 p-4">
-              <div>
-                <h4
-                  class="mb-2 text-xs font-black uppercase tracking-[0.12em] text-gray-700"
-                >
-                  Criterion Ratings
+            <section
+              class="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+            >
+              <div
+                class="border-b border-gray-200/80 bg-gradient-to-r from-gray-50 to-white px-5 py-4 dark:border-gray-800 dark:from-gray-950/60 dark:to-gray-900"
+              >
+                <h4 class="text-sm font-bold text-gray-900 dark:text-white">
+                  Criteria Responses
                 </h4>
+              </div>
 
-                <table class="w-full border-collapse text-[10px]">
-                  <thead>
-                    <tr class="bg-gray-50">
-                      <th
-                        class="w-10 border border-gray-300 px-2 py-2 text-center font-bold"
-                      >
-                        #
-                      </th>
-
-                      <th
-                        class="border border-gray-300 px-2 py-2 text-left font-bold"
-                      >
-                        Criterion
-                      </th>
-
-                      <th
-                        class="w-20 border border-gray-300 px-2 py-2 text-center font-bold"
-                      >
-                        Rating
-                      </th>
-
-                      <th
-                        class="w-28 border border-gray-300 px-2 py-2 text-center font-bold"
-                      >
-                        Interpretation
-                      </th>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead
+                    class="bg-gray-50 text-xs uppercase text-gray-600 dark:bg-gray-950/40 dark:text-gray-400"
+                  >
+                    <tr>
+                      <th class="px-4 py-3 text-left">Criterion</th>
+                      <th class="px-4 py-3 text-center">Score</th>
+                      <th class="px-4 py-3 text-center">Interpretation</th>
                     </tr>
                   </thead>
 
-                  <tbody>
+                  <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     <tr
-                      v-for="(response, responseIndex) in formatResponses(
-                        record.responses,
+                      v-for="item in formatResponses(
+                        selectedEvaluation.responses,
                       )"
-                      :key="`${getEvaluationKey(record)}-${response.criteria_id}`"
+                      :key="item.criteria_id"
                     >
-                      <td class="border border-gray-300 px-2 py-2 text-center">
-                        {{ responseIndex + 1 }}
-                      </td>
-
-                      <td class="border border-gray-300 px-2 py-2">
-                        {{ response.statement }}
+                      <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                        {{ item.statement }}
                       </td>
 
                       <td
-                        class="border border-gray-300 px-2 py-2 text-center font-bold"
+                        class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white"
                       >
-                        {{ response.score }}/5
+                        {{ item.score }}
                       </td>
 
-                      <td class="border border-gray-300 px-2 py-2 text-center">
-                        {{ getRatingLabel(response.score) }}
+                      <td class="px-4 py-3 text-center">
+                        {{ getRatingLabel(item.score) }}
                       </td>
                     </tr>
 
-                    <tr v-if="!formatResponses(record.responses).length">
+                    <tr
+                      v-if="
+                        !formatResponses(selectedEvaluation.responses).length
+                      "
+                    >
                       <td
-                        colspan="4"
-                        class="border border-gray-300 px-3 py-4 text-center text-gray-500"
+                        colspan="3"
+                        class="px-4 py-8 text-center text-gray-500"
                       >
-                        No criterion-level responses were recorded.
+                        No criterion responses are available.
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+            </section>
 
-              <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px]">
-                <div class="rounded-lg border border-gray-300 bg-white p-3">
-                  <h4
-                    class="text-[10px] font-black uppercase tracking-[0.12em] text-gray-700"
-                  >
-                    Student Comment
-                  </h4>
+            <section
+              class="rounded-2xl border border-gray-200 p-4 dark:border-gray-800"
+            >
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white">
+                Faculty Comment
+              </h4>
 
-                  <p
-                    class="mt-2 whitespace-pre-wrap text-[11px] leading-5 text-gray-800"
-                  >
-                    {{ getRecordComment(record) }}
-                  </p>
-                </div>
+              <p
+                class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-400"
+              >
+                {{ getRecordComment(selectedEvaluation) }}
+              </p>
+            </section>
 
-                <div class="rounded-lg border border-gray-300 bg-gray-50 p-3">
-                  <h4
-                    class="text-[10px] font-black uppercase tracking-[0.12em] text-gray-700"
-                  >
-                    AI Sentiment
-                  </h4>
+            <div class="grid gap-4 md:grid-cols-2">
+              <section
+                class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20"
+              >
+                <h4
+                  class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
+                >
+                  <UIcon name="i-lucide-thumbs-up" class="size-4" />
+                  Strengths
+                </h4>
 
-                  <p class="mt-2 text-sm font-black text-gray-950">
-                    {{ record?.feedback_sentiment || "Neutral" }}
-                  </p>
+                <p
+                  class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-400"
+                >
+                  {{
+                    selectedEvaluation.strengths ||
+                    "No strengths were provided."
+                  }}
+                </p>
+              </section>
 
-                  <p
-                    v-if="record?.feedback_sentiment_summary"
-                    class="mt-2 text-[10px] leading-4 text-gray-700"
-                  >
-                    {{ record.feedback_sentiment_summary }}
-                  </p>
+              <section
+                class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 dark:border-amber-900 dark:bg-amber-950/20"
+              >
+                <h4
+                  class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
+                >
+                  <UIcon name="i-lucide-lightbulb" class="size-4" />
+                  Areas for Improvement
+                </h4>
 
-                  <p
-                    v-if="record?.feedback_sentiment_suggestion"
-                    class="mt-2 text-[10px] leading-4 text-gray-700"
-                  >
-                    <span class="font-bold">Suggestion:</span>
-                    {{ record.feedback_sentiment_suggestion }}
-                  </p>
-                </div>
-              </div>
+                <p
+                  class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-400"
+                >
+                  {{
+                    selectedEvaluation.areas_for_improvement ||
+                    "No areas for improvement were provided."
+                  }}
+                </p>
+              </section>
             </div>
-          </article>
-        </section>
-      </div>
-    </div>
+          </div>
+        </div>
+      </template>
+    </UModal>
 
+    <!-- =====================================================
+         PDF PREVIEW MODAL
+    ====================================================== -->
     <UModal
       v-model:open="showPdfPreview"
-      id="student-faculty-evaluation-pdf-preview-dialog"
-      title="Faculty Evaluation PDF Preview"
-      description="Preview the official faculty evaluation report before downloading or printing the PDF."
+      id="dean-faculty-evaluation-pdf-preview-dialog"
+      title="Dean–Faculty Evaluation PDF Preview"
+      description="Preview the official Dean–Faculty evaluation report before downloading or printing the PDF."
       :ui="{ content: 'max-w-7xl' }"
     >
       <template #content>
@@ -1957,8 +1487,9 @@
               <h3 class="text-sm font-bold text-gray-900 dark:text-white">
                 {{ pdfFileName }}
               </h3>
+
               <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                Official Student-Faculty Evaluation Report
+                Official Dean–Faculty Evaluation Report
               </p>
             </div>
 
@@ -1966,7 +1497,7 @@
               <UButton
                 color="primary"
                 icon="i-lucide-download"
-                :disabled="!pdfPreviewUrl"
+                :disabled="!pdfPreviewBlob"
                 @click="downloadExistingPdf"
               >
                 Download PDF
@@ -1986,7 +1517,7 @@
             <iframe
               v-if="pdfPreviewUrl"
               :src="pdfPreviewUrl"
-              title="Faculty Evaluation PDF Preview"
+              title="Dean–Faculty Evaluation PDF Preview"
               class="h-full w-full rounded-xl border border-gray-300 bg-white dark:border-gray-700"
             />
 
@@ -1997,8 +1528,9 @@
               <div class="text-center">
                 <UIcon
                   name="i-lucide-loader-circle"
-                  class="mx-auto size-8 animate-spin text-emerald-600"
+                  class="mx-auto size-8 animate-spin text-violet-600"
                 />
+
                 <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
                   Preparing PDF preview...
                 </p>
@@ -2009,6 +1541,9 @@
       </template>
     </UModal>
 
+    <!-- =====================================================
+         NOT FOUND
+    ====================================================== -->
     <div
       v-if="!pending && !loadError && !selectedGroup"
       class="rounded-[28px] border border-dashed border-gray-300 bg-white p-10 text-center dark:border-gray-700 dark:bg-gray-900"
@@ -2017,12 +1552,14 @@
         name="i-lucide-user-round-x"
         class="mx-auto size-10 text-gray-400"
       />
+
       <h1 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">
         Faculty summary not found
       </h1>
+
       <p class="mx-auto mt-2 max-w-lg text-sm text-gray-500 dark:text-gray-400">
-        No Student–Faculty evaluation records were found for this faculty
-        member.
+        No Dean–Faculty evaluation records were found for this Dean or
+        Coordinator.
       </p>
     </div>
   </div>
@@ -2043,41 +1580,20 @@ definePageMeta({
 });
 
 const route = useRoute();
+const router = useRouter();
 const { $api } = useNuxtApp();
-const toast = useToast();
-
-const facultyDocumentId = computed(() => {
-  // Prefer the expected parameter name, but also support an existing
-  // dynamic route named [teacherId], [facultyId], or another name.
-  const rawValue =
-    route.params.documentId ??
-    route.params.teacherId ??
-    route.params.facultyId ??
-    Object.values(route.params)[0] ??
-    "";
-
-  const resolvedValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
-
-  try {
-    return decodeURIComponent(String(resolvedValue || "")).trim();
-  } catch {
-    return String(resolvedValue || "").trim();
-  }
-});
-
-const hasValidFacultyId = computed(() => {
-  const value = facultyDocumentId.value.toLowerCase();
-
-  return Boolean(
-    value && !["undefined", "null", "unknown-faculty"].includes(value),
-  );
-});
 
 const pending = ref(false);
 const loadError = ref("");
-
 const evaluations = ref<any[]>([]);
 
+const activeTab = ref("overview");
+const recordSearch = ref("");
+const recordRating = ref("all");
+const recordPage = ref(1);
+const recordPageSize = ref(10);
+
+const showEvaluationDialog = ref(false);
 const selectedEvaluation = ref<any>(null);
 
 const showPdfPreview = ref(false);
@@ -2086,535 +1602,362 @@ const pdfPreviewBlob = ref<Blob | null>(null);
 const isGeneratingPdf = ref(false);
 const pdfAction = ref<"preview" | "download" | "">("");
 
-type SummaryTab = "overview" | "criteria" | "records";
-
-const activeTab = ref<SummaryTab>("overview");
-
 const summaryTabs = [
   {
     label: "Overview",
-    value: "overview" as SummaryTab,
+    value: "overview",
     icon: "i-lucide-layout-dashboard",
   },
   {
     label: "Criteria",
-    value: "criteria" as SummaryTab,
+    value: "criteria",
     icon: "i-lucide-list-checks",
   },
   {
     label: "Evaluation Records",
-    value: "records" as SummaryTab,
+    value: "records",
     icon: "i-lucide-files",
   },
 ];
 
-const recordSearch = ref("");
-const recordSentiment = ref("all");
-const recordRating = ref("all");
-const recordPage = ref(1);
-const recordPageSize = ref(10);
-const showEvaluationDialog = ref(false);
-
-const sentimentOptions = [
-  { label: "All Sentiments", value: "all" },
-  { label: "Positive", value: "positive" },
-  { label: "Neutral", value: "neutral" },
-  { label: "Negative", value: "negative" },
-];
-
 const ratingOptions = [
   { label: "All Ratings", value: "all" },
-  { label: "5 - Excellent", value: "5" },
-  { label: "4 - Very Good", value: "4" },
-  { label: "3 - Good", value: "3" },
-  { label: "2 - Fair", value: "2" },
-  { label: "1 - Poor", value: "1" },
+  { label: "Superior", value: "superior" },
+  { label: "Average", value: "average" },
+  { label: "Fair", value: "fair" },
+  { label: "Needs Improvement", value: "needs-improvement" },
 ];
-
-const searchQuery = ref("");
-const selectedFaculty = ref("all");
-const selectedDepartment = ref("all");
-const selectedSemester = ref(String(route.query.semester || "all"));
-const selectedSchoolYear = ref(String(route.query.schoolYear || "all"));
-
-const page = ref(1);
-const pageSize = ref(20);
 
 const pageSizeOptions = [
-  {
-    label: "10 rows",
-    value: 10,
-  },
-  {
-    label: "20 rows",
-    value: 20,
-  },
-  {
-    label: "50 rows",
-    value: 50,
-  },
-  {
-    label: "100 rows",
-    value: 100,
-  },
+  { label: "10 rows", value: 10 },
+  { label: "20 rows", value: 20 },
+  { label: "50 rows", value: 50 },
 ];
 
-const makeOptions = (values: any[], allLabel: string) => {
-  const uniqueValues = Array.from(
-    new Set(
-      values.filter(
-        (value) => value && value !== "N/A" && value !== "Not specified",
-      ),
-    ),
-  ).sort((a, b) => String(a).localeCompare(String(b)));
+const facultyDocumentId = computed(() =>
+  String(
+    route.params.documentId ||
+      route.params.teacherId ||
+      route.params.facultyId ||
+      Object.values(route.params)[0] ||
+      "",
+  ),
+);
 
-  return [
-    {
-      label: allLabel,
-      value: "all",
-    },
-    ...uniqueValues.map((value) => ({
-      label: String(value),
-      value,
-    })),
-  ];
+const hasValidFacultyId = computed(() => Boolean(facultyDocumentId.value));
+
+const selectedSemester = computed(() => String(route.query.semester || "all"));
+
+const selectedSchoolYear = computed(() =>
+  String(route.query.schoolYear || "all"),
+);
+
+const getFacultyName = (evaluation: any) => {
+  const teacher = evaluation?.teacher;
+  const info = teacher?.user?.user_info || teacher?.user_info || teacher || {};
+
+  const constructedName = [
+    info?.first_name,
+    info?.middle_name,
+    info?.last_name,
+    info?.suffix,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return (
+    teacher?.name ||
+    teacher?.full_name ||
+    teacher?.display_name ||
+    constructedName ||
+    teacher?.user?.name ||
+    teacher?.user?.full_name ||
+    teacher?.user?.username ||
+    teacher?.user?.email ||
+    "Unknown Faculty"
+  );
 };
 
-const facultyOptions = computed(() => {
-  const facultyMap = new Map<string, string>();
+const getFacultyDepartment = (evaluation: any) => {
+  const teacher = evaluation?.teacher;
 
-  evaluations.value.forEach((evaluation: any) => {
-    const value = String(
-      evaluation?.teacher?.documentId ||
-        evaluation?.teacher?.id ||
-        evaluation?.teacher?.name ||
-        "",
+  return (
+    teacher?.department?.name ||
+    teacher?.department ||
+    teacher?.user?.user_info?.department?.name ||
+    teacher?.user?.user_info?.department ||
+    teacher?.user_info?.department?.name ||
+    teacher?.user_info?.department ||
+    "Not specified"
+  );
+};
+
+const getSubjectName = (evaluation: any) => {
+  return (
+    evaluation?.subject?.name || evaluation?.subject?.subject_name || "N/A"
+  );
+};
+
+const getEvaluatorName = (evaluation: any) => {
+  const user = evaluation?.evaluator_user;
+  const info = user?.user_info || user || {};
+
+  const constructedName = [
+    info?.first_name,
+    info?.middle_name,
+    info?.last_name,
+    info?.suffix,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return (
+    user?.name ||
+    user?.full_name ||
+    constructedName ||
+    user?.username ||
+    user?.email ||
+    "Unknown Dean"
+  );
+};
+
+const getSemester = (evaluation: any) => evaluation?.batch?.semester || "N/A";
+
+const getSchoolYear = (evaluation: any) =>
+  evaluation?.batch?.school_year || "N/A";
+
+const getEvaluationDate = (evaluation: any) =>
+  evaluation?.batch?.date || evaluation?.date || evaluation?.createdAt || null;
+
+const getEvaluationKey = (evaluation: any) => {
+  if (!evaluation) return "";
+
+  return String(
+    evaluation?.documentId ||
+      evaluation?.id ||
+      `${evaluation?.teacher?.id || ""}-${
+        evaluation?.evaluator_user?.id || ""
+      }-${evaluation?.createdAt || ""}`,
+  );
+};
+
+const formatResponses = (responses: any) => {
+  if (!responses) return [];
+
+  if (Array.isArray(responses)) {
+    return responses.map((item: any) => ({
+      criteria_id:
+        item.criteria_id || item.criteriaId || item.id || item.statement,
+
+      statement:
+        item.statement ||
+        item.question ||
+        `Criterion #${item.criteria_id || item.criteriaId || item.id}`,
+
+      score: Number(item.score ?? item.value ?? item.rating ?? 0),
+    }));
+  }
+
+  return Object.entries(responses).map(([criteriaId, score]) => ({
+    criteria_id: criteriaId,
+    statement: `Criterion #${criteriaId}`,
+    score: Number(score || 0),
+  }));
+};
+
+const getRecordAverage = (record: any) => {
+  const stored = Number(record?.average_score);
+
+  if (Number.isFinite(stored) && stored > 0) {
+    return stored;
+  }
+
+  const responses = formatResponses(record?.responses);
+
+  if (!responses.length) return 0;
+
+  return (
+    responses.reduce(
+      (sum: number, item: any) => sum + Number(item.score || 0),
+      0,
+    ) / responses.length
+  );
+};
+
+const getRecordComment = (record: any) => {
+  return (
+    String(
+      record?.comment || record?.comments || record?.feedback || "",
+    ).trim() || "No additional comment provided."
+  );
+};
+
+const selectedGroup = computed(() => {
+  if (!evaluations.value.length) return null;
+
+  const facultyRecords = evaluations.value.filter((evaluation: any) => {
+    const facultyId = String(
+      evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
     );
 
-    const label = evaluation?.teacher?.name || "Unknown Faculty";
-
-    if (value) {
-      facultyMap.set(value, label);
-    }
+    return (
+      facultyId === facultyDocumentId.value ||
+      getFacultyName(evaluation) === facultyDocumentId.value
+    );
   });
 
-  return [
-    {
-      label: "All Faculty",
-      value: "all",
-    },
-    ...Array.from(facultyMap.entries())
-      .map(([value, label]) => ({
-        label,
-        value,
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label)),
-  ];
-});
+  if (!facultyRecords.length) return null;
 
-const departmentOptions = computed(() =>
-  makeOptions(
-    evaluations.value.map((evaluation) => getEvaluationDepartment(evaluation)),
-    "All Departments",
-  ),
-);
-
-const semesterOptions = computed(() =>
-  makeOptions(
-    evaluations.value.map((evaluation) => getSemester(evaluation)),
-    "All Semesters",
-  ),
-);
-
-const schoolYearOptions = computed(() => {
-  const options = makeOptions(
-    evaluations.value.map((evaluation) => getSchoolYear(evaluation)),
-    "All School Years",
-  );
-
-  return [
-    options[0],
-    ...options
-      .slice(1)
-      .sort((a, b) => String(b.value).localeCompare(String(a.value))),
-  ];
-});
-
-type NormalizedResponse = {
-  criteriaId: string;
-  statement: string;
-  score: number;
-};
-
-const normalizeResponses = (responses: any): NormalizedResponse[] => {
-  if (!responses) {
-    return [];
-  }
-
-  let parsedResponses = responses;
-
-  if (typeof parsedResponses === "string") {
-    try {
-      parsedResponses = JSON.parse(parsedResponses);
-    } catch {
-      return [];
-    }
-  }
-
-  if (Array.isArray(parsedResponses)) {
-    return parsedResponses
-      .map((item: any, index: number) => {
-        const rawCriteriaId =
-          item?.criteria_id ??
-          item?.criteriaId ??
-          item?.criterion_id ??
-          item?.criterionId ??
-          item?.evaluation_criteria_id ??
-          item?.evaluationCriteriaId ??
-          item?.criterion?.documentId ??
-          item?.criterion?.id ??
-          item?.evaluation_criterion?.documentId ??
-          item?.evaluation_criterion?.id ??
-          item?.documentId ??
-          item?.id ??
-          index + 1;
-
-        const rawScore =
-          item?.score ??
-          item?.value ??
-          item?.rating ??
-          item?.response ??
-          item?.answer ??
-          0;
-
-        const rawStatement =
-          item?.statement ??
-          item?.question ??
-          item?.criteria ??
-          item?.criterion?.statement ??
-          item?.evaluation_criterion?.statement ??
-          `Criterion #${rawCriteriaId}`;
-
-        return {
-          criteriaId: String(rawCriteriaId),
-          statement: String(rawStatement),
-          score: Number(rawScore),
-        };
-      })
-      .filter(
-        (item) =>
-          item.criteriaId &&
-          Number.isFinite(item.score) &&
-          item.score >= 1 &&
-          item.score <= 5,
-      );
-  }
-
-  if (typeof parsedResponses === "object" && parsedResponses !== null) {
-    return Object.entries(parsedResponses)
-      .map(([criteriaId, value]: [string, any]) => {
-        if (value && typeof value === "object" && !Array.isArray(value)) {
-          const rawCriteriaId =
-            value?.criteria_id ??
-            value?.criteriaId ??
-            value?.criterion_id ??
-            value?.criterionId ??
-            value?.evaluation_criteria_id ??
-            value?.evaluationCriteriaId ??
-            value?.criterion?.documentId ??
-            value?.criterion?.id ??
-            value?.evaluation_criterion?.documentId ??
-            value?.evaluation_criterion?.id ??
-            value?.documentId ??
-            value?.id ??
-            criteriaId;
-
-          const rawStatement =
-            value?.statement ??
-            value?.question ??
-            value?.criteria ??
-            value?.criterion?.statement ??
-            value?.evaluation_criterion?.statement ??
-            `Criterion #${rawCriteriaId}`;
-
-          const rawScore =
-            value?.score ??
-            value?.value ??
-            value?.rating ??
-            value?.response ??
-            value?.answer ??
-            0;
-
-          return {
-            criteriaId: String(rawCriteriaId),
-            statement: String(rawStatement),
-            score: Number(rawScore),
-          };
-        }
-
-        return {
-          criteriaId: String(criteriaId),
-          statement: `Criterion #${criteriaId}`,
-          score: Number(value),
-        };
-      })
-      .filter(
-        (item) =>
-          item.criteriaId &&
-          Number.isFinite(item.score) &&
-          item.score >= 1 &&
-          item.score <= 5,
-      );
-  }
-
-  return [];
-};
-
-const filteredEvaluationRecords = computed(() => {
-  return evaluations.value.filter((evaluation: any) => {
-    const teacherKey = String(
-      evaluation?.teacher?.documentId ||
-        evaluation?.teacher?.id ||
-        evaluation?.teacher?.name ||
-        "",
-    );
-
-    const department = getEvaluationDepartment(evaluation);
-    const semester = getSemester(evaluation);
-    const schoolYear = getSchoolYear(evaluation);
-
-    const matchesFaculty =
-      selectedFaculty.value === "all" ||
-      teacherKey === String(selectedFaculty.value);
-
-    const matchesDepartment =
-      selectedDepartment.value === "all" ||
-      department === selectedDepartment.value;
-
+  const periodRecords = facultyRecords.filter((record: any) => {
     const matchesSemester =
-      selectedSemester.value === "all" || semester === selectedSemester.value;
+      selectedSemester.value === "all" ||
+      getSemester(record) === selectedSemester.value;
 
     const matchesSchoolYear =
       selectedSchoolYear.value === "all" ||
-      schoolYear === selectedSchoolYear.value;
+      getSchoolYear(record) === selectedSchoolYear.value;
 
-    return (
-      matchesFaculty &&
-      matchesDepartment &&
-      matchesSemester &&
-      matchesSchoolYear
-    );
+    return matchesSemester && matchesSchoolYear;
   });
-});
 
-const groupedResults = computed(() => {
-  const groups = new Map<string, any>();
+  const records = periodRecords.length ? periodRecords : facultyRecords;
 
-  filteredEvaluationRecords.value.forEach((evaluation: any) => {
-    const teacherKey = String(
-      evaluation?.teacher?.documentId ||
-        evaluation?.teacher?.id ||
-        evaluation?.teacher?.name ||
-        "unknown-faculty",
-    );
+  const evaluatorKeys = new Set(
+    records.map(
+      (record: any) =>
+        record?.evaluator_user?.documentId ||
+        record?.evaluator_user?.id ||
+        getEvaluatorName(record),
+    ),
+  );
 
-    if (!groups.has(teacherKey)) {
-      groups.set(teacherKey, {
-        key: teacherKey,
-        teacherDocumentId: evaluation?.teacher?.documentId || "",
-        teacherId:
-          evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
-        documentId:
-          evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
-        name: evaluation?.teacher?.name || "Unknown Faculty",
-        department: getEvaluationDepartment(evaluation),
-        records: [],
-        evaluatorKeys: new Set<string>(),
-        semesterValues: new Set<string>(),
-        schoolYearValues: new Set<string>(),
-        criteriaMap: new Map<string, any>(),
-        ratingDistribution: {
-          5: 0,
-          4: 0,
-          3: 0,
-          2: 0,
-          1: 0,
-        },
-        totalRatingScore: 0,
-        totalRatingResponses: 0,
-      });
+  const responseRows = records.flatMap((record: any) =>
+    formatResponses(record.responses),
+  );
+
+  const scores = responseRows
+    .map((item: any) => Number(item.score))
+    .filter((score: number) => Number.isFinite(score) && score > 0);
+
+  const ratingDistribution: Record<number, number> = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+  };
+
+  scores.forEach((score: number) => {
+    const rounded = Math.round(score);
+
+    if (rounded >= 1 && rounded <= 4) {
+      ratingDistribution[rounded] += 1;
     }
+  });
 
-    const group = groups.get(teacherKey);
-    group.records.push(evaluation);
+  const criteriaMap = new Map<string, any>();
 
-    const evaluatorKey = String(
-      evaluation?.evaluator_user?.documentId ||
-        evaluation?.evaluator_user?.id ||
-        "",
-    );
+  records.forEach((record: any) => {
+    formatResponses(record.responses).forEach((item: any) => {
+      const key = String(item.criteria_id);
 
-    if (evaluatorKey) {
-      group.evaluatorKeys.add(evaluatorKey);
-    }
-
-    const semester = getSemester(evaluation);
-    const schoolYear = getSchoolYear(evaluation);
-
-    if (semester !== "N/A") {
-      group.semesterValues.add(semester);
-    }
-
-    if (schoolYear !== "N/A") {
-      group.schoolYearValues.add(schoolYear);
-    }
-
-    normalizeResponses(evaluation.responses).forEach((response) => {
-      if (!group.criteriaMap.has(response.criteriaId)) {
-        group.criteriaMap.set(response.criteriaId, {
-          criteriaId: response.criteriaId,
-          statement: response.statement,
-          totalScore: 0,
-          responseCount: 0,
+      if (!criteriaMap.has(key)) {
+        criteriaMap.set(key, {
+          criteriaId: key,
+          statement: item.statement,
+          scores: [],
           distribution: {
-            5: 0,
-            4: 0,
-            3: 0,
-            2: 0,
             1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
           },
         });
       }
 
-      const criterion = group.criteriaMap.get(response.criteriaId);
+      const criterion = criteriaMap.get(key);
 
-      if (
-        criterion.statement.startsWith("Criterion #") &&
-        !response.statement.startsWith("Criterion #")
-      ) {
-        criterion.statement = response.statement;
+      if (Number.isFinite(item.score) && item.score > 0) {
+        criterion.scores.push(item.score);
+
+        const rounded = Math.round(item.score);
+
+        if (rounded >= 1 && rounded <= 4) {
+          criterion.distribution[rounded] += 1;
+        }
       }
-
-      criterion.totalScore += response.score;
-      criterion.responseCount += 1;
-      criterion.distribution[response.score] += 1;
-
-      group.ratingDistribution[response.score] += 1;
-      group.totalRatingScore += response.score;
-      group.totalRatingResponses += 1;
     });
   });
 
-  return Array.from(groups.values())
-    .map((group) => {
-      const sentiments = group.records.reduce(
-        (result: any, record: any) => {
-          const sentiment = String(
-            record?.feedback_sentiment || "Neutral",
-          ).toLowerCase();
-
-          if (sentiment === "positive") {
-            result.positive += 1;
-          } else if (sentiment === "negative") {
-            result.negative += 1;
-          } else {
-            result.neutral += 1;
-          }
-
-          return result;
-        },
-        {
-          positive: 0,
-          negative: 0,
-          neutral: 0,
-        },
-      );
-
-      const sortedRecords = [...group.records].sort(
-        (a: any, b: any) =>
-          new Date(getEvaluationDate(b) || 0).getTime() -
-          new Date(getEvaluationDate(a) || 0).getTime(),
-      );
-
-      const criteriaSummary = Array.from(group.criteriaMap.values())
-        .map((criterion: any) => {
-          const averageScore = criterion.responseCount
-            ? criterion.totalScore / criterion.responseCount
-            : 0;
-
-          return {
-            ...criterion,
-            averageScore,
-            ratingLabel: getRatingLabel(averageScore),
-          };
-        })
-        .sort((a: any, b: any) => {
-          const first = Number(a.criteriaId);
-          const second = Number(b.criteriaId);
-
-          if (Number.isFinite(first) && Number.isFinite(second)) {
-            return first - second;
-          }
-
-          return String(a.criteriaId).localeCompare(String(b.criteriaId));
-        });
-
-      const overallAverage = group.totalRatingResponses
-        ? group.totalRatingScore / group.totalRatingResponses
-        : 0;
-
-      const expectedResponses =
-        group.evaluatorKeys.size * criteriaSummary.length;
-
-      const completionRate = expectedResponses
-        ? Math.min(
-            100,
-            Math.round((group.totalRatingResponses / expectedResponses) * 100),
-          )
-        : 0;
-
-      return {
-        ...group,
-        records: sortedRecords,
-        recordCount: sortedRecords.length,
-        evaluatorCount: group.evaluatorKeys.size,
-        semesters: Array.from(group.semesterValues),
-        schoolYears: Array.from(group.schoolYearValues),
-        criteriaSummary,
-        criteriaCount: criteriaSummary.length,
-        totalRatingScore: group.totalRatingScore,
-        totalRatingResponses: group.totalRatingResponses,
-        averageScore: overallAverage,
-        ratingDistribution: group.ratingDistribution,
-        completionRate,
-        sentiments,
-        latestDate: getEvaluationDate(sortedRecords[0]),
-      };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
-});
-
-const selectedGroup = computed(() => {
-  const routeId = facultyDocumentId.value;
-
-  if (!routeId) {
-    return null;
-  }
-
-  return (
-    groupedResults.value.find((group: any) => {
-      const possibleIds = [
-        group?.teacherDocumentId,
-        group?.teacherId,
-        group?.documentId,
-        group?.key,
-      ]
-        .filter(Boolean)
-        .map((value) => String(value));
-
-      return possibleIds.includes(routeId);
-    }) || null
+  const criteriaSummary = Array.from(criteriaMap.values()).map(
+    (criterion: any) => ({
+      criteriaId: criterion.criteriaId,
+      statement: criterion.statement,
+      responseCount: criterion.scores.length,
+      averageScore: criterion.scores.length
+        ? criterion.scores.reduce(
+            (sum: number, score: number) => sum + score,
+            0,
+          ) / criterion.scores.length
+        : 0,
+      distribution: criterion.distribution,
+    }),
   );
+
+  const expectedResponses = records.length * criteriaSummary.length;
+
+  const completionRate = expectedResponses
+    ? (scores.length / expectedResponses) * 100
+    : 0;
+
+  return {
+    key: facultyDocumentId.value,
+    name: getFacultyName(records[0]),
+    department: getFacultyDepartment(records[0]),
+    records: [...records].sort(
+      (a: any, b: any) =>
+        new Date(getEvaluationDate(b) || 0).getTime() -
+        new Date(getEvaluationDate(a) || 0).getTime(),
+    ),
+    recordCount: records.length,
+    evaluatorCount: evaluatorKeys.size,
+    subjectCount: new Set(
+      records
+        .map((record: any) =>
+          String(
+            record?.subject?.documentId ||
+              record?.subject?.id ||
+              getSubjectName(record),
+          ),
+        )
+        .filter(Boolean),
+    ).size,
+    subjects: Array.from(
+      new Set(
+        records
+          .map((record: any) => getSubjectName(record))
+          .filter((value: string) => value !== "N/A"),
+      ),
+    ),
+    criteriaCount: criteriaSummary.length,
+    criteriaSummary,
+    ratingDistribution,
+    totalRatingResponses: scores.length,
+    averageScore: scores.length
+      ? scores.reduce((sum: number, score: number) => sum + score, 0) /
+        scores.length
+      : 0,
+    completionRate,
+    semesters: Array.from(new Set(records.map(getSemester))).filter(
+      (value) => value !== "N/A",
+    ),
+    schoolYears: Array.from(new Set(records.map(getSchoolYear))).filter(
+      (value) => value !== "N/A",
+    ),
+  };
 });
 
 const currentSemesterLabel = computed(() => {
@@ -2622,9 +1965,7 @@ const currentSemesterLabel = computed(() => {
     return selectedSemester.value;
   }
 
-  const groupSemesters = selectedGroup.value?.semesters || [];
-
-  return groupSemesters.length ? groupSemesters.join(", ") : "All Semesters";
+  return selectedGroup.value?.semesters?.join(", ") || "All Semesters";
 });
 
 const currentSchoolYearLabel = computed(() => {
@@ -2632,11 +1973,7 @@ const currentSchoolYearLabel = computed(() => {
     return selectedSchoolYear.value;
   }
 
-  const groupSchoolYears = selectedGroup.value?.schoolYears || [];
-
-  return groupSchoolYears.length
-    ? groupSchoolYears.join(", ")
-    : "All School Years";
+  return selectedGroup.value?.schoolYears?.join(", ") || "All School Years";
 });
 
 const generatedReportDate = computed(() =>
@@ -2646,23 +1983,23 @@ const generatedReportDate = computed(() =>
   }).format(new Date()),
 );
 
-const reportDocumentCode = "SNC-QA-SFE-001";
+const reportDocumentCode = "SNC-QA-DFE-001";
 
-const reportSystemReference = computed(() => {
-  return facultyDocumentId.value || "Not available";
-});
+const reportSystemReference = computed(
+  () => facultyDocumentId.value || "Not available",
+);
 
 const reportNumber = computed(() => {
-  const facultyPart = String(facultyDocumentId.value || "REPORT")
+  const deanPart = String(facultyDocumentId.value || "REPORT")
     .replace(/[^a-zA-Z0-9]/g, "")
     .slice(-8)
     .toUpperCase();
 
-  return `SNC-EVAL-${new Date().getFullYear()}-${facultyPart || "REPORT"}`;
+  return `SNC-DFE-${new Date().getFullYear()}-${deanPart || "REPORT"}`;
 });
 
 const pdfFileName = computed(() => {
-  const facultyName = String(selectedGroup.value?.name || "Faculty")
+  const deanName = String(selectedGroup.value?.name || "Dean")
     .replace(/[^a-zA-Z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-");
@@ -2677,351 +2014,299 @@ const pdfFileName = computed(() => {
     .trim()
     .replace(/\s+/g, "-");
 
-  return `${facultyName}-${semester}-${schoolYear}-Evaluation-Report.pdf`;
+  return `${deanName}-${semester}-${schoolYear}-Dean-Faculty-Evaluation-Report.pdf`;
 });
+
+const consolidatedStrengths = computed(() =>
+  Array.from(
+    new Set(
+      selectedGroup.value?.records
+        ?.map((record: any) => String(record?.strengths || "").trim())
+        .filter(Boolean) || [],
+    ),
+  ),
+);
+
+const consolidatedImprovements = computed(() =>
+  Array.from(
+    new Set(
+      selectedGroup.value?.records
+        ?.map((record: any) =>
+          String(record?.areas_for_improvement || "").trim(),
+        )
+        .filter(Boolean) || [],
+    ),
+  ),
+);
+
+const consolidatedComments = computed(() =>
+  Array.from(
+    new Set(
+      selectedGroup.value?.records
+        ?.map((record: any) => {
+          const value = String(
+            record?.comment || record?.comments || record?.feedback || "",
+          ).trim();
+
+          return value;
+        })
+        .filter(Boolean) || [],
+    ),
+  ),
+);
+
+const normalizeSentiment = (value: any) => {
+  const sentiment = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  if (sentiment.includes("positive") || sentiment === "good") {
+    return "Positive";
+  }
+
+  if (sentiment.includes("negative") || sentiment === "bad") {
+    return "Negative";
+  }
+
+  return "Neutral";
+};
+
+const formatKeywords = (value: any): string[] => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item) =>
+        typeof item === "string"
+          ? item.split(",")
+          : String(item?.keyword || item?.label || item?.value || "").split(
+              ",",
+            ),
+      )
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value)
+      .flatMap((item) => String(item || "").split(","))
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return String(value)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
 
 const selectedFacultySentimentAnalysis = computed(() => {
   const records = selectedGroup.value?.records || [];
 
   const counts = {
-    positive: 0,
-    neutral: 0,
-    negative: 0,
+    Positive: 0,
+    Neutral: 0,
+    Negative: 0,
   };
 
-  const keywordCounts = new Map<string, number>();
-  const summaries: string[] = [];
+  const keywords: string[] = [];
   const suggestions: string[] = [];
-
+  const summaries: string[] = [];
   let analysedComments = 0;
-
-  const addKeywords = (rawKeywords: any) => {
-    let values: string[] = [];
-
-    if (Array.isArray(rawKeywords)) {
-      values = rawKeywords.map((item) => String(item));
-    } else if (typeof rawKeywords === "string") {
-      const trimmed = rawKeywords.trim();
-
-      if (!trimmed) {
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(trimmed);
-
-        values = Array.isArray(parsed)
-          ? parsed.map((item) => String(item))
-          : trimmed.split(",");
-      } catch {
-        values = trimmed.split(",");
-      }
-    }
-
-    values
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .forEach((keyword) => {
-        const normalized = keyword.toLowerCase();
-
-        keywordCounts.set(normalized, (keywordCounts.get(normalized) || 0) + 1);
-      });
-  };
 
   records.forEach((record: any) => {
     const comment = String(
-      record?.comments ?? record?.comment ?? record?.feedback ?? "",
+      record?.comment || record?.comments || record?.feedback || "",
     ).trim();
 
-    if (comment) {
+    const storedSentiment =
+      record?.feedback_sentiment ||
+      record?.sentiment ||
+      record?.ai_sentiment ||
+      "";
+
+    if (comment || storedSentiment) {
       analysedComments += 1;
+
+      const sentiment = normalizeSentiment(storedSentiment);
+
+      counts[sentiment] += 1;
     }
 
-    const sentiment = String(record?.feedback_sentiment || "Neutral")
-      .trim()
-      .toLowerCase();
+    keywords.push(
+      ...formatKeywords(
+        record?.feedback_keywords ||
+          record?.sentiment_keywords ||
+          record?.ai_keywords,
+      ),
+    );
 
-    if (sentiment === "positive") {
-      counts.positive += 1;
-    } else if (sentiment === "negative") {
-      counts.negative += 1;
-    } else {
-      counts.neutral += 1;
-    }
+    const summary = String(
+      record?.feedback_sentiment_summary ||
+        record?.sentiment_summary ||
+        record?.ai_summary ||
+        "",
+    ).trim();
 
-    const summary = String(record?.feedback_sentiment_summary || "").trim();
-
-    if (summary && !summaries.includes(summary)) {
+    if (summary) {
       summaries.push(summary);
     }
 
     const suggestion = String(
-      record?.feedback_sentiment_suggestion || "",
+      record?.feedback_sentiment_suggestion ||
+        record?.sentiment_suggestion ||
+        record?.ai_suggestion ||
+        record?.areas_for_improvement ||
+        record?.effectiveness ||
+        record?.suggested_activities ||
+        "",
     ).trim();
 
-    if (suggestion && !suggestions.includes(suggestion)) {
+    if (suggestion) {
       suggestions.push(suggestion);
     }
-
-    addKeywords(record?.feedback_keywords);
   });
 
-  const total = counts.positive + counts.neutral + counts.negative;
-
-  const percentage = (count: number) => (total ? (count / total) * 100 : 0);
+  const total = counts.Positive + counts.Neutral + counts.Negative;
 
   let overallSentiment = "Neutral";
 
-  if (counts.positive > counts.neutral && counts.positive > counts.negative) {
+  if (counts.Positive > counts.Neutral && counts.Positive > counts.Negative) {
     overallSentiment = "Positive";
   } else if (
-    counts.negative > counts.neutral &&
-    counts.negative > counts.positive
+    counts.Negative > counts.Positive &&
+    counts.Negative > counts.Neutral
   ) {
     overallSentiment = "Negative";
-  } else if (
-    counts.positive === counts.negative &&
-    counts.positive > counts.neutral
-  ) {
-    overallSentiment = "Mixed";
   }
 
-  const keywords = Array.from(keywordCounts.entries())
-    .sort((a, b) => {
-      if (b[1] !== a[1]) {
-        return b[1] - a[1];
-      }
+  const uniqueKeywords = Array.from(
+    new Set(keywords.map((keyword) => keyword.toLowerCase())),
+  ).slice(0, 12);
 
-      return a[0].localeCompare(b[0]);
-    })
-    .slice(0, 10)
-    .map(([keyword]) => keyword);
+  const uniqueSuggestions = Array.from(new Set(suggestions)).slice(0, 6);
 
-  let summary = "No consolidated AI sentiment summary is available.";
-
-  if (summaries.length) {
-    summary = summaries.slice(0, 4).join(" ");
-  } else if (total) {
-    summary =
-      `The combined evaluation feedback is predominantly ${overallSentiment.toLowerCase()}. ` +
-      `${formatNumber(percentage(counts.positive))}% of analysed records are positive, ` +
-      `${formatNumber(percentage(counts.neutral))}% are neutral, and ` +
-      `${formatNumber(percentage(counts.negative))}% are negative.`;
-  }
+  const summary =
+    summaries[0] ||
+    (analysedComments
+      ? `The available faculty feedback is predominantly ${overallSentiment.toLowerCase()}. This consolidated result is based on ${analysedComments} analysed evaluation comment${
+          analysedComments === 1 ? "" : "s"
+        }.`
+      : "No written faculty feedback or stored AI sentiment result is available for this faculty member.");
 
   return {
     overallSentiment,
-    positive: counts.positive,
-    neutral: counts.neutral,
-    negative: counts.negative,
-    positivePercentage: percentage(counts.positive),
-    neutralPercentage: percentage(counts.neutral),
-    negativePercentage: percentage(counts.negative),
+    positive: counts.Positive,
+    neutral: counts.Neutral,
+    negative: counts.Negative,
     analysedComments,
-    keywords,
+    positivePercentage: total ? (counts.Positive / total) * 100 : 0,
+    neutralPercentage: total ? (counts.Neutral / total) * 100 : 0,
+    negativePercentage: total ? (counts.Negative / total) * 100 : 0,
+    keywords: uniqueKeywords,
+    suggestions: uniqueSuggestions,
     summary,
-    suggestions: suggestions.slice(0, 5),
   };
 });
 
+const sentimentColor = (sentiment: any) => {
+  const value = normalizeSentiment(sentiment);
+
+  if (value === "Positive") return "success";
+  if (value === "Negative") return "error";
+
+  return "neutral";
+};
+
+const summaryCards = computed(() => [
+  {
+    label: "Evaluations",
+    value: selectedGroup.value?.recordCount || 0,
+    caption: "Submitted records",
+    icon: "i-lucide-files",
+    labelClass: "text-blue-600 dark:text-blue-400",
+    iconClass:
+      "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300",
+  },
+  {
+    label: "Dean Evaluators",
+    value: selectedGroup.value?.evaluatorCount || 0,
+    caption: "Unique respondents",
+    icon: "i-lucide-users-round",
+    labelClass: "text-violet-600 dark:text-violet-400",
+    iconClass:
+      "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300",
+  },
+  {
+    label: "Criteria",
+    value: selectedGroup.value?.criteriaCount || 0,
+    caption: "Leadership indicators",
+    icon: "i-lucide-list-checks",
+    labelClass: "text-amber-600 dark:text-amber-400",
+    iconClass:
+      "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300",
+  },
+  {
+    label: "Subjects",
+    value: selectedGroup.value?.subjectCount || 0,
+    caption: "Subjects represented",
+    icon: "i-lucide-book-open-check",
+    labelClass: "text-emerald-600 dark:text-emerald-400",
+    iconClass:
+      "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300",
+  },
+]);
+
 const filteredRecordRows = computed(() => {
-  const records = selectedGroup.value?.records || [];
   const query = recordSearch.value.trim().toLowerCase();
 
-  return records.filter((record: any) => {
-    const label = getRecordLabel(record).toLowerCase();
-    const comment = String(record?.comment || "").toLowerCase();
-    const sentiment = String(
-      record?.feedback_sentiment || "Neutral",
-    ).toLowerCase();
-    const roundedRating = String(
-      Math.round(Number(record?.average_score || 0)),
-    );
+  return (selectedGroup.value?.records || []).filter((record: any) => {
+    const average = getRecordAverage(record);
 
     const matchesSearch =
-      !query || label.includes(query) || comment.includes(query);
-    const matchesSentiment =
-      recordSentiment.value === "all" || sentiment === recordSentiment.value;
-    const matchesRating =
-      recordRating.value === "all" || roundedRating === recordRating.value;
+      !query ||
+      [
+        getEvaluatorName(record),
+        getSemester(record),
+        getSchoolYear(record),
+        getRecordComment(record),
+        record?.strengths,
+        record?.areas_for_improvement,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
 
-    return matchesSearch && matchesSentiment && matchesRating;
+    const label = getRatingLabel(average).toLowerCase().replace(/\s+/g, "-");
+
+    const matchesRating =
+      recordRating.value === "all" || label === recordRating.value;
+
+    return matchesSearch && matchesRating;
   });
 });
 
 const recordTotalPages = computed(() =>
   Math.max(
     1,
-    Math.ceil(filteredRecordRows.value.length / recordPageSize.value),
+    Math.ceil(filteredRecordRows.value.length / Number(recordPageSize.value)),
   ),
 );
 
 const paginatedRecordRows = computed(() => {
-  const start = (recordPage.value - 1) * recordPageSize.value;
-  return filteredRecordRows.value.slice(start, start + recordPageSize.value);
+  const size = Number(recordPageSize.value);
+  const start = (recordPage.value - 1) * size;
+
+  return filteredRecordRows.value.slice(start, start + size);
 });
 
-watch([recordSearch, recordSentiment, recordRating, recordPageSize], () => {
-  recordPage.value = 1;
-});
-
-watch(recordTotalPages, (total) => {
-  if (recordPage.value > total) recordPage.value = total;
-});
-
-const filteredGroups = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase();
-
-  return groupedResults.value.filter((group) => {
-    const searchable = [
-      group.name,
-      group.department,
-      ...group.schoolYears,
-      ...group.semesters,
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    return !query || searchable.includes(query);
-  });
-});
-
-const hasActiveFilters = computed(() =>
-  Boolean(
-    searchQuery.value ||
-    selectedFaculty.value !== "all" ||
-    selectedDepartment.value !== "all" ||
-    selectedSemester.value !== "all" ||
-    selectedSchoolYear.value !== "all",
-  ),
-);
-
-const getSelectedLabel = (options: any[], value: any) => {
-  return (
-    options.find((option) => option.value === value)?.label ||
-    String(value || "")
-  );
-};
-
-const summary = computed(() => {
-  const evaluatorKeys = new Set<string>();
-
-  filteredEvaluationRecords.value.forEach((evaluation: any) => {
-    const evaluatorKey = String(
-      evaluation?.evaluator_user?.documentId ||
-        evaluation?.evaluator_user?.id ||
-        "",
-    );
-
-    if (evaluatorKey) {
-      evaluatorKeys.add(evaluatorKey);
-    }
-  });
-
-  const totalScore = groupedResults.value.reduce(
-    (sum, group) => sum + Number(group.totalRatingScore || 0),
-    0,
-  );
-
-  const totalResponses = groupedResults.value.reduce(
-    (sum, group) => sum + Number(group.totalRatingResponses || 0),
-    0,
-  );
-
-  return {
-    totalFaculty: groupedResults.value.length,
-    totalEvaluations: filteredEvaluationRecords.value.length,
-    totalEvaluators: evaluatorKeys.size,
-    averageScore: totalResponses
-      ? (totalScore / totalResponses).toFixed(2)
-      : "0.00",
-  };
-});
-
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(filteredGroups.value.length / Number(pageSize.value))),
-);
-
-const paginatedGroups = computed(() => {
-  const size = Number(pageSize.value);
-  const start = (page.value - 1) * size;
-
-  return filteredGroups.value.slice(start, start + size);
-});
-
-const paginationStart = computed(() => {
-  if (!filteredGroups.value.length) {
-    return 0;
-  }
-
-  return (page.value - 1) * Number(pageSize.value) + 1;
-});
-
-const paginationEnd = computed(() =>
-  Math.min(page.value * Number(pageSize.value), filteredGroups.value.length),
-);
-
-const getEvaluationDepartment = (evaluation: any) => {
-  return (
-    evaluation?.teacher?.department?.name ||
-    evaluation?.teacher?.department ||
-    "Not specified"
-  );
-};
-
-const getRecordLabel = (evaluation: any) => {
-  const evaluatorName =
-    evaluation?.evaluator_user?.username ||
-    evaluation?.evaluator_user?.email ||
-    "";
-
-  return evaluatorName
-    ? `Student Evaluation · ${evaluatorName}`
-    : "Student Evaluation";
-};
-
-const getSemester = (evaluation: any) => {
-  return evaluation?.batch?.semester || "N/A";
-};
-
-const getSchoolYear = (evaluation: any) => {
-  return evaluation?.batch?.school_year || "N/A";
-};
-
-const getEvaluationDate = (evaluation: any) => {
-  return (
-    evaluation?.batch?.date || evaluation?.date || evaluation?.createdAt || null
-  );
-};
-
-const getEvaluationKey = (evaluation: any) => {
-  if (!evaluation) {
-    return "";
-  }
-
-  return (
-    evaluation?.documentId ||
-    evaluation?.id ||
-    `${evaluation?.teacher?.id || ""}-${evaluation?.evaluator_user?.id || ""}-${evaluation?.createdAt || ""}`
-  );
-};
-
-const createInitials = (value: string) => {
-  return String(value || "")
+const createInitials = (value: string) =>
+  String(value || "")
     .trim()
     .split(/\s+/)
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
-};
-
-const getRatingPercentage = (count: number, total: number) => {
-  if (!total) {
-    return 0;
-  }
-
-  return (Number(count || 0) / Number(total)) * 100;
-};
 
 const formatNumber = (value: any) => {
   const number = Number(value);
@@ -3030,85 +2315,68 @@ const formatNumber = (value: any) => {
 };
 
 const formatDate = (value: any) => {
-  if (!value) {
-    return "N/A";
-  }
+  if (!value) return "N/A";
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return date.toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return Number.isNaN(date.getTime())
+    ? String(value)
+    : date.toLocaleDateString("en-PH", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
 };
 
-const getResults = async () => {
-  if (!hasValidFacultyId.value) {
-    evaluations.value = [];
-    loadError.value = "No valid faculty document ID was provided in the URL.";
-    pending.value = false;
-    return;
+const getRatingLabel = (average: any) => {
+  const avg = Number(average);
+
+  if (avg >= 3.5) return "Superior";
+  if (avg >= 2.5) return "Average";
+  if (avg >= 1.5) return "Fair";
+  if (avg > 0) return "Needs Improvement";
+
+  return "N/A";
+};
+
+const ratingColor = (average: any) => {
+  const avg = Number(average);
+
+  if (avg >= 3.5) return "success";
+  if (avg >= 2.5) return "primary";
+  if (avg >= 1.5) return "warning";
+
+  return "error";
+};
+
+const ratingBadge = (average: any) => {
+  const avg = Number(average);
+
+  if (avg >= 3.5) {
+    return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
   }
 
-  pending.value = true;
-  loadError.value = "";
-
-  try {
-    const query: Record<string, any> = {
-      "filters[batch][evaluation_type][code][$eq]": "student-faculty",
-
-      "filters[teacher][documentId][$eq]": facultyDocumentId.value,
-
-      "populate[teacher][populate][department]": true,
-      "populate[evaluator_user]": true,
-      "populate[batch][populate][0]": "evaluation_type",
-
-      "sort[0]": "createdAt:desc",
-      "pagination[pageSize]": 10000,
-    };
-
-    if (selectedSemester.value !== "all") {
-      query["filters[batch][semester][$eq]"] = selectedSemester.value;
-    }
-
-    if (selectedSchoolYear.value !== "all") {
-      query["filters[batch][school_year][$eq]"] = selectedSchoolYear.value;
-    }
-
-    const response: any = await $api("/evaluations", {
-      method: "GET",
-      query,
-    });
-
-    evaluations.value = Array.isArray(response?.data) ? response.data : [];
-
-    selectedEvaluation.value = evaluations.value[0] || null;
-  } catch (error: any) {
-    console.error("Faculty evaluation summary loading error:", error);
-
-    evaluations.value = [];
-    selectedEvaluation.value = null;
-
-    loadError.value =
-      error?.data?.error?.message ||
-      error?.data?.message ||
-      error?.message ||
-      "Failed to load the faculty evaluation summary.";
-
-    toast.add({
-      title: "Unable to load summary",
-      description: loadError.value,
-      icon: "i-lucide-triangle-alert",
-      color: "error",
-    });
-  } finally {
-    pending.value = false;
+  if (avg >= 2.5) {
+    return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
   }
+
+  if (avg >= 1.5) {
+    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
+  }
+
+  if (avg > 0) {
+    return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
+  }
+
+  return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+};
+
+const getRatingPercentage = (count: number, total: number) =>
+  total ? (count / total) * 100 : 0;
+
+const openEvaluationRecord = (record: any) => {
+  selectedEvaluation.value = record;
+  showEvaluationDialog.value = true;
 };
 
 const revokePdfPreviewUrl = () => {
@@ -3120,14 +2388,19 @@ const revokePdfPreviewUrl = () => {
   pdfPreviewBlob.value = null;
 };
 
-const waitForPdfAssets = async () => {
-  await nextTick();
+const triggerPdfDownload = (blob: Blob) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
 
-  if (document.fonts?.ready) {
-    await document.fonts.ready;
-  }
+  link.href = url;
+  link.download = pdfFileName.value;
+  link.style.display = "none";
 
-  await new Promise((resolve) => window.setTimeout(resolve, 150));
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
 const createPdfBlob = async (): Promise<Blob> => {
@@ -3136,20 +2409,18 @@ const createPdfBlob = async (): Promise<Blob> => {
   }
 
   if (!selectedGroup.value) {
-    throw new Error("No faculty evaluation result is available.");
+    throw new Error("No Dean–Faculty evaluation summary is available.");
   }
 
-  /*
-   * jsPDF and jspdf-autotable are imported statically at the top of this
-   * page. Static imports avoid Vite's failed runtime request for a
-   * dynamically generated dependency URL.
-   */
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
     format: "a4",
     compress: true,
   });
+
+  const group: any = selectedGroup.value;
+  const sentiment: any = selectedFacultySentimentAnalysis.value;
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -3158,48 +2429,13 @@ const createPdfBlob = async (): Promise<Blob> => {
   const marginRight = 14;
   const contentWidth = pageWidth - marginLeft - marginRight;
 
-  const black = [17, 24, 39];
-  const border = [156, 163, 175];
-  const light = [245, 245, 245];
-  const white = [255, 255, 255];
-
-  const group: any = selectedGroup.value;
-  const sentiment: any = selectedFacultySentimentAnalysis.value;
+  const black: [number, number, number] = [17, 24, 39];
+  const border: [number, number, number] = [156, 163, 175];
+  const light: [number, number, number] = [245, 245, 245];
+  const white: [number, number, number] = [255, 255, 255];
+  const navy: [number, number, number] = [21, 45, 92];
 
   let y = 14;
-
-  const addPageNumber = () => {
-    const pageCount = doc.getNumberOfPages();
-
-    for (let page = 1; page <= pageCount; page += 1) {
-      doc.setPage(page);
-      doc.setDrawColor(...border);
-      doc.setLineWidth(0.2);
-      doc.line(
-        marginLeft,
-        pageHeight - 10,
-        pageWidth - marginRight,
-        pageHeight - 10,
-      );
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(7);
-      doc.setTextColor(...black);
-
-      doc.text(
-        `${reportDocumentCode} · ${reportNumber.value} · Confidential`,
-        marginLeft,
-        pageHeight - 6,
-      );
-
-      doc.text(
-        `Page ${page} of ${pageCount}`,
-        pageWidth - marginRight,
-        pageHeight - 6,
-        { align: "right" },
-      );
-    }
-  };
 
   const ensureSpace = (needed: number) => {
     if (y + needed > pageHeight - 17) {
@@ -3247,7 +2483,6 @@ const createPdfBlob = async (): Promise<Blob> => {
     ensureSpace(requiredHeight);
 
     doc.text(lines, marginLeft + indent, y, {
-      align: "justify",
       maxWidth: usableWidth,
     });
 
@@ -3299,7 +2534,7 @@ const createPdfBlob = async (): Promise<Blob> => {
     y = (doc as any).lastAutoTable.finalY + 6;
   };
 
-  // Institutional header — final approved layout
+  // Institutional header
   const headerCenter = pageWidth / 2;
   const logoSize = 19;
   const logoX = marginLeft + 1;
@@ -3324,7 +2559,6 @@ const createPdfBlob = async (): Promise<Blob> => {
     schoolTextLeft + (schoolTextRight - schoolTextLeft) / 2;
 
   doc.setTextColor(...black);
-
   // doc.setFont("helvetica", "normal");
   // doc.setFontSize(7.8);
   // doc.text(
@@ -3375,7 +2609,7 @@ const createPdfBlob = async (): Promise<Blob> => {
 
   y += 23;
 
-  doc.setDrawColor(21, 45, 92);
+  doc.setDrawColor(...navy);
   doc.setLineWidth(0.8);
   doc.line(marginLeft, y, pageWidth - marginRight, y);
 
@@ -3407,28 +2641,18 @@ const createPdfBlob = async (): Promise<Blob> => {
     {
       showHead: "never",
       columnStyles: {
-        0: {
-          fontStyle: "bold",
-          cellWidth: 28,
-        },
-        1: {
-          cellWidth: 58,
-        },
-        2: {
-          fontStyle: "bold",
-          cellWidth: 28,
-        },
-        3: {
-          cellWidth: contentWidth - 114,
-        },
+        0: { fontStyle: "bold", cellWidth: 28 },
+        1: { cellWidth: 58 },
+        2: { fontStyle: "bold", cellWidth: 28 },
+        3: { cellWidth: contentWidth - 114 },
       },
     },
   );
 
-  // Report title
+  // Title
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("STUDENT–FACULTY EVALUATION REPORT", headerCenter, y, {
+  doc.text("DEAN–FACULTY EVALUATION REPORT", headerCenter, y, {
     align: "center",
   });
 
@@ -3437,7 +2661,7 @@ const createPdfBlob = async (): Promise<Blob> => {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text(
-    "Consolidated performance results, written feedback, and AI sentiment analysis",
+    "Consolidated faculty performance results, faculty feedback, and AI sentiment analysis",
     headerCenter,
     y,
     { align: "center" },
@@ -3445,52 +2669,6 @@ const createPdfBlob = async (): Promise<Blob> => {
 
   y += 8;
 
-  // // Contents
-  // addSectionTitle("REPORT CONTENTS");
-
-  // const contents = [
-  //   "I. Report Information",
-  //   "II. Executive Summary",
-  //   "III. Overall Rating Distribution",
-  //   "IV. Consolidated Results by Criterion",
-  //   "V. Consolidated AI Sentiment Analysis",
-  //   "VI. Certification and Sign-Off",
-  // ];
-
-  // const leftContents = contents.slice(0, 3);
-  // const rightContents = contents.slice(3);
-
-  // const maxRows = Math.max(
-  //   leftContents.length,
-  //   rightContents.length,
-  // );
-
-  // const contentRows = Array.from(
-  //   { length: maxRows },
-  //   (_, index) => [
-  //     leftContents[index] || "",
-  //     rightContents[index] || "",
-  //   ],
-  // );
-
-  // addTable([], contentRows, {
-  //   showHead: "never",
-  //   theme: "plain",
-  //   styles: {
-  //     font: "helvetica",
-  //     fontSize: 8.5,
-  //     textColor: black,
-  //     cellPadding: 1.5,
-  //     lineWidth: 0,
-  //     fillColor: white,
-  //   },
-  //   columnStyles: {
-  //     0: { cellWidth: contentWidth / 2 },
-  //     1: { cellWidth: contentWidth / 2 },
-  //   },
-  // });
-
-  // I. Report Information
   addSectionTitle("I. REPORT INFORMATION");
 
   addTable(
@@ -3511,7 +2689,7 @@ const createPdfBlob = async (): Promise<Blob> => {
       [
         "Total Evaluations",
         String(group.recordCount || 0),
-        "Student Evaluators",
+        "Dean Evaluators",
         String(group.evaluatorCount || 0),
       ],
       [
@@ -3530,32 +2708,21 @@ const createPdfBlob = async (): Promise<Blob> => {
     {
       showHead: "never",
       columnStyles: {
-        0: {
-          fontStyle: "bold",
-          cellWidth: 29,
-        },
-        1: {
-          cellWidth: 58,
-        },
-        2: {
-          fontStyle: "bold",
-          cellWidth: 29,
-        },
-        3: {
-          cellWidth: contentWidth - 116,
-        },
+        0: { fontStyle: "bold", cellWidth: 29 },
+        1: { cellWidth: 58 },
+        2: { fontStyle: "bold", cellWidth: 29 },
+        3: { cellWidth: contentWidth - 116 },
       },
     },
   );
 
-  // II. Executive Summary
   addSectionTitle("II. EXECUTIVE SUMMARY");
 
   addTable(
     [["Overall Rating", "Completion Rate", "Rating Responses", "AI Sentiment"]],
     [
       [
-        `${formatNumber(group.averageScore)} / 5.00\n${getRatingLabel(
+        `${formatNumber(group.averageScore)} / 4.00\n${getRatingLabel(
           group.averageScore,
         )}`,
         `${formatNumber(group.completionRate)}%`,
@@ -3594,10 +2761,9 @@ const createPdfBlob = async (): Promise<Blob> => {
     )}. The report covers ${group.criteriaCount || 0} evaluation criteria for ${currentSemesterLabel.value}, School Year ${currentSchoolYearLabel.value}.`,
   );
 
-  // III. Rating Distribution
   addSectionTitle("III. OVERALL RATING DISTRIBUTION");
 
-  const ratingRows = [5, 4, 3, 2, 1].map((score) => {
+  const ratingRows = [4, 3, 2, 1].map((score) => {
     const frequency = Number(group.ratingDistribution?.[score] || 0);
 
     return [
@@ -3638,9 +2804,9 @@ const createPdfBlob = async (): Promise<Blob> => {
     },
   );
 
-  // IV. Criteria
   doc.addPage();
   y = 14;
+
   addSectionTitle("IV. CONSOLIDATED RESULTS BY CRITERION");
 
   const criteriaRows = (group.criteriaSummary || []).map(
@@ -3671,7 +2837,8 @@ const createPdfBlob = async (): Promise<Blob> => {
     },
   );
 
-  // V. AI Sentiment
+  doc.addPage();
+  y = 14;
   addSectionTitle("V. CONSOLIDATED AI SENTIMENT ANALYSIS");
 
   addTable(
@@ -3703,6 +2870,7 @@ const createPdfBlob = async (): Promise<Blob> => {
   );
 
   addWrappedParagraph("Consolidated Interpretation", { bold: true });
+
   addWrappedParagraph(
     sentiment.summary || "No consolidated AI sentiment summary is available.",
   );
@@ -3711,6 +2879,7 @@ const createPdfBlob = async (): Promise<Blob> => {
     addWrappedParagraph("Common Keywords", {
       bold: true,
     });
+
     addWrappedParagraph(sentiment.keywords.join(", "));
   }
 
@@ -3722,12 +2891,12 @@ const createPdfBlob = async (): Promise<Blob> => {
     });
   }
 
-  // VI. Certification
   ensureSpace(65);
+
   addSectionTitle("VI. CERTIFICATION AND SIGN-OFF");
 
   addWrappedParagraph(
-    "This report was generated from the official Student–Faculty Evaluation System and reflects the records available for the stated academic period. It is intended solely for authorised institutional quality assurance, faculty development, academic review, and related administrative purposes.",
+    "This report was generated from the official Dean–Faculty Evaluation System and reflects the records available for the stated academic period. It is intended solely for authorised institutional quality assurance, faculty development, academic review, and related administrative purposes.",
   );
 
   doc.setDrawColor(...border);
@@ -3740,23 +2909,23 @@ const createPdfBlob = async (): Promise<Blob> => {
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
+
   const noticeLines = doc.splitTextToSize(
-    "Individual student evaluation records and written comments must be handled in accordance with institutional privacy, records management, and data protection policies.",
+    "Faculty evaluation records and written comments must be handled in accordance with institutional privacy, records management, and data protection policies.",
     contentWidth - 38,
   );
 
   doc.text(noticeLines, marginLeft + 35, y + 5);
 
   y += 28;
-
   ensureSpace(36);
 
   const signatureWidth = (contentWidth - 20) / 3;
 
   const signatureLabels = [
     ["Prepared by", "Evaluation System Administrator"],
-    ["Reviewed by", "Department Head / Dean"],
-    ["Approved / Noted by", "Academic Administrator"],
+    ["Reviewed by", "Academic Administrator"],
+    ["Approved / Noted by", "Executive Administrator"],
   ];
 
   signatureLabels.forEach(([label, role], index) => {
@@ -3778,15 +2947,43 @@ const createPdfBlob = async (): Promise<Blob> => {
     });
   });
 
-  addPageNumber();
+  const pageCount = doc.getNumberOfPages();
+
+  for (let page = 1; page <= pageCount; page += 1) {
+    doc.setPage(page);
+
+    doc.setDrawColor(...border);
+    doc.setLineWidth(0.2);
+    doc.line(
+      marginLeft,
+      pageHeight - 10,
+      pageWidth - marginRight,
+      pageHeight - 10,
+    );
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...black);
+
+    doc.text(
+      `${reportDocumentCode} · ${reportNumber.value} · Confidential`,
+      marginLeft,
+      pageHeight - 6,
+    );
+
+    doc.text(
+      `Page ${page} of ${pageCount}`,
+      pageWidth - marginRight,
+      pageHeight - 6,
+      { align: "right" },
+    );
+  }
 
   return doc.output("blob");
 };
 
 const previewPdfReport = async () => {
-  if (isGeneratingPdf.value) {
-    return;
-  }
+  if (isGeneratingPdf.value) return;
 
   isGeneratingPdf.value = true;
   pdfAction.value = "preview";
@@ -3801,42 +2998,18 @@ const previewPdfReport = async () => {
   } catch (error: any) {
     showPdfPreview.value = false;
 
-    console.error("PDF preview generation error:", error);
+    console.error("Dean–Faculty PDF preview generation error:", error);
 
-    toast.add({
-      title: "Unable to preview PDF",
-      description:
-        error?.message || "The faculty evaluation PDF could not be generated.",
-      icon: "i-lucide-triangle-alert",
-      color: "error",
-    });
+    loadError.value =
+      error?.message || "The Dean–Faculty PDF could not be generated.";
   } finally {
     isGeneratingPdf.value = false;
     pdfAction.value = "";
   }
 };
 
-const triggerPdfDownload = (blob: Blob) => {
-  const temporaryUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = temporaryUrl;
-  link.download = pdfFileName.value;
-  link.style.display = "none";
-
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  window.setTimeout(() => {
-    URL.revokeObjectURL(temporaryUrl);
-  }, 1000);
-};
-
 const downloadPdfReport = async () => {
-  if (isGeneratingPdf.value) {
-    return;
-  }
+  if (isGeneratingPdf.value) return;
 
   isGeneratingPdf.value = true;
   pdfAction.value = "download";
@@ -3844,23 +3017,11 @@ const downloadPdfReport = async () => {
   try {
     const blob = await createPdfBlob();
     triggerPdfDownload(blob);
-
-    toast.add({
-      title: "PDF downloaded",
-      description: `${pdfFileName.value} was generated successfully.`,
-      icon: "i-lucide-file-check-2",
-      color: "success",
-    });
   } catch (error: any) {
-    console.error("PDF download generation error:", error);
+    console.error("Dean–Faculty PDF download generation error:", error);
 
-    toast.add({
-      title: "Unable to download PDF",
-      description:
-        error?.message || "The faculty evaluation PDF could not be generated.",
-      icon: "i-lucide-triangle-alert",
-      color: "error",
-    });
+    loadError.value =
+      error?.message || "The Dean–Faculty PDF could not be generated.";
   } finally {
     isGeneratingPdf.value = false;
     pdfAction.value = "";
@@ -3868,9 +3029,7 @@ const downloadPdfReport = async () => {
 };
 
 const downloadExistingPdf = () => {
-  if (!pdfPreviewBlob.value) {
-    return;
-  }
+  if (!pdfPreviewBlob.value) return;
 
   triggerPdfDownload(pdfPreviewBlob.value);
 };
@@ -3880,240 +3039,76 @@ const closePdfPreview = () => {
   revokePdfPreviewUrl();
 };
 
+const getResults = async () => {
+  pending.value = true;
+  loadError.value = "";
+
+  try {
+    const response: any = await $api("/evaluations", {
+      query: {
+        "filters[batch][evaluation_type][code][$eq]": "dean-to-faculty",
+
+        "populate[teacher][populate][department]": true,
+        "populate[subject]": true,
+        "populate[evaluator_user][populate][0]": "user_info",
+        "populate[batch][populate][0]": "evaluation_type",
+
+        "sort[0]": "createdAt:desc",
+        "pagination[pageSize]": 10000,
+      },
+    });
+
+    evaluations.value = response?.data || [];
+
+    if (!selectedGroup.value) {
+      loadError.value =
+        "No Dean–Faculty evaluation summary was found for the selected faculty member.";
+    }
+  } catch (error: any) {
+    evaluations.value = [];
+
+    loadError.value =
+      error?.data?.error?.message ||
+      error?.data?.message ||
+      error?.message ||
+      "Failed to load the Dean–Faculty evaluation summary.";
+  } finally {
+    pending.value = false;
+  }
+};
+
+const goBack = () => {
+  router.push("/admin/evaluation/dean-faculty");
+};
+
+const printReport = async () => {
+  await nextTick();
+
+  if (import.meta.client) {
+    window.print();
+  }
+};
+
+watch([recordSearch, recordRating, recordPageSize], () => {
+  recordPage.value = 1;
+});
+
+watch(recordTotalPages, (total) => {
+  if (recordPage.value > total) {
+    recordPage.value = total;
+  }
+});
+
 onBeforeUnmount(() => {
   revokePdfPreviewUrl();
 });
 
-const printEvaluationReport = async () => {
-  activeTab.value = "overview";
-
-  await nextTick();
-
-  if (!import.meta.client) {
-    return;
-  }
-
-  window.print();
-};
-
-const goBack = () => {
-  navigateTo({
-    path: "/admin/evaluation/student-faculty",
-    query: {
-      semester: selectedSemester.value,
-      schoolYear: selectedSchoolYear.value,
-    },
-  });
-};
-
-const selectEvaluation = (evaluation: any) => {
-  selectedEvaluation.value = evaluation;
-};
-
-const openEvaluationRecord = (evaluation: any) => {
-  selectedEvaluation.value = evaluation;
-  showEvaluationDialog.value = true;
-};
-
-const getRecordAverage = (record: any) => {
-  const responses = normalizeResponses(record?.responses);
-
-  if (responses.length) {
-    const total = responses.reduce(
-      (sum, response) => sum + Number(response.score || 0),
-      0,
-    );
-
-    return total / responses.length;
-  }
-
-  const storedAverage = Number(
-    record?.average_score ?? record?.averageScore ?? record?.score ?? 0,
-  );
-
-  return Number.isFinite(storedAverage) ? storedAverage : 0;
-};
-
-const getRecordComment = (record: any) => {
-  const comment = String(
-    record?.comments ?? record?.comment ?? record?.feedback ?? "",
-  ).trim();
-
-  return comment || "No written comment was submitted.";
-};
-
-const formatResponses = (responses: any) => {
-  return normalizeResponses(responses).map((item) => ({
-    criteria_id: item.criteriaId,
-    statement: item.statement,
-    score: item.score,
-  }));
-};
-
-const getRatingLabel = (average: number) => {
-  const avg = Number(average);
-
-  if (avg >= 4.5) {
-    return "Outstanding";
-  }
-
-  if (avg >= 3.5) {
-    return "Excellent";
-  }
-
-  if (avg >= 2.5) {
-    return "Satisfactory";
-  }
-
-  if (avg >= 1.5) {
-    return "Fair";
-  }
-
-  if (avg > 0) {
-    return "Needs Improvement";
-  }
-
-  return "N/A";
-};
-
-const ratingBadge = (average: number) => {
-  const avg = Number(average);
-
-  if (avg >= 4.5) {
-    return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400";
-  }
-
-  if (avg >= 3.5) {
-    return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-  }
-
-  if (avg >= 2.5) {
-    return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
-  }
-
-  if (avg >= 1.5) {
-    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
-  }
-
-  if (avg > 0) {
-    return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-  }
-
-  return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
-};
-
-const ratingColor = (average: number) => {
-  const avg = Number(average);
-
-  if (avg >= 4.5) {
-    return "success";
-  }
-
-  if (avg >= 3.5) {
-    return "primary";
-  }
-
-  if (avg >= 2.5) {
-    return "info";
-  }
-
-  if (avg >= 1.5) {
-    return "warning";
-  }
-
-  return "error";
-};
-
-const sentimentColor = (sentiment: string) => {
-  const value = String(sentiment || "Neutral").toLowerCase();
-
-  if (value === "positive") {
-    return "success";
-  }
-
-  if (value === "negative") {
-    return "error";
-  }
-
-  if (value === "mixed") {
-    return "warning";
-  }
-
-  return "neutral";
-};
-
-const sentimentBadge = (sentiment: string) => {
-  const value = String(sentiment || "Neutral").toLowerCase();
-
-  if (value === "positive") {
-    return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-  }
-
-  if (value === "negative") {
-    return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-  }
-
-  return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
-};
-
-const formatKeywords = (keywords: any) => {
-  if (!keywords) {
-    return "N/A";
-  }
-
-  if (Array.isArray(keywords)) {
-    return keywords.length ? keywords.join(", ") : "N/A";
-  }
-
-  if (typeof keywords === "string") {
-    return keywords.trim() || "N/A";
-  }
-
-  return "N/A";
-};
-
-watch(
-  selectedGroup,
-  (group) => {
-    selectedEvaluation.value = group?.records?.[0] || null;
-  },
-  {
-    immediate: true,
-  },
-);
-
-watch(facultyDocumentId, () => {
-  if (hasValidFacultyId.value) {
-    getResults();
-  }
-});
-
-onMounted(() => {
-  getResults();
-});
+onMounted(getResults);
 </script>
 
 <style scoped>
 * {
   -webkit-tap-highlight-color: transparent;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .summary-enter {
-    animation: summary-fade-up 0.35s ease-out both;
-  }
-}
-
-@keyframes summary-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media print {
@@ -4149,930 +3144,19 @@ onMounted(() => {
   }
 
   section,
+  article,
   table,
-  tr,
-  td,
-  th {
+  tr {
     break-inside: avoid;
     page-break-inside: avoid;
-  }
-
-  .student-print-record {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .student-print-record + .student-print-record {
-    margin-top: 14px !important;
   }
 
   thead {
     display: table-header-group;
   }
 
-  tr {
-    page-break-after: auto;
-  }
-
-  .shadow-sm,
   [class*="shadow-"] {
     box-shadow: none !important;
   }
-
-  [class*="rounded-"] {
-    border-radius: 10px !important;
-  }
-
-  .space-y-5 > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 12px !important;
-  }
-}
-
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 14mm 13mm 15mm;
-  }
-
-  .formal-evaluation-report {
-    display: block !important;
-    width: 100%;
-    color: #111827 !important;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 10.5px;
-    line-height: 1.45;
-  }
-
-  .formal-evaluation-report * {
-    box-sizing: border-box;
-    color: inherit;
-  }
-
-  .formal-evaluation-report,
-  .formal-evaluation-report *,
-  .report-header,
-  .report-section,
-  .report-title-block,
-  .report-summary-grid,
-  .report-summary-grid > div,
-  .formal-student-record,
-  .formal-student-record-header,
-  .report-comment-box,
-  .report-analysis-box,
-  .report-information-table th,
-  .report-information-table td,
-  .report-standard-table th,
-  .report-standard-table td {
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-  }
-
-  .report-document-control {
-    margin-top: 10px;
-  }
-
-  .report-document-control table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .report-document-control th,
-  .report-document-control td {
-    border: 1px solid #9ca3af;
-    padding: 4px 6px;
-    font-size: 8px;
-  }
-
-  .report-document-control th {
-    width: 16%;
-    font-weight: 800;
-    text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .report-document-control td {
-    width: 34%;
-    font-weight: 600;
-  }
-
-  .report-contents ol {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 18px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .report-contents li {
-    display: flex;
-    gap: 7px;
-    border-bottom: 1px dotted #9ca3af;
-    padding: 3px 0;
-    font-size: 9px;
-  }
-
-  .report-contents li span {
-    min-width: 22px;
-    font-weight: 800;
-  }
-
-  .report-certification-note {
-    margin-top: 9px;
-    border: 1px solid #6b7280;
-    padding: 7px 8px;
-    font-size: 8.5px;
-    line-height: 1.5;
-  }
-
-  .report-signature-grid small {
-    display: block;
-    margin-top: 6px;
-    font-size: 7.5px;
-  }
-
-  .formal-evaluation-report {
-    counter-reset: page;
-  }
-
-  .report-header {
-    display: grid;
-    grid-template-columns: 62px minmax(0, 1fr) 100px;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 2px solid #111827;
-    padding-bottom: 10px;
-  }
-
-  .report-school-mark {
-    display: flex;
-    width: 54px;
-    height: 54px;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #111827;
-    border-radius: 50% !important;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-  }
-
-  .report-school-details {
-    text-align: center;
-  }
-
-  .report-school-details h1 {
-    margin: 2px 0;
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.025em;
-  }
-
-  .report-school-details p {
-    margin: 0;
-    font-size: 9px;
-  }
-
-  .report-republic {
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .report-control-copy {
-    text-align: right;
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-  }
-
-  .report-control-copy p {
-    margin: 0 0 4px;
-  }
-
-  .report-control-copy span {
-    display: inline-block;
-    border: 1px solid #111827;
-    padding: 2px 5px;
-  }
-
-  .report-title-block {
-    padding: 16px 0 12px;
-    text-align: center;
-  }
-
-  .report-title-block h2 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 0.045em;
-  }
-
-  .report-title-block p {
-    margin: 4px 0 0;
-    font-size: 9px;
-  }
-
-  .report-section {
-    margin-top: 14px;
-  }
-
-  .report-section-title {
-    margin: 0 0 7px;
-    border-bottom: 1px solid #111827;
-    padding-bottom: 4px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-  }
-
-  .report-information-table,
-  .report-standard-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .report-information-table th,
-  .report-information-table td,
-  .report-standard-table th,
-  .report-standard-table td {
-    border: 1px solid #9ca3af;
-    padding: 5px 6px;
-    vertical-align: top;
-  }
-
-  .report-information-table th {
-    width: 17%;
-    background: #ffffff !important;
-    text-align: left;
-    font-size: 9px;
-    font-weight: 700;
-  }
-
-  .report-information-table td {
-    width: 33%;
-    font-weight: 600;
-  }
-
-  .report-standard-table thead th {
-    background: #ffffff !important;
-    text-align: center;
-    font-size: 9px;
-    font-weight: 800;
-  }
-
-  .report-standard-table tbody td {
-    text-align: center;
-  }
-
-  .report-standard-table .report-left {
-    text-align: left;
-  }
-
-  .report-total-row td {
-    background: #ffffff !important;
-    font-weight: 800;
-  }
-
-  .report-summary-grid {
-    display: grid;
-    grid-template-columns: 1.35fr repeat(3, 1fr);
-    border: 1px solid #9ca3af;
-  }
-
-  .report-summary-grid > div {
-    border-right: 1px solid #9ca3af;
-    padding: 9px;
-    text-align: center;
-  }
-
-  .report-summary-grid > div:last-child {
-    border-right: 0;
-  }
-
-  .report-summary-label,
-  .report-summary-item p {
-    margin: 0;
-    font-size: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .report-summary-score {
-    margin: 3px 0 0;
-    font-size: 22px;
-    font-weight: 800;
-  }
-
-  .report-summary-score span {
-    font-size: 10px;
-  }
-
-  .report-summary-interpretation {
-    margin: 0;
-    font-size: 9px;
-    font-weight: 700;
-  }
-
-  .report-summary-item {
-    display: flex;
-    min-height: 72px;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .report-summary-item strong {
-    margin-top: 5px;
-    font-size: 14px;
-  }
-
-  .report-narrative,
-  .report-section-introduction,
-  .report-certification > p {
-    margin: 8px 0 0;
-    text-align: justify;
-    line-height: 1.6;
-  }
-
-  .report-analysis-box {
-    margin-top: 8px;
-    border: 1px solid #9ca3af;
-    padding: 8px 9px;
-  }
-
-  .report-analysis-box h4 {
-    margin: 0 0 3px;
-    font-size: 9px;
-    font-weight: 800;
-    text-transform: uppercase;
-  }
-
-  .report-analysis-box h4:not(:first-child) {
-    margin-top: 8px;
-  }
-
-  .report-analysis-box p,
-  .report-analysis-box ol {
-    margin: 0;
-    text-align: justify;
-  }
-
-  .report-analysis-box ol {
-    padding-left: 18px;
-  }
-
-  .formal-student-record {
-    margin-top: 12px;
-    border: 1px solid #6b7280;
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-  }
-
-  .formal-student-record-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    background: #ffffff !important;
-    border-bottom: 1px solid #6b7280;
-    padding: 7px 8px;
-  }
-
-  .formal-student-record-header p {
-    margin: 0;
-    font-size: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  .formal-student-record-header h4 {
-    margin: 2px 0 0;
-    font-size: 11px;
-    font-weight: 800;
-  }
-
-  .formal-student-record-header > div:last-child {
-    text-align: right;
-  }
-
-  .formal-student-record-header strong {
-    display: block;
-    font-size: 13px;
-  }
-
-  .formal-student-record-header span {
-    display: block;
-    font-size: 8px;
-    font-weight: 700;
-  }
-
-  .report-student-meta th,
-  .report-student-meta td {
-    padding: 4px 5px;
-  }
-
-  .report-individual-table {
-    margin-top: 7px;
-  }
-
-  .report-comment-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 7px;
-    padding: 7px;
-  }
-
-  .report-comment-box {
-    border: 1px solid #9ca3af;
-    padding: 6px 7px;
-  }
-
-  .report-comment-box h5 {
-    margin: 0 0 4px;
-    font-size: 9px;
-    font-weight: 800;
-    text-transform: uppercase;
-  }
-
-  .report-comment-box p {
-    margin: 0;
-    white-space: pre-wrap;
-    text-align: justify;
-  }
-
-  .report-comment-box p + p {
-    margin-top: 5px;
-  }
-
-  .report-signature-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
-    margin-top: 38px;
-    text-align: center;
-  }
-
-  .report-signature-grid span {
-    display: block;
-    border-top: 1px solid #111827;
-  }
-
-  .report-signature-grid strong {
-    display: block;
-    margin-top: 4px;
-    font-size: 9px;
-  }
-
-  .report-signature-grid p {
-    margin: 1px 0 0;
-    font-size: 8px;
-  }
-
-  .report-footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 20px;
-    border-top: 1px solid #9ca3af;
-    padding-top: 5px;
-    font-size: 7.5px;
-  }
-
-  .report-footer p {
-    margin: 0;
-  }
-
-  .report-page-break-before {
-    break-before: page;
-    page-break-before: always;
-  }
-
-  .report-criteria-table tr,
-  .report-individual-table tr,
-  .report-information-table tr {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .report-criteria-table thead,
-  .report-individual-table thead,
-  .report-rating-table thead,
-  .report-sentiment-table thead {
-    display: table-header-group;
-  }
-}
-
-/* Off-screen surface used by html2pdf.js. */
-.pdf-render-surface {
-  position: fixed;
-  top: 0;
-  left: -100000px;
-  z-index: -9999;
-  width: 794px;
-  min-height: 1123px;
-  overflow: visible;
-  background: #ffffff;
-  pointer-events: none;
-}
-
-.pdf-render-surface .formal-evaluation-report {
-  display: block !important;
-  width: 100% !important;
-}
-
-.pdf-render-surface .formal-evaluation-report {
-  display: block !important;
-  width: 100%;
-  color: #111827 !important;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 10.5px;
-  line-height: 1.45;
-}
-.pdf-render-surface .formal-evaluation-report * {
-  box-sizing: border-box;
-  color: inherit;
-}
-.pdf-render-surface .formal-evaluation-report,
-.pdf-render-surface .formal-evaluation-report *,
-.pdf-render-surface .report-header,
-.pdf-render-surface .report-section,
-.pdf-render-surface .report-title-block,
-.pdf-render-surface .report-summary-grid,
-.pdf-render-surface .report-summary-grid > div,
-.pdf-render-surface .formal-student-record,
-.pdf-render-surface .formal-student-record-header,
-.pdf-render-surface .report-comment-box,
-.pdf-render-surface .report-analysis-box,
-.pdf-render-surface .report-information-table th,
-.pdf-render-surface .report-information-table td,
-.pdf-render-surface .report-standard-table th,
-.pdf-render-surface .report-standard-table td {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-}
-.pdf-render-surface .report-document-control {
-  margin-top: 10px;
-}
-.pdf-render-surface .report-document-control table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.pdf-render-surface .report-document-control th,
-.pdf-render-surface .report-document-control td {
-  border: 1px solid #9ca3af;
-  padding: 4px 6px;
-  font-size: 8px;
-}
-.pdf-render-surface .report-document-control th {
-  width: 16%;
-  font-weight: 800;
-  text-align: left;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.pdf-render-surface .report-document-control td {
-  width: 34%;
-  font-weight: 600;
-}
-.pdf-render-surface .report-contents ol {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 18px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.pdf-render-surface .report-contents li {
-  display: flex;
-  gap: 7px;
-  border-bottom: 1px dotted #9ca3af;
-  padding: 3px 0;
-  font-size: 9px;
-}
-.pdf-render-surface .report-contents li span {
-  min-width: 22px;
-  font-weight: 800;
-}
-.pdf-render-surface .report-certification-note {
-  margin-top: 9px;
-  border: 1px solid #6b7280;
-  padding: 7px 8px;
-  font-size: 8.5px;
-  line-height: 1.5;
-}
-.pdf-render-surface .report-signature-grid small {
-  display: block;
-  margin-top: 6px;
-  font-size: 7.5px;
-}
-.pdf-render-surface .formal-evaluation-report {
-  counter-reset: page;
-}
-.pdf-render-surface .report-header {
-  display: grid;
-  grid-template-columns: 62px minmax(0, 1fr) 100px;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 2px solid #111827;
-  padding-bottom: 10px;
-}
-.pdf-render-surface .report-school-mark {
-  display: flex;
-  width: 54px;
-  height: 54px;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #111827;
-  border-radius: 50% !important;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-}
-.pdf-render-surface .report-school-details {
-  text-align: center;
-}
-.pdf-render-surface .report-school-details h1 {
-  margin: 2px 0;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.025em;
-}
-.pdf-render-surface .report-school-details p {
-  margin: 0;
-  font-size: 9px;
-}
-.pdf-render-surface .report-republic {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.pdf-render-surface .report-control-copy {
-  text-align: right;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-.pdf-render-surface .report-control-copy p {
-  margin: 0 0 4px;
-}
-.pdf-render-surface .report-control-copy span {
-  display: inline-block;
-  border: 1px solid #111827;
-  padding: 2px 5px;
-}
-.pdf-render-surface .report-title-block {
-  padding: 16px 0 12px;
-  text-align: center;
-}
-.pdf-render-surface .report-title-block h2 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 0.045em;
-}
-.pdf-render-surface .report-title-block p {
-  margin: 4px 0 0;
-  font-size: 9px;
-}
-.pdf-render-surface .report-section {
-  margin-top: 14px;
-}
-.pdf-render-surface .report-section-title {
-  margin: 0 0 7px;
-  border-bottom: 1px solid #111827;
-  padding-bottom: 4px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-.pdf-render-surface .report-information-table,
-.pdf-render-surface .report-standard-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.pdf-render-surface .report-information-table th,
-.pdf-render-surface .report-information-table td,
-.pdf-render-surface .report-standard-table th,
-.pdf-render-surface .report-standard-table td {
-  border: 1px solid #9ca3af;
-  padding: 5px 6px;
-  vertical-align: top;
-}
-.pdf-render-surface .report-information-table th {
-  width: 17%;
-  background: #ffffff !important;
-  text-align: left;
-  font-size: 9px;
-  font-weight: 700;
-}
-.pdf-render-surface .report-information-table td {
-  width: 33%;
-  font-weight: 600;
-}
-.pdf-render-surface .report-standard-table thead th {
-  background: #ffffff !important;
-  text-align: center;
-  font-size: 9px;
-  font-weight: 800;
-}
-.pdf-render-surface .report-standard-table tbody td {
-  text-align: center;
-}
-.pdf-render-surface .report-standard-table .report-left {
-  text-align: left;
-}
-.pdf-render-surface .report-total-row td {
-  background: #ffffff !important;
-  font-weight: 800;
-}
-.pdf-render-surface .report-summary-grid {
-  display: grid;
-  grid-template-columns: 1.35fr repeat(3, 1fr);
-  border: 1px solid #9ca3af;
-}
-.pdf-render-surface .report-summary-grid > div {
-  border-right: 1px solid #9ca3af;
-  padding: 9px;
-  text-align: center;
-}
-.pdf-render-surface .report-summary-grid > div:last-child {
-  border-right: 0;
-}
-.pdf-render-surface .report-summary-label,
-.pdf-render-surface .report-summary-item p {
-  margin: 0;
-  font-size: 8px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.pdf-render-surface .report-summary-score {
-  margin: 3px 0 0;
-  font-size: 22px;
-  font-weight: 800;
-}
-.pdf-render-surface .report-summary-score span {
-  font-size: 10px;
-}
-.pdf-render-surface .report-summary-interpretation {
-  margin: 0;
-  font-size: 9px;
-  font-weight: 700;
-}
-.pdf-render-surface .report-summary-item {
-  display: flex;
-  min-height: 72px;
-  flex-direction: column;
-  justify-content: center;
-}
-.pdf-render-surface .report-summary-item strong {
-  margin-top: 5px;
-  font-size: 14px;
-}
-.pdf-render-surface .report-narrative,
-.pdf-render-surface .report-section-introduction,
-.pdf-render-surface .report-certification > p {
-  margin: 8px 0 0;
-  text-align: justify;
-  line-height: 1.6;
-}
-.pdf-render-surface .report-analysis-box {
-  margin-top: 8px;
-  border: 1px solid #9ca3af;
-  padding: 8px 9px;
-}
-.pdf-render-surface .report-analysis-box h4 {
-  margin: 0 0 3px;
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-.pdf-render-surface .report-analysis-box h4:not(:first-child) {
-  margin-top: 8px;
-}
-.pdf-render-surface .report-analysis-box p,
-.pdf-render-surface .report-analysis-box ol {
-  margin: 0;
-  text-align: justify;
-}
-.pdf-render-surface .report-analysis-box ol {
-  padding-left: 18px;
-}
-.pdf-render-surface .formal-student-record {
-  margin-top: 12px;
-  border: 1px solid #6b7280;
-  break-inside: auto !important;
-  page-break-inside: auto !important;
-}
-.pdf-render-surface .formal-student-record-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  background: #ffffff !important;
-  border-bottom: 1px solid #6b7280;
-  padding: 7px 8px;
-}
-.pdf-render-surface .formal-student-record-header p {
-  margin: 0;
-  font-size: 8px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.pdf-render-surface .formal-student-record-header h4 {
-  margin: 2px 0 0;
-  font-size: 11px;
-  font-weight: 800;
-}
-.pdf-render-surface .formal-student-record-header > div:last-child {
-  text-align: right;
-}
-.pdf-render-surface .formal-student-record-header strong {
-  display: block;
-  font-size: 13px;
-}
-.pdf-render-surface .formal-student-record-header span {
-  display: block;
-  font-size: 8px;
-  font-weight: 700;
-}
-.pdf-render-surface .report-student-meta th,
-.pdf-render-surface .report-student-meta td {
-  padding: 4px 5px;
-}
-.pdf-render-surface .report-individual-table {
-  margin-top: 7px;
-}
-.pdf-render-surface .report-comment-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
-  padding: 7px;
-}
-.pdf-render-surface .report-comment-box {
-  border: 1px solid #9ca3af;
-  padding: 6px 7px;
-}
-.pdf-render-surface .report-comment-box h5 {
-  margin: 0 0 4px;
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-.pdf-render-surface .report-comment-box p {
-  margin: 0;
-  white-space: pre-wrap;
-  text-align: justify;
-}
-.pdf-render-surface .report-comment-box p + p {
-  margin-top: 5px;
-}
-.pdf-render-surface .report-signature-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  margin-top: 38px;
-  text-align: center;
-}
-.pdf-render-surface .report-signature-grid span {
-  display: block;
-  border-top: 1px solid #111827;
-}
-.pdf-render-surface .report-signature-grid strong {
-  display: block;
-  margin-top: 4px;
-  font-size: 9px;
-}
-.pdf-render-surface .report-signature-grid p {
-  margin: 1px 0 0;
-  font-size: 8px;
-}
-.pdf-render-surface .report-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 20px;
-  border-top: 1px solid #9ca3af;
-  padding-top: 5px;
-  font-size: 7.5px;
-}
-.pdf-render-surface .report-footer p {
-  margin: 0;
-}
-.pdf-render-surface .report-page-break-before {
-  break-before: page;
-  page-break-before: always;
-}
-.pdf-render-surface .report-criteria-table tr,
-.pdf-render-surface .report-individual-table tr,
-.pdf-render-surface .report-information-table tr {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-.pdf-render-surface .report-criteria-table thead,
-.pdf-render-surface .report-individual-table thead,
-.pdf-render-surface .report-rating-table thead,
-.pdf-render-surface .report-sentiment-table thead {
-  display: table-header-group;
 }
 </style>

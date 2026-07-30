@@ -130,7 +130,7 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
         {
           label: "Overall Feedback",
           icon: "i-lucide-message-square-text",
-          to: "/admin/evaluation/overall-feedback",
+          to: "/admin/evaluation/overall-feedbacks",
           
         },
         // {
@@ -264,7 +264,7 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
           exact: true,
         },
         {
-          label: "Overall Performance",
+          label: "Overall Feedbacks",
           icon: "i-lucide-school",
           to: "/student/overall-performance",
         },
