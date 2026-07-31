@@ -456,9 +456,11 @@
               </UFormField>
 
               <UFormField label="Year Level" name="year_level" required>
-                <UInput
+                <USelectMenu
                   v-model="createForm.year_level"
-                  placeholder="e.g. 1st Year"
+                  :items="yearLevelOptions"
+                  value-key="value"
+                  placeholder="Select year level"
                   class="w-full"
                 />
               </UFormField>
@@ -471,11 +473,18 @@
                 />
               </UFormField>
 
-              <UFormField label="Username" name="username" required>
+              <UFormField
+                label="Username"
+                name="username"
+                description="Automatically uses the Student ID."
+                required
+              >
                 <UInput
                   v-model="createForm.username"
                   autocomplete="username"
-                  placeholder="Enter username"
+                  placeholder="Student ID will be used"
+                  icon="i-lucide-badge-check"
+                  readonly
                   class="w-full"
                 />
               </UFormField>
@@ -577,7 +586,13 @@
               </UFormField>
 
               <UFormField label="Year Level" name="year_level" required>
-                <UInput v-model="editForm.year_level" class="w-full" />
+                <USelectMenu
+                  v-model="editForm.year_level"
+                  :items="yearLevelOptions"
+                  value-key="value"
+                  placeholder="Select year level"
+                  class="w-full"
+                />
               </UFormField>
 
               <UFormField label="Section" name="section" required>
@@ -973,6 +988,14 @@ const pageSizeOptions = [
   { label: '20 rows', value: 20 },
   { label: '50 rows', value: 50 },
   { label: '100 rows', value: 100 }
+]
+
+const yearLevelOptions = [
+  { label: '1st Year', value: '1st Year' },
+  { label: '2nd Year', value: '2nd Year' },
+  { label: '3rd Year', value: '3rd Year' },
+  { label: '4th Year', value: '4th Year' },
+  { label: '5th Year', value: '5th Year' }
 ]
 
 const createForm = reactive({
@@ -1470,7 +1493,7 @@ const createStudent = async () => {
         course: createForm.course,
         year_level: createForm.year_level.trim(),
         section: createForm.section.trim(),
-        username: createForm.username.trim(),
+        username: createForm.student_id.trim(),
         email: createForm.email.trim(),
         password: createForm.password
       }
@@ -1658,6 +1681,13 @@ const confirmDelete = async () => {
     loadingDelete.value = false
   }
 }
+
+watch(
+  () => createForm.student_id,
+  value => {
+    createForm.username = String(value || '').trim()
+  }
+)
 
 watch(
   [

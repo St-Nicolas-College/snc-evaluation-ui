@@ -293,7 +293,7 @@
                 />
               </th>
 
-              <th class="px-4 py-3 text-left">Code</th>
+              <!-- <th class="px-4 py-3 text-left">Code</th> -->
               <th class="px-4 py-3 text-left">Course Name</th>
               <th class="px-4 py-3 text-left">Department</th>
               <th class="w-20 px-4 py-3 text-center">Action</th>
@@ -313,11 +313,11 @@
                 />
               </td>
 
-              <td class="px-4 py-4">
+              <!-- <td class="px-4 py-4">
                 <UBadge color="primary" variant="subtle">
                   {{ formatCourseCode(course.code) }}
                 </UBadge>
-              </td>
+              </td> -->
 
               <td class="px-4 py-4">
                 <div class="flex min-w-0 items-center gap-3">

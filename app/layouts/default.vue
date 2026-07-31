@@ -113,25 +113,21 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
           label: "Student – Faculty",
           icon: "i-lucide-graduation-cap",
           to: "/admin/evaluation/student-faculty",
-          
         },
         {
           label: "Faculty – Dean",
           icon: "i-lucide-building-2",
           to: "/admin/evaluation/faculty-dean",
-         
         },
         {
           label: "Dean – Faculty",
           icon: "i-lucide-presentation",
           to: "/admin/evaluation/dean-faculty",
-          
         },
         {
           label: "Overall Feedback",
           icon: "i-lucide-message-square-text",
           to: "/admin/evaluation/overall-feedbacks",
-          
         },
         // {
         //   label: "Evaluation Results",
@@ -169,12 +165,12 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
           to: "/admin/management/course",
           exact: true,
         },
-        {
-          label: "Subjects",
-          icon: "i-lucide-book-open",
-          to: "/admin/management/subjects",
-          exact: true,
-        },
+        // {
+        //   label: "Subjects",
+        //   icon: "i-lucide-book-open",
+        //   to: "/admin/management/subjects",
+        //   exact: true,
+        // },
         {
           label: "Evaluation Sections",
           icon: "i-lucide-panels-top-left",
@@ -188,6 +184,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
           exact: true,
         },
       ],
+    },
+    {
+      label: "Evaluation Reports",
+      icon: "i-lucide-file-chart-column",
+      to: "/admin/reports/evaluations",
     },
   ],
 

@@ -45,8 +45,8 @@
             </h1>
 
             <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
-              Register faculty and Dean accounts, manage departments, roles,
-              contact information, and subject assignments.
+              Register Faculty and Dean accounts, manage departments, roles,
+              and contact information.
             </p>
           </div>
         </div>
@@ -108,9 +108,9 @@
       />
 
       <StatCard
-        label="Subject Assignments"
-        :value="summary.assignments"
-        icon="i-lucide-book-open-check"
+        label="Departments"
+        :value="summary.departments"
+        icon="i-lucide-building-2"
         tone="amber"
       />
     </section>
@@ -290,7 +290,7 @@
       </div>
 
       <div v-else class="overflow-x-auto">
-        <table class="w-full min-w-[1120px] text-sm">
+        <table class="w-full min-w-[920px] text-sm">
           <thead
             class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
           >
@@ -308,7 +308,6 @@
               <th class="px-4 py-3 text-left">Department</th>
               <th class="px-4 py-3 text-left">Role</th>
               <th class="px-4 py-3 text-left">Email</th>
-              <th class="px-4 py-3 text-left">Assigned Subjects</th>
               <th class="w-20 px-4 py-3 text-center">Action</th>
             </tr>
           </thead>
@@ -367,36 +366,6 @@
                 {{ teacher.user?.email || '—' }}
               </td>
 
-              <td class="px-4 py-4">
-                <UTooltip
-                  v-if="teacher.assigned_subjects?.length"
-                  :text="formatSubjectTooltip(teacher.assigned_subjects)"
-                >
-                  <div class="flex max-w-[330px] flex-wrap gap-1">
-                    <UBadge
-                      v-for="subject in teacher.assigned_subjects.slice(0, 3)"
-                      :key="subject.documentId || subject.id"
-                      color="primary"
-                      variant="soft"
-                    >
-                      {{ subject.code || subject.name }}
-                    </UBadge>
-
-                    <UBadge
-                      v-if="teacher.assigned_subjects.length > 3"
-                      color="neutral"
-                      variant="soft"
-                    >
-                      +{{ teacher.assigned_subjects.length - 3 }} more
-                    </UBadge>
-                  </div>
-                </UTooltip>
-
-                <span v-else class="text-xs text-gray-400">
-                  No subjects assigned
-                </span>
-              </td>
-
               <td class="px-4 py-4 text-center">
                 <UDropdownMenu :items="getDropdownActions(teacher)">
                   <UButton
@@ -453,7 +422,13 @@
     <!-- =====================================================
       CREATE MODAL
     ====================================================== -->
-    <UModal v-model:open="createModal" :ui="{ content: 'max-w-3xl' }">
+    <UModal
+      id="register-faculty-modal"
+      v-model:open="createModal"
+      title="Register Faculty"
+      description="Create a new Faculty or Dean account."
+      :ui="{ content: 'max-w-3xl' }"
+    >
       <template #content>
         <div class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900">
           <ModalHeader
@@ -501,11 +476,18 @@
                 />
               </UFormField>
 
-              <UFormField label="Username" name="username" required>
+              <UFormField
+                label="Username"
+                name="username"
+                description="Automatically uses the Employee No."
+                required
+              >
                 <UInput
                   v-model="createForm.username"
                   autocomplete="username"
-                  placeholder="Enter username"
+                  placeholder="Employee No. will be used"
+                  icon="i-lucide-badge-check"
+                  readonly
                   class="w-full"
                 />
               </UFormField>
@@ -570,12 +552,18 @@
     <!-- =====================================================
       EDIT MODAL
     ====================================================== -->
-    <UModal v-model:open="editModal" :ui="{ content: 'max-w-4xl' }">
+    <UModal
+      id="edit-faculty-modal"
+      v-model:open="editModal"
+      title="Edit Faculty"
+      description="Update faculty account and personnel information."
+      :ui="{ content: 'max-w-4xl' }"
+    >
       <template #content>
         <div class="max-h-[90vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900">
           <ModalHeader
             title="Edit Faculty"
-            description="Update account details and subject assignments."
+            description="Update faculty account and personnel information."
             icon="i-lucide-user-round-cog"
             tone="blue"
             @close="editModal = false"
@@ -616,85 +604,6 @@
               </UFormField>
             </div>
 
-            <section
-              class="rounded-2xl border border-gray-200 p-4 dark:border-gray-800"
-            >
-              <div class="mb-4">
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                  Assigned Subjects
-                </h3>
-
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Select every subject currently handled by this faculty member.
-                </p>
-              </div>
-
-              <UFormField name="assigned_subjects">
-                <USelectMenu
-                  v-model="editForm.assigned_subjects"
-                  :items="subjectOptions"
-                  value-key="value"
-                  multiple
-                  class="w-full"
-                  placeholder="Select assigned subjects"
-                />
-              </UFormField>
-
-              <div
-                v-if="assignedSubjectPreview.length"
-                class="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800"
-              >
-                <table class="w-full text-sm">
-                  <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-950/40">
-                    <tr>
-                      <th class="px-4 py-3 text-left">Code</th>
-                      <th class="px-4 py-3 text-left">Subject</th>
-                      <th class="px-4 py-3 text-left">Course</th>
-                      <th class="w-16 px-4 py-3 text-center">Remove</th>
-                    </tr>
-                  </thead>
-
-                  <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                    <tr
-                      v-for="subject in assignedSubjectPreview"
-                      :key="subject.documentId || subject.id"
-                    >
-                      <td class="px-4 py-3 font-mono text-xs">
-                        {{ subject.code || '—' }}
-                      </td>
-
-                      <td class="px-4 py-3 font-medium">
-                        {{ subject.name }}
-                      </td>
-
-                      <td class="px-4 py-3 text-gray-500">
-                        {{ subject.course?.name || '—' }}
-                      </td>
-
-                      <td class="px-4 py-3 text-center">
-                        <UButton
-                          color="error"
-                          variant="ghost"
-                          size="xs"
-                          icon="i-lucide-x"
-                          square
-                          type="button"
-                          @click="removeSubject(subject.documentId || subject.id)"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div
-                v-else
-                class="mt-4 rounded-xl border border-dashed border-gray-300 px-4 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
-              >
-                No assigned subjects selected.
-              </div>
-            </section>
-
             <div class="flex flex-col-reverse gap-2 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end dark:border-gray-800">
               <UButton
                 color="neutral"
@@ -722,7 +631,13 @@
     <!-- =====================================================
       DELETE CONFIRMATION
     ====================================================== -->
-    <UModal v-model:open="deleteModal" :ui="{ content: 'max-w-md' }">
+    <UModal
+      id="delete-faculty-modal"
+      v-model:open="deleteModal"
+      title="Confirm Faculty Deletion"
+      description="Permanently delete the selected faculty record or records."
+      :ui="{ content: 'max-w-md' }"
+    >
       <template #content>
         <div class="rounded-[24px] bg-white p-6 dark:bg-gray-900">
           <div
@@ -970,7 +885,6 @@ const selectedDepartment = ref('all')
 const selectedRole = ref('all')
 
 const teachers = ref<any[]>([])
-const subjects = ref<any[]>([])
 const departments = ref<any[]>([])
 
 const selectedId = ref<any>(null)
@@ -1011,8 +925,7 @@ const editForm = reactive({
   name: '',
   department: null as any,
   roleName: '',
-  email: '',
-  assigned_subjects: [] as string[]
+  email: ''
 })
 
 const summary = computed(() => ({
@@ -1026,11 +939,11 @@ const summary = computed(() => ({
     teacher => teacher?.user?.role?.name === 'Dean'
   ).length,
 
-  assignments: teachers.value.reduce(
-    (sum, teacher) =>
-      sum + (teacher?.assigned_subjects?.length || 0),
-    0
-  )
+  departments: new Set(
+    teachers.value
+      .map(teacher => teacher?.department?.id)
+      .filter(Boolean)
+  ).size
 }))
 
 const departmentOptions = computed(() =>
@@ -1058,16 +971,6 @@ const selectedDepartmentLabel = computed(() =>
   )?.label || 'Department'
 )
 
-const subjectOptions = computed(() =>
-  subjects.value.map(subject => ({
-    label: `${subject.code ? `${subject.code} - ` : ''}${subject.name}${
-      subject.course?.name ? ` (${subject.course.name})` : ''
-    }`,
-
-    value: subject.documentId || subject.id
-  }))
-)
-
 const filteredTeachers = computed(() => {
   const keyword = globalFilter.value.trim().toLowerCase()
 
@@ -1078,11 +981,7 @@ const filteredTeachers = computed(() => {
       teacher.department?.name,
       teacher.user?.username,
       teacher.user?.email,
-      teacher.user?.role?.name,
-      ...(teacher.assigned_subjects || []).flatMap((subject: any) => [
-        subject.code,
-        subject.name
-      ])
+      teacher.user?.role?.name
     ]
       .filter(Boolean)
       .join(' ')
@@ -1144,14 +1043,6 @@ const selectedCount = computed(() =>
   Object.values(selectedRows.value).filter(Boolean).length
 )
 
-const assignedSubjectPreview = computed(() =>
-  subjects.value.filter(subject =>
-    editForm.assigned_subjects.includes(
-      subject.documentId || subject.id
-    )
-  )
-)
-
 const hasActiveFilters = computed(() =>
   Boolean(
     globalFilter.value ||
@@ -1188,15 +1079,6 @@ const createInitials = (value: string) =>
     )
     .join('')
 
-const formatSubjectTooltip = (items: any[]) =>
-  items
-    .map(subject =>
-      subject.code
-        ? `${subject.code} - ${subject.name}`
-        : subject.name
-    )
-    .join(', ')
-
 const resetCreateForm = () => {
   createForm.employee_no = ''
   createForm.name = ''
@@ -1215,7 +1097,6 @@ const resetEditForm = () => {
   editForm.department = null
   editForm.roleName = ''
   editForm.email = ''
-  editForm.assigned_subjects = []
 
   selectedId.value = null
 }
@@ -1233,12 +1114,6 @@ const openEditModal = (row: any) => {
   editForm.department = row.department?.id || null
   editForm.roleName = row.user?.role?.name || ''
   editForm.email = row.user?.email || ''
-
-  editForm.assigned_subjects =
-    row.assigned_subjects?.map(
-      (subject: any) =>
-        subject.documentId || subject.id
-    ) || []
 
   editModal.value = true
 }
@@ -1315,13 +1190,6 @@ const getDropdownActions = (
   ]
 ]
 
-const removeSubject = (id: string) => {
-  editForm.assigned_subjects =
-    editForm.assigned_subjects.filter(
-      subjectId => subjectId !== id
-    )
-}
-
 const getDepartments = async () => {
   try {
     const res: any = await $api(
@@ -1345,35 +1213,6 @@ const getDepartments = async () => {
   }
 }
 
-const getSubjects = async () => {
-  try {
-    const res: any = await $api(
-      '/subjects',
-      {
-        query: {
-          'populate[course][populate][0]':
-            'department',
-
-          'sort[0]':
-            'name:asc',
-
-          'pagination[pageSize]':
-            500
-        }
-      }
-    )
-
-    subjects.value = res.data || []
-  } catch (error) {
-    console.error(
-      'Subject loading error:',
-      error
-    )
-
-    subjects.value = []
-  }
-}
-
 const getTeachers = async () => {
   loading.value = true
   loadError.value = ''
@@ -1385,9 +1224,6 @@ const getTeachers = async () => {
         query: {
           'populate[department]':
             true,
-
-          'populate[assigned_subjects][populate][0]':
-            'course',
 
           'populate[user][populate][0]':
             'role',
@@ -1508,7 +1344,7 @@ const createTeacher = async () => {
           createForm.roleName,
 
         username:
-          createForm.username.trim(),
+          createForm.employee_no.trim(),
 
         email:
           createForm.email.trim(),
@@ -1578,10 +1414,7 @@ const updateTeacher = async () => {
             editForm.email.trim(),
 
           roleName:
-            editForm.roleName,
-
-          assigned_subjects:
-            editForm.assigned_subjects
+            editForm.roleName
         }
       }
     )
@@ -1733,6 +1566,13 @@ const confirmDelete = async () => {
 }
 
 watch(
+  () => createForm.employee_no,
+  value => {
+    createForm.username = String(value || '').trim()
+  }
+)
+
+watch(
   [
     globalFilter,
     selectedDepartment,
@@ -1756,7 +1596,6 @@ watch(
 onMounted(async () => {
   await Promise.all([
     getDepartments(),
-    getSubjects(),
     getTeachers()
   ])
 })

@@ -1087,7 +1087,7 @@ const quickActions = [
   {
     label: 'Manage Students',
     description: 'View student accounts',
-    to: '/students',
+    to: '/admin/management/student',
     icon: 'i-lucide-graduation-cap',
     iconClass:
       'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400'
@@ -1095,7 +1095,7 @@ const quickActions = [
   {
     label: 'Manage Faculty',
     description: 'View faculty accounts',
-    to: '/teachers',
+    to: '/admin/management/faculty',
     icon: 'i-lucide-users-round',
     iconClass:
       'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
@@ -1103,7 +1103,7 @@ const quickActions = [
   {
     label: 'Evaluation Results',
     description: 'Review submitted results',
-    to: '/evaluation-results',
+    to: '/admin/evaluation/student-faculty',
     icon: 'i-lucide-chart-column-big',
     iconClass:
       'bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400'
@@ -1111,7 +1111,7 @@ const quickActions = [
   {
     label: 'Evaluation Setup',
     description: 'Configure sections and criteria',
-    to: '/evaluation-sections',
+    to: '/admin/management/section',
     icon: 'i-lucide-settings-2',
     iconClass:
       'bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400'

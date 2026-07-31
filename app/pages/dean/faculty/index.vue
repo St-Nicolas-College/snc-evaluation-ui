@@ -33,13 +33,12 @@
             </h1>
 
             <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
-              Register, update, assign subjects, and manage faculty accounts
-              within your department.
+              Register, update, and manage faculty accounts within your department.
             </p>
           </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 sm:min-w-[390px]">
+        <div class="grid grid-cols-2 gap-2 sm:min-w-[300px]">
           <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
             <p class="text-2xl font-bold">
               {{ teachers.length }}
@@ -52,21 +51,11 @@
 
           <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
             <p class="text-2xl font-bold">
-              {{ assignedFacultyCount }}
+              {{ deanDepartmentId ? 1 : 0 }}
             </p>
 
             <p class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100">
-              With Subjects
-            </p>
-          </div>
-
-          <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
-            <p class="text-2xl font-bold">
-              {{ departmentSubjectCount }}
-            </p>
-
-            <p class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100">
-              Subjects
+              Department
             </p>
           </div>
         </div>
@@ -208,7 +197,7 @@
         class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
       >
         <div class="overflow-x-auto">
-          <table class="min-w-[1100px] w-full border-collapse">
+          <table class="min-w-[900px] w-full border-collapse">
             <thead>
               <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-950/40">
                 <th class="w-12 px-4 py-3 text-center">
@@ -234,10 +223,6 @@
                   Email
                 </th>
 
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                  Assigned Subjects
-                </th>
-
                 <th class="w-20 px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wide text-gray-500">
                   Action
                 </th>
@@ -246,7 +231,7 @@
 
             <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
               <tr v-if="loading">
-                <td colspan="7" class="px-4 py-12 text-center">
+                <td colspan="6" class="px-4 py-12 text-center">
                   <UIcon name="i-lucide-loader-circle" class="mx-auto size-6 animate-spin text-emerald-500" />
                   <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                     Loading faculty...
@@ -255,7 +240,7 @@
               </tr>
 
               <tr v-else-if="paginatedTeachers.length === 0">
-                <td colspan="7" class="px-4 py-12 text-center">
+                <td colspan="6" class="px-4 py-12 text-center">
                   <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800">
                     <UIcon name="i-lucide-users-round" class="size-7" />
                   </div>
@@ -312,44 +297,6 @@
 
                 <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                   {{ teacher.user?.email || '-' }}
-                </td>
-
-                <td class="px-4 py-3">
-                  <UTooltip
-                    v-if="teacher.assigned_subjects?.length"
-                    :text="teacher.assigned_subjects
-                      .map((subject: any) =>
-                        subject.code
-                          ? `${subject.code} - ${subject.name}`
-                          : subject.name
-                      )
-                      .join(', ')"
-                  >
-                    <div class="flex flex-wrap gap-1">
-                      <UBadge
-                        v-for="subject in teacher.assigned_subjects.slice(0, 3)"
-                        :key="subject.documentId || subject.id"
-                        color="primary"
-                        variant="soft"
-                        size="sm"
-                      >
-                        {{ subject.code || subject.name }}
-                      </UBadge>
-
-                      <UBadge
-                        v-if="teacher.assigned_subjects.length > 3"
-                        color="neutral"
-                        variant="soft"
-                        size="sm"
-                      >
-                        +{{ teacher.assigned_subjects.length - 3 }}
-                      </UBadge>
-                    </div>
-                  </UTooltip>
-
-                  <span v-else class="text-xs text-gray-400">
-                    No subjects assigned
-                  </span>
                 </td>
 
                 <td class="px-4 py-3 text-center">
@@ -466,13 +413,19 @@
                 />
               </UFormField>
 
-              <UFormField label="Username" name="username" required>
+              <UFormField
+                label="Username"
+                name="username"
+                description="Automatically uses the Employee No."
+                required
+              >
                 <UInput
                   v-model="createForm.username"
-                  icon="i-lucide-at-sign"
+                  icon="i-lucide-badge-check"
                   class="w-full"
-                  placeholder="Enter username"
+                  placeholder="Employee No. will be used"
                   autocomplete="username"
+                  readonly
                 />
               </UFormField>
 
@@ -548,7 +501,7 @@
                   </h2>
 
                   <p class="mt-1 text-xs text-slate-300">
-                    Update faculty information and subject assignments.
+                    Update faculty account information.
                   </p>
                 </div>
               </div>
@@ -612,91 +565,6 @@
                   class="w-full"
                 />
               </UFormField>
-            </div>
-
-            <div class="space-y-3">
-              <UFormField label="Assigned Subjects">
-                <USelectMenu
-                  v-model="editForm.assigned_subjects"
-                  :items="subjectOptions"
-                  value-key="value"
-                  multiple
-                  class="w-full"
-                  placeholder="Select assigned subjects"
-                >
-                  <template #default="{ modelValue }">
-                    <div class="flex min-h-7 flex-wrap items-center gap-1">
-                      <UBadge
-                        v-for="id in modelValue"
-                        :key="id"
-                        color="primary"
-                        variant="soft"
-                        class="flex items-center gap-1"
-                      >
-                        {{ getSubjectName(id) }}
-
-                        <UIcon
-                          name="i-lucide-x"
-                          class="cursor-pointer"
-                          @click.stop="removeSubject(id)"
-                        />
-                      </UBadge>
-
-                      <span
-                        v-if="!modelValue?.length"
-                        class="text-gray-400"
-                      >
-                        Select assigned subjects
-                      </span>
-                    </div>
-                  </template>
-                </USelectMenu>
-              </UFormField>
-
-              <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-                <table class="w-full border-collapse text-sm">
-                  <thead>
-                    <tr class="bg-gray-50 dark:bg-gray-950/40">
-                      <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                        Code
-                      </th>
-
-                      <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                        Subject
-                      </th>
-
-                      <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                        Course
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-                    <tr v-if="assignedSubjectPreview.length === 0">
-                      <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500">
-                        No assigned subjects selected.
-                      </td>
-                    </tr>
-
-                    <tr
-                      v-for="subject in assignedSubjectPreview"
-                      :key="subject.documentId || subject.id"
-                    >
-                      <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                        {{ subject.code || '-' }}
-                      </td>
-
-                      <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
-                        {{ subject.name }}
-                      </td>
-
-                      <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                        {{ subject.course?.name || '-' }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
             </div>
 
             <div class="flex justify-end gap-2 border-t border-gray-200 pt-5 dark:border-gray-800">
@@ -807,7 +675,6 @@ const itemsPerPage = 10
 const globalFilter = ref('')
 
 const teachers = ref<any[]>([])
-const subjects = ref<any[]>([])
 const deanProfile = ref<any>(null)
 
 const selectedId = ref<any>(null)
@@ -824,8 +691,7 @@ const createForm = reactive({
 const editForm = reactive({
   employee_no: '',
   name: '',
-  email: '',
-  assigned_subjects: [] as string[]
+  email: ''
 })
 
 const deanName = computed(() => {
@@ -865,16 +731,7 @@ const deanInitials = computed(() => {
   return createInitials(deanName.value)
 })
 
-const assignedFacultyCount = computed(() => {
-  return teachers.value.filter(
-    teacher =>
-      teacher.assigned_subjects?.length
-  ).length
-})
 
-const departmentSubjectCount = computed(() => {
-  return subjects.value.length
-})
 
 const isCreateFormValid = computed(() => {
   return Boolean(
@@ -953,30 +810,18 @@ const allVisibleSelected = computed(() => {
   )
 })
 
-const assignedSubjectPreview = computed(() => {
-  return subjects.value.filter(
-    subject =>
-      editForm.assigned_subjects.includes(
-        subject.documentId
-      )
-  )
-})
 
-const subjectOptions = computed(() => {
-  return subjects.value.map((subject: any) => ({
-    label:
-      `${subject.code ? `${subject.code} - ` : ''}` +
-      `${subject.name}` +
-      `${subject.course?.name ? ` (${subject.course.name})` : ''}`,
-
-    value:
-      subject.documentId
-  }))
-})
 
 watch(globalFilter, () => {
   page.value = 1
 })
+
+watch(
+  () => createForm.employee_no,
+  value => {
+    createForm.username = String(value || '').trim()
+  }
+)
 
 const createInitials = (value: string) => {
   return String(value || '')
@@ -1001,8 +846,6 @@ const resetEditForm = () => {
   editForm.employee_no = ''
   editForm.name = ''
   editForm.email = ''
-  editForm.assigned_subjects = []
-
   selectedId.value = null
 }
 
@@ -1023,12 +866,6 @@ const openEditModal = (row: any) => {
 
   editForm.email =
     row.user?.email || ''
-
-  editForm.assigned_subjects =
-    row.assigned_subjects?.map(
-      (subject: any) =>
-        subject.documentId
-    ) || []
 
   editModal.value = true
 }
@@ -1117,32 +954,7 @@ const getDropdownActions = (
   ]]
 }
 
-const getSubjectName = (
-  documentId: string
-) => {
-  const subject =
-    subjects.value.find(
-      item =>
-        item.documentId ===
-        documentId
-    )
 
-  return (
-    subject?.code ||
-    subject?.name ||
-    'Unknown'
-  )
-}
-
-const removeSubject = (
-  documentId: string
-) => {
-  editForm.assigned_subjects =
-    editForm.assigned_subjects.filter(
-      value =>
-        value !== documentId
-    )
-}
 
 const getDeanProfile = async () => {
   if (!user.value?.id) {
@@ -1170,31 +982,6 @@ const getDeanProfile = async () => {
     response.data?.[0] || null
 }
 
-const getSubjects = async () => {
-  if (!deanDepartmentId.value) {
-    subjects.value = []
-    return
-  }
-
-  const response = await $api('/subjects', {
-    query: {
-      'filters[course][department][id][$eq]':
-        deanDepartmentId.value,
-
-      'populate[course][populate][0]':
-        'department',
-
-      'sort[0]':
-        'name:asc',
-
-      'pagination[pageSize]':
-        500
-    }
-  })
-
-  subjects.value =
-    response.data || []
-}
 
 const getTeachers = async () => {
   if (!deanDepartmentId.value) {
@@ -1212,9 +999,6 @@ const getTeachers = async () => {
 
       'populate[department]':
         true,
-
-      'populate[assigned_subjects][populate][0]':
-        'course',
 
       'populate[user][populate][0]':
         'role',
@@ -1255,7 +1039,7 @@ const createTeacher = async () => {
           'Faculty',
 
         username:
-          createForm.username.trim(),
+          createForm.employee_no.trim(),
 
         email:
           createForm.email.trim(),
@@ -1323,10 +1107,7 @@ const updateTeacher = async () => {
             editForm.email.trim(),
 
           roleName:
-            'Faculty',
-
-          assigned_subjects:
-            editForm.assigned_subjects
+            'Faculty'
         }
       }
     )
@@ -1334,7 +1115,7 @@ const updateTeacher = async () => {
     toast.add({
       title: 'Faculty updated',
       description:
-        'Faculty information and subject assignments were updated successfully.',
+        'Faculty information was updated successfully.',
       icon: 'i-lucide-circle-check-big',
       color: 'success'
     })
@@ -1475,10 +1256,7 @@ const loadData = async () => {
       )
     }
 
-    await Promise.all([
-      getTeachers(),
-      getSubjects()
-    ])
+    await getTeachers()
   } catch (error: any) {
     console.error(
       'Department faculty management loading error:',
