@@ -13,7 +13,13 @@ const collapsed = ref(false);
 const mobileOpen = ref(false);
 const logoutOpen = ref(false);
 
-const openGroups = ref<string[]>(["Evaluation", "Management"]);
+const openGroups = ref<string[]>([
+  "Evaluation",
+  "Management",
+  "Portfolio Management",
+  "Ranking",
+  "Reports",
+]);
 
 /* =========================================================
    USER INFORMATION
@@ -85,6 +91,13 @@ const roleInformationMap: Record<string, any> = {
     label: "Student",
     description: "Student evaluation portal",
     icon: "i-lucide-graduation-cap",
+    color: "info",
+  },
+
+  HR: {
+    label: "Human Resource",
+    description: "Portfolio verification and personnel records",
+    icon: "i-lucide-briefcase-business",
     color: "info",
   },
 };
@@ -221,6 +234,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       to: "/dean/faculty-ranking",
       exact: true,
     },
+    {
+      label: "Faculty Portfolios",
+      icon: "i-lucide-folder-check",
+      to: "/dean/portfolio",
+    },
   ],
 
   Faculty: [
@@ -244,6 +262,110 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       label: "My Dean Evaluations",
       icon: "i-lucide-file-clock",
       to: "/faculty/dean-evaluation-records",
+    },
+    {
+      label: "My Portfolio",
+      icon: "i-lucide-folder-kanban",
+      to: "/faculty/portfolio",
+    },
+  ],
+
+  HR: [
+    {
+      label: "Dashboard",
+      icon: "i-lucide-layout-dashboard",
+      to: "/hr",
+      exact: true,
+    },
+    {
+      label: "Portfolio Management",
+      icon: "i-lucide-folder-check",
+      children: [
+        {
+          label: "All Portfolios",
+          icon: "i-lucide-folders",
+          to: "/hr/portfolio",
+          exact: true,
+        },
+        {
+          label: "Verification Queue",
+          icon: "i-lucide-list-checks",
+          to: "/hr/portfolio/verification",
+          exact: true,
+        },
+        {
+          label: "Verification History",
+          icon: "i-lucide-history",
+          to: "/hr/portfolio/history",
+          exact: true,
+        },
+        {
+          label: "Expiring Credentials",
+          icon: "i-lucide-calendar-clock",
+          to: "/hr/portfolio/expiring",
+          exact: true,
+        },
+        {
+          label: "Portfolio Reports",
+          icon: "i-lucide-file-chart-column",
+          to: "/hr/portfolio/reports",
+          exact: true,
+        },
+      ],
+    },
+    {
+      label: "Ranking",
+      icon: "i-lucide-trophy",
+      children: [
+        {
+          label: "Ranking Overview",
+          icon: "i-lucide-chart-no-axes-combined",
+          to: "/hr/ranking",
+          exact: true,
+        },
+        {
+          label: "Ranking Verification",
+          icon: "i-lucide-shield-check",
+          to: "/hr/ranking/verification",
+          exact: true,
+        },
+      ],
+    },
+    {
+      label: "Employee Records",
+      icon: "i-lucide-users",
+      to: "/hr/employees",
+      exact: true,
+    },
+    {
+      label: "Reports",
+      icon: "i-lucide-files",
+      children: [
+        {
+          label: "Portfolio Report",
+          icon: "i-lucide-folder-output",
+          to: "/hr/reports/portfolios",
+          exact: true,
+        },
+        {
+          label: "Verification Report",
+          icon: "i-lucide-file-check-2",
+          to: "/hr/reports/verification",
+          exact: true,
+        },
+        {
+          label: "Ranking Report",
+          icon: "i-lucide-chart-column",
+          to: "/hr/reports/ranking",
+          exact: true,
+        },
+      ],
+    },
+    {
+      label: "My Profile",
+      icon: "i-lucide-user-round",
+      to: "/hr/profile",
+      exact: true,
     },
   ],
 
@@ -353,6 +475,13 @@ const dashboardPageInformation: Record<string, any> = {
     title: "Student Dashboard",
     description: "Complete and monitor your assigned evaluations.",
     icon: "i-lucide-graduation-cap",
+  },
+
+  HR: {
+    title: "Human Resource Dashboard",
+    description:
+      "Monitor portfolio verification, personnel records, and ranking readiness.",
+    icon: "i-lucide-briefcase-business",
   },
 };
 
@@ -465,6 +594,84 @@ const pageInformationMap: Record<string, any> = {
     icon: "i-lucide-file-clock",
   },
 
+  "/hr/portfolio": {
+    title: "All Portfolios",
+    description: "Monitor faculty and dean portfolio completion and status.",
+    icon: "i-lucide-folders",
+  },
+
+  "/hr/portfolio/verification": {
+    title: "Portfolio Verification Queue",
+    description: "Review submitted portfolio entries and supporting evidence.",
+    icon: "i-lucide-list-checks",
+  },
+
+  "/hr/portfolio/history": {
+    title: "Verification History",
+    description: "Review the audit trail of HR portfolio decisions.",
+    icon: "i-lucide-history",
+  },
+
+  "/hr/portfolio/expiring": {
+    title: "Expiring Credentials",
+    description: "Monitor licenses and certifications nearing expiration.",
+    icon: "i-lucide-calendar-clock",
+  },
+
+  "/hr/portfolio/reports": {
+    title: "Portfolio Reports",
+    description: "Open portfolio completion and verification reports.",
+    icon: "i-lucide-file-chart-column",
+  },
+
+  "/hr/ranking": {
+    title: "Ranking Overview",
+    description: "Monitor faculty ranking readiness and verified records.",
+    icon: "i-lucide-trophy",
+  },
+
+  "/hr/ranking/verification": {
+    title: "Ranking Verification",
+    description: "Confirm that faculty records are ready for ranking.",
+    icon: "i-lucide-shield-check",
+  },
+
+  "/hr/employees": {
+    title: "Employee Records",
+    description: "Browse faculty and dean personnel records.",
+    icon: "i-lucide-users",
+  },
+
+  "/hr/reports": {
+    title: "HR Reports",
+    description: "Open portfolio, verification, and ranking reports.",
+    icon: "i-lucide-files",
+  },
+
+  "/hr/reports/portfolios": {
+    title: "Portfolio Report",
+    description: "Review portfolio completion and verification status.",
+    icon: "i-lucide-folder-output",
+  },
+
+  "/hr/reports/verification": {
+    title: "Verification Report",
+    description: "Review HR verification decisions and audit records.",
+    icon: "i-lucide-file-check-2",
+  },
+
+  "/hr/reports/ranking": {
+    title: "Ranking Report",
+    description: "Review faculty ranking readiness and results.",
+    icon: "i-lucide-chart-column",
+  },
+
+  "/hr/profile": {
+    title: "My HR Profile",
+    description: "Review your Human Resource account information.",
+    icon: "i-lucide-user-round",
+  },
+
   "/student/evaluate": {
     title: "Evaluate Faculty",
     description: "Submit your faculty evaluations.",
@@ -485,7 +692,11 @@ const pageInformationMap: Record<string, any> = {
 };
 
 const currentPage = computed(() => {
-  if (route.path === "/") {
+  const isRoleDashboard =
+    route.path === "/" ||
+    (currentRole.value === "HR" && route.path === "/hr");
+
+  if (isRoleDashboard) {
     return (
       dashboardPageInformation[currentRole.value] ||
       dashboardPageInformation.Student
@@ -495,6 +706,45 @@ const currentPage = computed(() => {
   const page = pageInformationMap[route.path];
 
   if (page) return page;
+
+  /*
+   * Dynamic HR detail pages contain a documentId in the URL,
+   * so they cannot be represented as exact keys in pageInformationMap.
+   */
+  if (route.path.startsWith("/hr/portfolio/entry/")) {
+    return {
+      title: "Portfolio Entry Review",
+      description: "Review portfolio evidence and record the HR decision.",
+      icon: "i-lucide-file-search-2",
+    };
+  }
+
+  if (
+    route.path.startsWith("/hr/portfolio/faculty/") ||
+    route.path.startsWith("/hr/portfolio/dean/")
+  ) {
+    return {
+      title: "Portfolio Details",
+      description: "Review the complete faculty or dean portfolio.",
+      icon: "i-lucide-folder-open",
+    };
+  }
+
+  if (route.path.startsWith("/hr/ranking/faculty/")) {
+    return {
+      title: "Faculty Ranking Record",
+      description: "Review an individual faculty ranking record.",
+      icon: "i-lucide-trophy",
+    };
+  }
+
+  if (route.path.startsWith("/hr/employees/")) {
+    return {
+      title: "Employee Profile",
+      description: "Review the employee record and connected portfolio.",
+      icon: "i-lucide-user-round-search",
+    };
+  }
 
   const segment = route.path.split("/").filter(Boolean).at(-1) || "Dashboard";
 
