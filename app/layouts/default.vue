@@ -272,101 +272,31 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
 
   HR: [
     {
-      label: "Dashboard",
-      icon: "i-lucide-layout-dashboard",
-      to: "/hr",
-      exact: true,
-    },
-    {
-      label: "Portfolio Management",
-      icon: "i-lucide-folder-check",
-      children: [
-        {
-          label: "All Portfolios",
-          icon: "i-lucide-folders",
-          to: "/hr/portfolio",
-          exact: true,
-        },
-        {
-          label: "Verification Queue",
-          icon: "i-lucide-list-checks",
-          to: "/hr/portfolio/verification",
-          exact: true,
-        },
-        {
-          label: "Verification History",
-          icon: "i-lucide-history",
-          to: "/hr/portfolio/history",
-          exact: true,
-        },
-        {
-          label: "Expiring Credentials",
-          icon: "i-lucide-calendar-clock",
-          to: "/hr/portfolio/expiring",
-          exact: true,
-        },
-        {
-          label: "Portfolio Reports",
-          icon: "i-lucide-file-chart-column",
-          to: "/hr/portfolio/reports",
-          exact: true,
-        },
-      ],
-    },
-    {
-      label: "Ranking",
-      icon: "i-lucide-trophy",
-      children: [
-        {
-          label: "Ranking Overview",
-          icon: "i-lucide-chart-no-axes-combined",
-          to: "/hr/ranking",
-          exact: true,
-        },
-        {
-          label: "Ranking Verification",
-          icon: "i-lucide-shield-check",
-          to: "/hr/ranking/verification",
-          exact: true,
-        },
-      ],
-    },
-    {
-      label: "Employee Records",
-      icon: "i-lucide-users",
-      to: "/hr/employees",
-      exact: true,
-    },
-    {
-      label: "Reports",
-      icon: "i-lucide-files",
-      children: [
-        {
-          label: "Portfolio Report",
-          icon: "i-lucide-folder-output",
-          to: "/hr/reports/portfolios",
-          exact: true,
-        },
-        {
-          label: "Verification Report",
-          icon: "i-lucide-file-check-2",
-          to: "/hr/reports/verification",
-          exact: true,
-        },
-        {
-          label: "Ranking Report",
-          icon: "i-lucide-chart-column",
-          to: "/hr/reports/ranking",
-          exact: true,
-        },
-      ],
-    },
-    {
-      label: "My Profile",
-      icon: "i-lucide-user-round",
-      to: "/hr/profile",
-      exact: true,
-    },
+    label: "Dashboard",
+    icon: "i-lucide-layout-dashboard",
+    to: "/",
+    exact: true,
+  },
+  {
+    label: "Faculty Portfolios",
+    icon: "i-lucide-folder-kanban",
+    to: "/hr/portfolio",
+  },
+  {
+    label: "Faculty Ranking",
+    icon: "i-lucide-trophy",
+    to: "/hr/ranking",
+  },
+  {
+    label: "Reports",
+    icon: "i-lucide-files",
+    to: "/hr/reports",
+  },
+  {
+    label: "My Profile",
+    icon: "i-lucide-user-round",
+    to: "/hr/profile",
+  },
   ],
 
   Student: [
