@@ -175,6 +175,18 @@
                   >
                     Ref. No.: {{ entry.reference_number }}
                   </p>
+
+                  <div
+                    v-if="entry.entry_type === 'evaluation'"
+                    class="mt-2 flex flex-wrap gap-2"
+                  >
+                    <UBadge color="info" variant="subtle" size="xs">
+                      {{ entry.school_year || "No school year" }}
+                    </UBadge>
+                    <UBadge color="neutral" variant="subtle" size="xs">
+                      {{ entry.semester || "No semester" }}
+                    </UBadge>
+                  </div>
                 </td>
 
                 <td class="px-4 py-4">
@@ -291,7 +303,21 @@
               </UFormField>
 
               <UFormField label="Title" required>
-                <UInput v-model="form.title" class="w-full" />
+                <USelectMenu
+                  v-if="isEvaluationEntry"
+                  v-model="form.title"
+                  :items="manualEvaluationTitleOptions"
+                  value-key="value"
+                  placeholder="Select evaluation title"
+                  class="w-full"
+                />
+
+                <UInput
+                  v-else
+                  v-model="form.title"
+                  placeholder="Enter portfolio entry title"
+                  class="w-full"
+                />
               </UFormField>
             </div>
 
@@ -360,6 +386,45 @@
                   class="w-full"
                 />
               </UFormField>
+            </div>
+
+            <div
+              v-if="isEvaluationEntry"
+              class="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 dark:border-blue-900 dark:bg-blue-950/20"
+            >
+              <div class="mb-4">
+                <p class="font-semibold text-gray-900 dark:text-white">
+                  Evaluation Period
+                </p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  This period ensures that the manual evaluation points are used
+                  only for the selected ranking cycle.
+                </p>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                <UFormField
+                  label="School Year"
+                  description="Example: 2026-2027"
+                  required
+                >
+                  <UInput
+                    v-model="form.school_year"
+                    placeholder="2026-2027"
+                    class="w-full"
+                  />
+                </UFormField>
+
+                <UFormField label="Semester" required>
+                  <USelectMenu
+                    v-model="form.semester"
+                    :items="semesterOptions"
+                    value-key="value"
+                    placeholder="Select semester"
+                    class="w-full"
+                  />
+                </UFormField>
+              </div>
             </div>
 
             <UFormField label="Remarks">
@@ -454,20 +519,48 @@ const saving = ref(false);
 const deleting = ref(false);
 
 const entryTypeOptions = [
-  { label: "Educational Attainment", value: "educational_attainment" },
-  { label: "Eligibility", value: "eligibility" },
-  { label: "License", value: "license" },
-  { label: "Certification", value: "certification" },
-  { label: "Training", value: "training" },
-  { label: "Seminar", value: "seminar" },
-  { label: "Resource Speaker", value: "resource_speaker" },
-  { label: "Research", value: "research" },
-  { label: "Publication", value: "publication" },
-  { label: "Award", value: "award" },
-  { label: "Professional Experience", value: "professional_experience" },
-  { label: "Institutional Service", value: "institutional_service" },
-  { label: "Community Service", value: "community_service" },
-  { label: "Other", value: "other" },
+  {
+    label: "Educational Qualifications",
+    value: "educational_qualifications",
+  },
+  {
+    label: "Eligibility",
+    value: "eligibility",
+  },
+  {
+    label: "Training and Seminars",
+    value: "training_seminars",
+  },
+  {
+    label: "Research",
+    value: "research",
+  },
+  {
+    label: "Awards and Recognition",
+    value: "awards_recognition",
+  },
+  {
+    label: "Professional Experience",
+    value: "professional_experience",
+  },
+  {
+    label: "Loyalty",
+    value: "loyalty",
+  },
+  {
+    label: "Evaluation",
+    value: "evaluation",
+  },
+  {
+    label: "Corporate Social Responsibility",
+    value: "corporate_social_responsibility",
+  },
+];
+
+const semesterOptions = [
+  { label: "1st Semester", value: "1st Semester" },
+  { label: "2nd Semester", value: "2nd Semester" },
+  { label: "Summer", value: "Summer" },
 ];
 
 const typeFilterOptions = [
@@ -494,6 +587,8 @@ const createEmptyForm = () => ({
   expiration_date: "",
   points: 0,
   years_count: null,
+  school_year: "",
+  semester: "1st Semester",
   remarks: "",
   is_current: true,
 });
@@ -515,6 +610,32 @@ const teacherRole = computed(
     teacher.value?.role ||
     "Faculty",
 );
+
+const isDean = computed(() =>
+  String(teacherRole.value || "")
+    .trim()
+    .toLowerCase()
+    .includes("dean"),
+);
+
+const isEvaluationEntry = computed(
+  () => form.entry_type === "evaluation",
+);
+
+const manualEvaluationTitleOptions = computed(() => {
+  const options = [
+    { label: "HR Evaluation", value: "HR Evaluation" },
+  ];
+
+  if (isDean.value) {
+    options.unshift({
+      label: "Immediate Superior Evaluation",
+      value: "Immediate Superior Evaluation",
+    });
+  }
+
+  return options;
+});
 
 const departmentName = computed(
   () => teacher.value?.department?.name || "Department not specified",
@@ -576,7 +697,7 @@ const openCreateDialog = () => {
   entryDialogOpen.value = true;
 };
 
-const openEditDialog = (entry: any) => {
+const openEditDialog = async (entry: any) => {
   editingEntry.value = entry;
 
   Object.assign(form, {
@@ -595,10 +716,13 @@ const openEditDialog = (entry: any) => {
       entry.years_count === null || entry.years_count === undefined
         ? null
         : Number(entry.years_count),
+    school_year: entry.school_year || "",
+    semester: entry.semester || "1st Semester",
     remarks: entry.remarks || "",
     is_current: entry.is_current !== false,
   });
 
+  await nextTick();
   entryDialogOpen.value = true;
 };
 
@@ -616,6 +740,49 @@ const saveEntry = async () => {
       color: "error",
     });
     return;
+  }
+
+  if (isEvaluationEntry.value) {
+    if (!form.school_year.trim()) {
+      toast.add({
+        title: "School year required",
+        description: "Evaluation entries must include a school year.",
+        color: "error",
+      });
+      return;
+    }
+
+    if (!semesterOptions.some((item) => item.value === form.semester)) {
+      toast.add({
+        title: "Semester required",
+        description: "Select a valid semester for the evaluation entry.",
+        color: "error",
+      });
+      return;
+    }
+
+    if (form.title === "Student Evaluation") {
+      toast.add({
+        title: "Student Evaluation is automatic",
+        description:
+          "Student Evaluation points are generated from Student-to-Faculty evaluation results and must not be entered manually.",
+        color: "error",
+      });
+      return;
+    }
+
+    if (
+      !isDean.value &&
+      form.title === "Immediate Superior Evaluation"
+    ) {
+      toast.add({
+        title: "Immediate Superior Evaluation is automatic",
+        description:
+          "For regular faculty members, these points are generated from Dean-to-Faculty evaluation results.",
+        color: "error",
+      });
+      return;
+    }
   }
 
   const teacherDocumentId = teacher.value?.documentId || getDocumentId();
@@ -640,6 +807,10 @@ const saveEntry = async () => {
         form.years_count === null || form.years_count === ""
           ? null
           : Number(form.years_count),
+      school_year: isEvaluationEntry.value
+        ? form.school_year.trim()
+        : null,
+      semester: isEvaluationEntry.value ? form.semester : null,
       remarks: form.remarks.trim() || null,
       is_current: Boolean(form.is_current),
     };
@@ -828,18 +999,45 @@ const expirationLabel = (value: any) => {
 };
 
 const formatPoints = (value: unknown) => {
-  const points = Number(value || 0)
+  const points = Number(value || 0);
 
   if (!Number.isFinite(points)) {
-    return "0"
+    return "0";
   }
 
   return Number.isInteger(points)
     ? String(points)
-    : points.toFixed(2).replace(/\.?0+$/, "")
-}
+    : points.toFixed(2).replace(/\.?0+$/, "");
+};
 
 const toDateInput = (value: any) => (value ? String(value).slice(0, 10) : "");
+
+watch(
+  () => form.entry_type,
+  (newType, oldType) => {
+    if (newType === oldType) {
+      return;
+    }
+
+    // Preserve the existing title and period while loading an entry for editing.
+    if (editingEntry.value) {
+      return;
+    }
+
+    if (newType === "evaluation") {
+      form.title = "";
+      form.school_year = form.school_year || "2026-2027";
+      form.semester = form.semester || "1st Semester";
+      return;
+    }
+
+    if (oldType === "evaluation") {
+      form.title = "";
+      form.school_year = "";
+      form.semester = "1st Semester";
+    }
+  },
+);
 
 onMounted(loadData);
 </script>
