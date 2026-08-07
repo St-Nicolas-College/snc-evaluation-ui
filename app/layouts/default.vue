@@ -272,31 +272,71 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
 
   HR: [
     {
-    label: "Dashboard",
-    icon: "i-lucide-layout-dashboard",
-    to: "/",
-    exact: true,
+      label: "Dashboard",
+      icon: "i-lucide-layout-dashboard",
+      to: "/",
+      exact: true,
+    },
+
+    {
+      label: "Faculty Portfolios",
+      icon: "i-lucide-folder-kanban",
+      to: "/hr/portfolio",
+    },
+
+    {
+      label: "Faculty Ranking",
+      icon: "i-lucide-trophy",
+      children: [
+        {
+          label: "Ranking Management",
+          icon: "i-lucide-list-ordered",
+          to: "/hr/ranking",
+           exact: true,
+        },
+        {
+          label: "Ranking Analytics",
+          icon: "i-lucide-chart-no-axes-combined",
+          to: "/hr/ranking/analytics",
+        },
+      ],
+    },
+
+     {
+    label: "Ranking Configuration",
+    icon: "i-lucide-settings-2",
+    children: [
+      {
+        label: "Ranking Schemes",
+        icon: "i-lucide-layers-3",
+        to: "/hr/ranking-schemes",
+      },
+    ],
   },
-  {
-    label: "Faculty Portfolios",
-    icon: "i-lucide-folder-kanban",
-    to: "/hr/portfolio",
-  },
-  {
-    label: "Faculty Ranking",
-    icon: "i-lucide-trophy",
-    to: "/hr/ranking",
-  },
-  {
-    label: "Reports",
-    icon: "i-lucide-files",
-    to: "/hr/reports",
-  },
-  {
-    label: "My Profile",
-    icon: "i-lucide-user-round",
-    to: "/hr/profile",
-  },
+
+    {
+      label: "Reports",
+      icon: "i-lucide-files",
+      children: [
+        {
+          label: "Reports Overview",
+          icon: "i-lucide-layout-dashboard",
+          to: "/hr/reports",
+          exact: true,
+        },
+        {
+          label: "Faculty Ranking Report",
+          icon: "i-lucide-file-chart-column",
+          to: "/hr/reports/ranking",
+        },
+      ],
+    },
+
+    {
+      label: "My Profile",
+      icon: "i-lucide-user-round",
+      to: "/hr/profile",
+    },
   ],
 
   Student: [
@@ -623,8 +663,7 @@ const pageInformationMap: Record<string, any> = {
 
 const currentPage = computed(() => {
   const isRoleDashboard =
-    route.path === "/" ||
-    (currentRole.value === "HR" && route.path === "/hr");
+    route.path === "/" || (currentRole.value === "HR" && route.path === "/hr");
 
   if (isRoleDashboard) {
     return (
