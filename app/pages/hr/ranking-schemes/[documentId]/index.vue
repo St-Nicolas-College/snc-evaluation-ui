@@ -4,11 +4,7 @@
     <div v-if="loading" class="space-y-5">
       <USkeleton class="h-52 rounded-[34px]" />
       <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <USkeleton
-          v-for="i in 4"
-          :key="i"
-          class="h-28 rounded-[24px]"
-        />
+        <USkeleton v-for="i in 4" :key="i" class="h-28 rounded-[24px]" />
       </div>
       <USkeleton class="h-72 rounded-[28px]" />
       <USkeleton class="h-80 rounded-[28px]" />
@@ -22,10 +18,7 @@
       <div
         class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950/40"
       >
-        <UIcon
-          name="i-lucide-triangle-alert"
-          class="size-8"
-        />
+        <UIcon name="i-lucide-triangle-alert" class="size-8" />
       </div>
 
       <h2 class="mt-4 text-lg font-black text-gray-900 dark:text-white">
@@ -46,10 +39,7 @@
           Back to Schemes
         </UButton>
 
-        <UButton
-          icon="i-lucide-refresh-cw"
-          @click="loadScheme"
-        >
+        <UButton icon="i-lucide-refresh-cw" @click="loadScheme">
           Retry
         </UButton>
       </div>
@@ -157,7 +147,9 @@
         >
           <div class="flex items-start justify-between gap-4">
             <div>
-              <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500"
+              >
                 Academic Year
               </p>
               <p class="mt-2 text-2xl font-black text-gray-900 dark:text-white">
@@ -180,7 +172,9 @@
         >
           <div class="flex items-start justify-between gap-4">
             <div>
-              <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500"
+              >
                 Evaluation Max
               </p>
               <p class="mt-2 text-2xl font-black text-gray-900 dark:text-white">
@@ -203,15 +197,15 @@
         >
           <div class="flex items-start justify-between gap-4">
             <div>
-              <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500"
+              >
                 Rank Bands
               </p>
               <p class="mt-2 text-2xl font-black text-gray-900 dark:text-white">
                 {{ rankBands.length }}
               </p>
-              <p class="mt-1 text-xs text-gray-400">
-                Configured rank levels
-              </p>
+              <p class="mt-1 text-xs text-gray-400">Configured rank levels</p>
             </div>
             <div
               class="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
@@ -226,7 +220,9 @@
         >
           <div class="flex items-start justify-between gap-4">
             <div>
-              <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500"
+              >
                 Salary Rates
               </p>
               <p class="mt-2 text-2xl font-black text-gray-900 dark:text-white">
@@ -278,7 +274,9 @@
             <div
               class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30"
             >
-              <p class="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-wide text-gray-500"
+              >
                 Scheme Code
               </p>
               <p class="mt-1.5 font-semibold text-gray-900 dark:text-white">
@@ -289,7 +287,9 @@
             <div
               class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30"
             >
-              <p class="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-wide text-gray-500"
+              >
                 Version
               </p>
               <p class="mt-1.5 font-semibold text-gray-900 dark:text-white">
@@ -300,7 +300,9 @@
             <div
               class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30"
             >
-              <p class="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-wide text-gray-500"
+              >
                 Effective Date
               </p>
               <p class="mt-1.5 font-semibold text-gray-900 dark:text-white">
@@ -311,7 +313,9 @@
             <div
               class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30"
             >
-              <p class="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-wide text-gray-500"
+              >
                 Expiration Date
               </p>
               <p class="mt-1.5 font-semibold text-gray-900 dark:text-white">
@@ -326,7 +330,9 @@
             <div
               class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30"
             >
-              <p class="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-wide text-gray-500"
+              >
                 Status
               </p>
               <div class="mt-2">
@@ -342,7 +348,9 @@
             <div
               class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30"
             >
-              <p class="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              <p
+                class="text-[10px] font-bold uppercase tracking-wide text-gray-500"
+              >
                 Availability
               </p>
               <div class="mt-2">
@@ -394,7 +402,9 @@
                 >
                   <UIcon name="i-lucide-graduation-cap" class="size-3.5" />
                 </div>
-                <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                <span
+                  class="text-sm font-semibold text-gray-800 dark:text-gray-200"
+                >
                   Student Evaluation
                 </span>
               </div>
@@ -413,7 +423,9 @@
                 >
                   <UIcon name="i-lucide-user-round-check" class="size-3.5" />
                 </div>
-                <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                <span
+                  class="text-sm font-semibold text-gray-800 dark:text-gray-200"
+                >
                   Immediate Superior
                 </span>
               </div>
@@ -432,7 +444,9 @@
                 >
                   <UIcon name="i-lucide-briefcase-business" class="size-3.5" />
                 </div>
-                <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                <span
+                  class="text-sm font-semibold text-gray-800 dark:text-gray-200"
+                >
                   HR Evaluation
                 </span>
               </div>
@@ -478,10 +492,7 @@
             <div
               class="flex size-11 items-center justify-center rounded-2xl bg-slate-800 text-white shadow-lg shadow-slate-800/20 dark:bg-slate-700"
             >
-              <UIcon
-                name="i-lucide-table-properties"
-                class="size-5"
-              />
+              <UIcon name="i-lucide-table-properties" class="size-5" />
             </div>
 
             <div>
@@ -491,9 +502,7 @@
                 Scheme Configuration
               </p>
 
-              <h2
-                class="mt-1 font-black text-gray-900 dark:text-white"
-              >
+              <h2 class="mt-1 font-black text-gray-900 dark:text-white">
                 Rank Bands and Salary Rates
               </h2>
 
@@ -516,10 +525,7 @@
               "
               @click="activeConfigTab = 'rank-bands'"
             >
-              <UIcon
-                name="i-lucide-trophy"
-                class="size-3.5"
-              />
+              <UIcon name="i-lucide-trophy" class="size-3.5" />
               Rank Bands
               <span
                 class="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
@@ -538,10 +544,7 @@
               "
               @click="activeConfigTab = 'salary-rates'"
             >
-              <UIcon
-                name="i-lucide-wallet-cards"
-                class="size-3.5"
-              />
+              <UIcon name="i-lucide-wallet-cards" class="size-3.5" />
               Salary Rates
               <span
                 class="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
@@ -558,9 +561,7 @@
             class="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-3 dark:border-gray-800"
           >
             <div>
-              <p
-                class="text-sm font-bold text-gray-900 dark:text-white"
-              >
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
                 Rank Bands
               </p>
 
@@ -570,75 +571,59 @@
             </div>
 
             <UButton
+              :to="`/hr/ranking-schemes/${documentId}/rank-bands`"
               color="success"
               variant="soft"
               size="xs"
               icon="i-lucide-settings-2"
-              disabled
             >
-              Manage
+              Manage Rank Bands
             </UButton>
           </div>
 
-          <div
-            v-if="!rankBands.length"
-            class="px-6 py-12 text-center"
-          >
+          <div v-if="!rankBands.length" class="px-6 py-12 text-center">
             <div
               class="mx-auto flex size-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-950/30"
             >
-              <UIcon
-                name="i-lucide-trophy"
-                class="size-6"
-              />
+              <UIcon name="i-lucide-trophy" class="size-6" />
             </div>
 
-            <h3
-              class="mt-3 font-bold text-gray-900 dark:text-white"
-            >
+            <h3 class="mt-3 font-bold text-gray-900 dark:text-white">
               No rank bands configured
             </h3>
 
             <p class="mt-1 text-xs text-gray-500">
-              Rank Band Management will be connected next.
+              Open Rank Band Management to add and configure rank levels.
             </p>
+
+            <UButton
+              class="mt-4"
+              :to="`/hr/ranking-schemes/${documentId}/rank-bands`"
+              color="success"
+              variant="soft"
+              size="sm"
+              icon="i-lucide-settings-2"
+            >
+              Manage Rank Bands
+            </UButton>
           </div>
 
-          <div
-            v-else
-            class="max-h-[420px] overflow-auto"
-          >
-            <table
-              class="w-full min-w-[900px] text-[12px]"
-            >
+          <div v-else class="max-h-[420px] overflow-auto">
+            <table class="w-full min-w-[900px] text-[12px]">
               <thead
                 class="sticky top-0 z-[1] border-b border-gray-200 bg-slate-100 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-600 dark:border-gray-800 dark:bg-gray-950 dark:text-slate-400"
               >
                 <tr>
-                  <th class="px-4 py-2.5 text-left">
-                    Rank
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Level
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Points
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Rate Range
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Sequence
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Status
-                  </th>
+                  <th class="px-4 py-2.5 text-left">Rank</th>
+                  <th class="px-3 py-2.5 text-center">Level</th>
+                  <th class="px-3 py-2.5 text-center">Points</th>
+                  <th class="px-3 py-2.5 text-center">Rate Range</th>
+                  <th class="px-3 py-2.5 text-center">Sequence</th>
+                  <th class="px-3 py-2.5 text-center">Status</th>
                 </tr>
               </thead>
 
-              <tbody
-                class="divide-y divide-gray-100 dark:divide-gray-800"
-              >
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                 <tr
                   v-for="band in rankBands"
                   :key="band.documentId || band.id"
@@ -649,16 +634,11 @@
                       <div
                         class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
                       >
-                        <UIcon
-                          name="i-lucide-award"
-                          class="size-3.5"
-                        />
+                        <UIcon name="i-lucide-award" class="size-3.5" />
                       </div>
 
                       <div>
-                        <p
-                          class="font-bold text-gray-900 dark:text-white"
-                        >
+                        <p class="font-bold text-gray-900 dark:text-white">
                           {{ rankBandLabel(band) }}
                         </p>
 
@@ -719,9 +699,7 @@
             class="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-3 dark:border-gray-800"
           >
             <div>
-              <p
-                class="text-sm font-bold text-gray-900 dark:text-white"
-              >
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
                 Salary Rates
               </p>
 
@@ -731,72 +709,59 @@
             </div>
 
             <UButton
+              :to="`/hr/ranking-schemes/${documentId}/salary-rates`"
               color="warning"
               variant="soft"
               size="xs"
               icon="i-lucide-settings-2"
-              disabled
             >
-              Manage
+              Manage Salary Rates
             </UButton>
           </div>
 
-          <div
-            v-if="!salaryRates.length"
-            class="px-6 py-12 text-center"
-          >
+          <div v-if="!salaryRates.length" class="px-6 py-12 text-center">
             <div
               class="mx-auto flex size-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 dark:bg-amber-950/30"
             >
-              <UIcon
-                name="i-lucide-wallet-cards"
-                class="size-6"
-              />
+              <UIcon name="i-lucide-wallet-cards" class="size-6" />
             </div>
 
-            <h3
-              class="mt-3 font-bold text-gray-900 dark:text-white"
-            >
+            <h3 class="mt-3 font-bold text-gray-900 dark:text-white">
               No salary rates configured
             </h3>
 
             <p class="mt-1 text-xs text-gray-500">
-              Salary Rate Management will be connected later.
+              Open Salary Rate Management to add and configure compensation
+              rates.
             </p>
+
+            <UButton
+              class="mt-4"
+              :to="`/hr/ranking-schemes/${documentId}/salary-rates`"
+              color="warning"
+              variant="soft"
+              size="sm"
+              icon="i-lucide-settings-2"
+            >
+              Manage Salary Rates
+            </UButton>
           </div>
 
-          <div
-            v-else
-            class="max-h-[420px] overflow-auto"
-          >
-            <table
-              class="w-full min-w-[820px] text-[12px]"
-            >
+          <div v-else class="max-h-[420px] overflow-auto">
+            <table class="w-full min-w-[820px] text-[12px]">
               <thead
                 class="sticky top-0 z-[1] border-b border-gray-200 bg-slate-100 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-600 dark:border-gray-800 dark:bg-gray-950 dark:text-slate-400"
               >
                 <tr>
-                  <th class="px-4 py-2.5 text-left">
-                    Rate
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Point Value
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Below Points
-                  </th>
-                  <th class="px-3 py-2.5 text-right">
-                    Salary Rate
-                  </th>
-                  <th class="px-3 py-2.5 text-center">
-                    Status
-                  </th>
+                  <th class="px-4 py-2.5 text-left">Rate</th>
+                  <th class="px-3 py-2.5 text-center">Point Value</th>
+                  <th class="px-3 py-2.5 text-center">Below Points</th>
+                  <th class="px-3 py-2.5 text-right">Salary Rate</th>
+                  <th class="px-3 py-2.5 text-center">Status</th>
                 </tr>
               </thead>
 
-              <tbody
-                class="divide-y divide-gray-100 dark:divide-gray-800"
-              >
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                 <tr
                   v-for="rate in salaryRates"
                   :key="rate.documentId || rate.id"
@@ -807,16 +772,11 @@
                       <div
                         class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"
                       >
-                        <UIcon
-                          name="i-lucide-banknote"
-                          class="size-3.5"
-                        />
+                        <UIcon name="i-lucide-banknote" class="size-3.5" />
                       </div>
 
                       <div>
-                        <p
-                          class="font-bold text-gray-900 dark:text-white"
-                        >
+                        <p class="font-bold text-gray-900 dark:text-white">
                           {{ rate.rate_name || "Salary Rate" }}
                         </p>
 
@@ -931,170 +891,134 @@
 definePageMeta({
   middleware: ["auth", "role"],
   role: ["HR", "Admin"],
-})
+});
 
-const route = useRoute()
-const { $api } = useNuxtApp()
+const route = useRoute();
+const { $api } = useNuxtApp();
 
-const loading = ref(false)
-const loadError = ref("")
-const scheme = ref<any>(null)
+const loading = ref(false);
+const loadError = ref("");
+const scheme = ref<any>(null);
 
-const activeConfigTab = ref<"rank-bands" | "salary-rates">("rank-bands")
+const activeConfigTab = ref<"rank-bands" | "salary-rates">("rank-bands");
 
-const documentId = computed(() =>
-  String(
-    route.params.documentId || "",
-  ),
-)
+const documentId = computed(() => String(route.params.documentId || ""));
 
 const rankBands = computed(() =>
   [...(scheme.value?.rank_bands || [])].sort(
-    (a: any, b: any) =>
-      Number(a.sequence || 0) -
-      Number(b.sequence || 0),
+    (a: any, b: any) => Number(a.sequence || 0) - Number(b.sequence || 0),
   ),
-)
+);
 
 const salaryRates = computed(() =>
   [...(scheme.value?.salary_rates || [])].sort(
-    (a: any, b: any) =>
-      Number(a.sort_order || 0) -
-      Number(b.sort_order || 0),
+    (a: any, b: any) => Number(a.sort_order || 0) - Number(b.sort_order || 0),
   ),
-)
+);
 
 const points = (value: unknown) => {
-  const parsed = Number(value ?? 0)
+  const parsed = Number(value ?? 0);
 
   if (!Number.isFinite(parsed)) {
-    return "0"
+    return "0";
   }
 
   return Number.isInteger(parsed)
     ? String(parsed)
-    : parsed
-        .toFixed(2)
-        .replace(/\.?0+$/, "")
-}
+    : parsed.toFixed(2).replace(/\.?0+$/, "");
+};
 
 const php = (value: unknown) => {
-  const parsed = Number(value)
+  const parsed = Number(value);
 
   if (!Number.isFinite(parsed)) {
-    return "Not configured"
+    return "Not configured";
   }
 
-  return `PHP ${new Intl.NumberFormat(
-    "en-PH",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    },
-  ).format(parsed)}`
-}
+  return `PHP ${new Intl.NumberFormat("en-PH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(parsed)}`;
+};
 
 const formatDate = (value: any) => {
   if (!value) {
-    return "N/A"
+    return "N/A";
   }
 
-  const date = new Date(value)
+  const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return String(value)
+    return String(value);
   }
 
-  return date.toLocaleDateString(
-    "en-PH",
-    {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    },
-  )
-}
+  return date.toLocaleDateString("en-PH", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 
 const formatStatus = (value: string) =>
   String(value || "")
     .replace(/_/g, " ")
-    .replace(
-      /\b\w/g,
-      (character) =>
-        character.toUpperCase(),
-    )
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 
 const statusColor = (status: string) => {
   if (status === "active") {
-    return "success"
+    return "success";
   }
 
   if (status === "draft") {
-    return "warning"
+    return "warning";
   }
 
-  return "neutral"
-}
+  return "neutral";
+};
 
 const rankBandLabel = (band: any) => {
-  const name = String(
-    band.rank_name || "",
-  )
+  const name = String(band.rank_name || "")
     .replace(/_/g, " ")
-    .replace(
-      /\b\w/g,
-      (character) =>
-        character.toUpperCase(),
-    )
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 
-  return `${name} ${band.rank_level || ""}`.trim()
-}
+  return `${name} ${band.rank_level || ""}`.trim();
+};
 
 const loadScheme = async () => {
   if (!documentId.value) {
-    loadError.value =
-      "Ranking scheme document ID is missing."
-    return
+    loadError.value = "Ranking scheme document ID is missing.";
+    return;
   }
 
-  loading.value = true
-  loadError.value = ""
+  loading.value = true;
+  loadError.value = "";
 
   try {
-    const response: any =
-      await $api(
-        `/ranking-schemes/${documentId.value}`,
-        {
-          query: {
-            "populate[rank_bands]": true,
-            "populate[salary_rates]": true,
-            "populate[categories]": true,
-          },
-        },
-      )
+    const response: any = await $api(`/ranking-schemes/${documentId.value}`, {
+      query: {
+        "populate[rank_bands]": true,
+        "populate[salary_rates]": true,
+        "populate[categories]": true,
+      },
+    });
 
-    scheme.value =
-      response?.data || null
+    scheme.value = response?.data || null;
 
     if (!scheme.value) {
-      loadError.value =
-        "Ranking scheme was not found."
+      loadError.value = "Ranking scheme was not found.";
     }
   } catch (error: any) {
-    console.error(
-      "Ranking scheme loading error:",
-      error,
-    )
+    console.error("Ranking scheme loading error:", error);
 
     loadError.value =
       error?.data?.error?.message ||
       error?.data?.message ||
       error?.message ||
-      "Unable to load the ranking scheme."
+      "Unable to load the ranking scheme.";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const SummaryCard = defineComponent({
   props: {
@@ -1119,8 +1043,7 @@ const SummaryCard = defineComponent({
           h(
             "div",
             {
-              class:
-                "flex items-start justify-between gap-4",
+              class: "flex items-start justify-between gap-4",
             },
             [
               h("div", {}, [
@@ -1143,20 +1066,16 @@ const SummaryCard = defineComponent({
                 ),
               ]),
 
-              h(
-                resolveComponent("UIcon"),
-                {
-                  name: props.icon,
-                  class:
-                    "size-6 text-blue-600",
-                },
-              ),
+              h(resolveComponent("UIcon"), {
+                name: props.icon,
+                class: "size-6 text-blue-600",
+              }),
             ],
           ),
         ],
-      )
+      );
   },
-})
+});
 
 const InfoItem = defineComponent({
   props: {
@@ -1185,15 +1104,14 @@ const InfoItem = defineComponent({
           h(
             "p",
             {
-              class:
-                "mt-1.5 font-semibold text-gray-900 dark:text-white",
+              class: "mt-1.5 font-semibold text-gray-900 dark:text-white",
             },
             String(props.value ?? "N/A"),
           ),
         ],
-      )
+      );
   },
-})
+});
 
 const PointCard = defineComponent({
   props: {
@@ -1207,10 +1125,9 @@ const PointCard = defineComponent({
       h(
         "div",
         {
-          class:
-            props.total
-              ? "rounded-2xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900 dark:bg-violet-950/20"
-              : "rounded-2xl border border-gray-200 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30",
+          class: props.total
+            ? "rounded-2xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900 dark:bg-violet-950/20"
+            : "rounded-2xl border border-gray-200 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30",
         },
         [
           h(
@@ -1225,8 +1142,7 @@ const PointCard = defineComponent({
           h(
             "p",
             {
-              class:
-                "mt-2 text-3xl font-black text-gray-900 dark:text-white",
+              class: "mt-2 text-3xl font-black text-gray-900 dark:text-white",
             },
             String(props.value ?? 0),
           ),
@@ -1234,15 +1150,14 @@ const PointCard = defineComponent({
           h(
             "p",
             {
-              class:
-                "mt-1 text-xs text-gray-400",
+              class: "mt-1 text-xs text-gray-400",
             },
             "Maximum points",
           ),
         ],
-      )
+      );
   },
-})
+});
 
-onMounted(loadScheme)
+onMounted(loadScheme);
 </script>
