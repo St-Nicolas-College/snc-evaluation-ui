@@ -41,6 +41,20 @@
               >
                 School-Wide Feedback
               </span>
+
+              <span
+                v-if="evaluationType"
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
+              >
+                {{ evaluationTypeLabel }}
+              </span>
+
+              <span
+                v-if="evaluationType"
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
+              >
+                {{ responseTypeLabel }}
+              </span>
             </div>
 
             <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
@@ -48,8 +62,10 @@
             </h1>
 
             <p class="mt-2 max-w-3xl text-sm leading-6 text-cyan-50/90">
-              Review student feedback about school facilities, services, and
-              the overall learning experience.
+              Review written Student - School feedback about facilities,
+              services, and the overall learning experience. This page uses
+              the configured Text / Comment Evaluation Type and focuses on
+              themes, priorities, strengths, concerns, and recommended actions.
             </p>
           </div>
         </div>
@@ -194,6 +210,345 @@
     </section>
 
     <!-- =====================================================
+      EXECUTIVE FEEDBACK SUMMARY
+    ====================================================== -->
+    <section
+      class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+    >
+      <div
+        class="border-b border-gray-200 bg-gradient-to-r from-slate-50 via-white to-cyan-50 px-5 py-4 dark:border-gray-800 dark:from-slate-950/50 dark:via-gray-900 dark:to-cyan-950/20"
+      >
+        <div
+          class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div class="flex items-start gap-3">
+            <div
+              class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-800"
+            >
+              <UIcon name="i-lucide-layout-dashboard" class="size-5" />
+            </div>
+
+            <div>
+              <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+                Executive Feedback Summary
+              </h2>
+
+              <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                A management-level view of the most important patterns found in the currently filtered Student - School written feedback.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <UBadge
+              v-if="evaluationType"
+              color="info"
+              variant="subtle"
+              icon="i-lucide-message-square-text"
+            >
+              {{ evaluationTypeLabel }}
+            </UBadge>
+
+            <UBadge color="neutral" variant="subtle">
+              {{ responseTypeLabel }}
+            </UBadge>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-3">
+        <article
+          class="rounded-2xl border border-gray-200 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-950/30"
+        >
+          <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">
+            Overall Sentiment
+          </p>
+
+          <div class="mt-2 flex items-center justify-between gap-3">
+            <p class="text-xl font-black text-gray-950 dark:text-white">
+              {{ overallSentimentAnalysis.overallSentiment }}
+            </p>
+
+            <UBadge
+              :color="sentimentColor(overallSentimentAnalysis.overallSentiment)"
+              variant="subtle"
+            >
+              {{ overallSentimentAnalysis.analysedAnswers }} analysed
+            </UBadge>
+          </div>
+        </article>
+
+        <article
+          class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20"
+        >
+          <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400">
+            Top Strength
+          </p>
+
+          <p class="mt-2 text-base font-black text-gray-950 dark:text-white">
+            {{ executiveSummary.topStrength }}
+          </p>
+
+          <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+            Most frequently positive area in the current feedback set.
+          </p>
+        </article>
+
+        <article
+          class="rounded-2xl border border-red-100 bg-red-50/60 p-4 dark:border-red-900 dark:bg-red-950/20"
+        >
+          <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-red-700 dark:text-red-400">
+            Top Concern
+          </p>
+
+          <p class="mt-2 text-base font-black text-gray-950 dark:text-white">
+            {{ executiveSummary.topConcern }}
+          </p>
+
+          <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+            Highest-priority concern based on mentions and negative feedback.
+          </p>
+        </article>
+
+        <article
+          class="rounded-2xl border border-violet-100 bg-violet-50/60 p-4 dark:border-violet-900 dark:bg-violet-950/20"
+        >
+          <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-400">
+            Most Mentioned Theme
+          </p>
+
+          <p class="mt-2 text-base font-black text-gray-950 dark:text-white">
+            {{ executiveSummary.mostMentionedTheme }}
+          </p>
+
+          <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+            The topic appearing most often in written responses.
+          </p>
+        </article>
+
+        <article
+          class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 dark:border-amber-900 dark:bg-amber-950/20"
+        >
+          <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-400">
+            Highest Priority
+          </p>
+
+          <div class="mt-2 flex items-center gap-2">
+            <p class="text-base font-black text-gray-950 dark:text-white">
+              {{ executiveSummary.highestPriority }}
+            </p>
+
+            <UBadge
+              :color="priorityColor(executiveSummary.highestPriorityLevel)"
+              variant="subtle"
+            >
+              {{ executiveSummary.highestPriorityLevel }}
+            </UBadge>
+          </div>
+
+          <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+            Priority is derived from issue frequency and negative-response percentage.
+          </p>
+        </article>
+
+        <article
+          class="rounded-2xl border border-cyan-100 bg-cyan-50/60 p-4 dark:border-cyan-900 dark:bg-cyan-950/20"
+        >
+          <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-400">
+            Recommended Immediate Action
+          </p>
+
+          <p class="mt-2 text-sm font-semibold leading-6 text-gray-800 dark:text-gray-200">
+            {{ executiveSummary.recommendedAction }}
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- =====================================================
+      KEY ISSUES & PRIORITIES
+    ====================================================== -->
+    <section
+      class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+    >
+      <div
+        class="border-b border-gray-200 bg-gradient-to-r from-red-50 via-white to-amber-50 px-5 py-4 dark:border-gray-800 dark:from-red-950/20 dark:via-gray-900 dark:to-amber-950/20"
+      >
+        <div class="flex items-start gap-3">
+          <div
+            class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+          >
+            <UIcon name="i-lucide-triangle-alert" class="size-5" />
+          </div>
+
+          <div>
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+              Key Issues & Priorities
+            </h2>
+
+            <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+              Frequently mentioned school-wide concerns ranked using response volume and negative sentiment.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="priorityIssues.length" class="divide-y divide-gray-200 dark:divide-gray-800">
+        <article
+          v-for="(issue, index) in priorityIssues"
+          :key="issue.key"
+          class="grid gap-4 p-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center"
+        >
+          <div
+            class="flex size-10 items-center justify-center rounded-2xl bg-gray-100 text-sm font-black text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+          >
+            {{ index + 1 }}
+          </div>
+
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="font-bold text-gray-900 dark:text-white">
+                {{ issue.label }}
+              </h3>
+
+              <UBadge
+                :color="priorityColor(issue.priority)"
+                variant="subtle"
+              >
+                {{ issue.priority }} Priority
+              </UBadge>
+            </div>
+
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ issue.mentions }} mention{{ issue.mentions === 1 ? '' : 's' }}
+              · {{ formatNumber(issue.negativePercentage) }}% negative
+              · {{ formatNumber(issue.positivePercentage) }}% positive
+            </p>
+
+            <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
+              {{ issue.recommendedAction }}
+            </p>
+          </div>
+
+          <div class="min-w-[150px]">
+            <div class="flex items-center justify-between text-[10px] font-semibold text-gray-500">
+              <span>Negative</span>
+              <span>{{ formatNumber(issue.negativePercentage) }}%</span>
+            </div>
+
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+              <div
+                class="h-full rounded-full bg-red-500"
+                :style="{ width: `${Math.min(100, issue.negativePercentage)}%` }"
+              />
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="px-6 py-12 text-center">
+        <UIcon name="i-lucide-circle-check-big" class="mx-auto size-9 text-emerald-500" />
+        <p class="mt-3 text-sm font-semibold text-gray-900 dark:text-white">
+          No priority issue detected
+        </p>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          There are not enough concern-related responses in the current filtered set.
+        </p>
+      </div>
+    </section>
+
+    <!-- =====================================================
+      STRENGTHS & CONCERNS
+    ====================================================== -->
+    <section class="grid gap-4 xl:grid-cols-2">
+      <article
+        class="overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-sm dark:border-emerald-900 dark:bg-gray-900"
+      >
+        <div
+          class="border-b border-emerald-100 bg-emerald-50/70 px-5 py-4 dark:border-emerald-900 dark:bg-emerald-950/20"
+        >
+          <div class="flex items-start gap-3">
+            <div
+              class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+            >
+              <UIcon name="i-lucide-thumbs-up" class="size-5" />
+            </div>
+
+            <div>
+              <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+                What Students Appreciate
+              </h2>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Representative positive observations from the current feedback set.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="strengthInsights.length" class="space-y-3 p-5">
+          <div
+            v-for="item in strengthInsights"
+            :key="item"
+            class="flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-sm leading-6 text-gray-700 dark:border-emerald-900 dark:bg-emerald-950/10 dark:text-gray-300"
+          >
+            <span class="mt-2 size-1.5 shrink-0 rounded-full bg-emerald-500" />
+            <span>{{ item }}</span>
+          </div>
+        </div>
+
+        <div v-else class="px-5 py-10 text-center">
+          <UIcon name="i-lucide-message-square-off" class="mx-auto size-8 text-gray-400" />
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            No representative positive responses are available.
+          </p>
+        </div>
+      </article>
+
+      <article
+        class="overflow-hidden rounded-3xl border border-amber-100 bg-white shadow-sm dark:border-amber-900 dark:bg-gray-900"
+      >
+        <div
+          class="border-b border-amber-100 bg-amber-50/70 px-5 py-4 dark:border-amber-900 dark:bg-amber-950/20"
+        >
+          <div class="flex items-start gap-3">
+            <div
+              class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+            >
+              <UIcon name="i-lucide-wrench" class="size-5" />
+            </div>
+
+            <div>
+              <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+                What Students Want Improved
+              </h2>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Representative concerns and actionable requests from written responses.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="concernInsights.length" class="space-y-3 p-5">
+          <div
+            v-for="item in concernInsights"
+            :key="item"
+            class="flex gap-3 rounded-2xl border border-amber-100 bg-amber-50/40 p-4 text-sm leading-6 text-gray-700 dark:border-amber-900 dark:bg-amber-950/10 dark:text-gray-300"
+          >
+            <span class="mt-2 size-1.5 shrink-0 rounded-full bg-amber-500" />
+            <span>{{ item }}</span>
+          </div>
+        </div>
+
+        <div v-else class="px-5 py-10 text-center">
+          <UIcon name="i-lucide-circle-check" class="mx-auto size-8 text-emerald-500" />
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            No representative improvement concern was detected.
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <!-- =====================================================
       FILTERS
     ====================================================== -->
     <section
@@ -207,6 +562,25 @@
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Search and filter feedback submissions by course and academic period.
         </p>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <UBadge
+            v-if="evaluationType"
+            color="info"
+            variant="subtle"
+            icon="i-lucide-message-square-text"
+          >
+            {{ evaluationTypeLabel }}
+          </UBadge>
+
+          <UBadge
+            v-if="evaluationType"
+            color="neutral"
+            variant="subtle"
+          >
+            Response Type: {{ responseTypeLabel }}
+          </UBadge>
+        </div>
       </div>
 
       <div
@@ -1237,7 +1611,7 @@
           </div>
 
           <div class="space-y-5 p-6">
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-5">
               <InfoBox
                 label="Answers"
                 :value="getResponses(selectedFeedback).length"
@@ -1256,6 +1630,12 @@
               <InfoBox
                 label="Date"
                 :value="formatDate(getFeedbackDate(selectedFeedback))"
+                tone="cyan"
+              />
+
+              <InfoBox
+                label="Response Type"
+                :value="responseTypeLabel"
                 tone="cyan"
               />
             </div>
@@ -1335,7 +1715,7 @@
 
 definePageMeta({
   middleware: ['auth', 'role'],
-  role: ['Admin']
+  role: ['Admin', "HR"]
 })
 
 const { $api } = useNuxtApp()
@@ -1388,6 +1768,7 @@ const InfoBox = defineComponent({
 const loading = ref(false)
 const loadError = ref('')
 const feedbacks = ref<any[]>([])
+const evaluationType = ref<any>(null)
 
 const selectedFeedback = ref<any>(null)
 const showDetails = ref(false)
@@ -1409,6 +1790,28 @@ const pageSizeOptions = [
   { label: '50 rows', value: 50 },
   { label: '100 rows', value: 100 }
 ]
+
+/* =========================================================
+   EVALUATION TYPE CONFIGURATION
+========================================================= */
+
+const evaluationResponseType = computed(() => {
+  return evaluationType.value?.response_type || 'text'
+})
+
+const isTextEvaluation = computed(() => {
+  return evaluationResponseType.value === 'text'
+})
+
+const evaluationTypeLabel = computed(() => {
+  return evaluationType.value?.name || 'Student - School'
+})
+
+const responseTypeLabel = computed(() => {
+  return isTextEvaluation.value
+    ? 'Text / Comment'
+    : String(evaluationResponseType.value || 'Unknown')
+})
 
 const makeOptions = (
   values: any[],
@@ -2128,6 +2531,304 @@ const stopWords = new Set([
   'student',
   'students'
 ])
+
+/* =========================================================
+   MANAGEMENT INSIGHTS
+========================================================= */
+
+const feedbackTopicDefinitions = [
+  {
+    key: 'internet',
+    label: 'Internet / Wi-Fi',
+    keywords: ['internet', 'wifi', 'wi-fi', 'network', 'signal', 'connection', 'connectivity'],
+    action: 'Conduct a network coverage and reliability assessment in the areas most frequently mentioned by students, then prioritise access-point adjustment, repair, or capacity upgrades.'
+  },
+  {
+    key: 'facilities',
+    label: 'Classrooms & Facilities',
+    keywords: ['classroom', 'facility', 'facilities', 'chair', 'desk', 'aircon', 'air conditioning', 'fan', 'lighting', 'room', 'building', 'ventilation'],
+    action: 'Inspect the classrooms and facility items most frequently mentioned by students and prepare a prioritised repair, replacement, ventilation, lighting, or seating plan.'
+  },
+  {
+    key: 'office-services',
+    label: 'Office / Student Services',
+    keywords: ['registrar', 'cashier', 'accounting', 'admission', 'guidance', 'office', 'service', 'queue', 'waiting', 'staff'],
+    action: 'Review the most frequently mentioned student-service process, identify causes of delay or poor assistance, and set a measurable response-time or service-quality target.'
+  },
+  {
+    key: 'library',
+    label: 'Library & Learning Resources',
+    keywords: ['library', 'book', 'books', 'reference', 'resources', 'learning resource', 'materials'],
+    action: 'Review frequently requested books, references, digital materials, and library services, then prioritise the resources students report as limited or unavailable.'
+  },
+  {
+    key: 'canteen',
+    label: 'Canteen & Food Services',
+    keywords: ['canteen', 'food', 'meal', 'price', 'affordable', 'water', 'drinking water'],
+    action: 'Coordinate with the canteen operator to address recurring concerns about food quality, price, sanitation, variety, serving time, or drinking-water availability.'
+  },
+  {
+    key: 'safety',
+    label: 'Safety & Security',
+    keywords: ['safety', 'safe', 'security', 'guard', 'gate', 'hazard', 'emergency'],
+    action: 'Validate the reported safety concerns through an on-site inspection and assign corrective action to the responsible security or facilities personnel.'
+  },
+  {
+    key: 'communication',
+    label: 'Announcements & Communication',
+    keywords: ['announcement', 'communication', 'information', 'notice', 'update', 'schedule'],
+    action: 'Improve official communication by addressing the timing, clarity, completeness, and channel used for announcements most frequently mentioned by students.'
+  },
+  {
+    key: 'activities',
+    label: 'Student Activities & Programs',
+    keywords: ['activity', 'activities', 'event', 'program', 'seminar', 'training', 'orientation'],
+    action: 'Use the recurring comments to improve the schedule, content, variety, announcement, or delivery of future student activities and programs.'
+  },
+  {
+    key: 'teaching',
+    label: 'Teaching & Learning Experience',
+    keywords: ['teacher', 'faculty', 'teaching', 'instruction', 'lesson', 'class', 'subject'],
+    action: 'Review recurring instructional concerns with the appropriate academic unit and provide targeted support on lesson clarity, pacing, consultation, or feedback.'
+  }
+]
+
+const allFilteredAnswers = computed(() => {
+  const rows: any[] = []
+
+  filteredFeedbacks.value.forEach(feedback => {
+    getResponses(feedback).forEach(response => {
+      const answer = String(response?.answer || '').trim()
+
+      if (!answer) {
+        return
+      }
+
+      rows.push({
+        answer,
+        response,
+        student: getStudentName(feedback),
+        course: getCourseName(feedback),
+        semester: getSemester(feedback),
+        schoolYear: getSchoolYear(feedback)
+      })
+    })
+  })
+
+  return rows
+})
+
+const getTopicMatches = (answer: string) => {
+  const value = String(answer || '').toLowerCase()
+
+  return feedbackTopicDefinitions.filter(topic =>
+    topic.keywords.some(keyword =>
+      value.includes(keyword)
+    )
+  )
+}
+
+const topicInsights = computed(() => {
+  const map = new Map<string, any>()
+
+  feedbackTopicDefinitions.forEach(topic => {
+    map.set(topic.key, {
+      ...topic,
+      mentions: 0,
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      examples: []
+    })
+  })
+
+  allFilteredAnswers.value.forEach(item => {
+    const matches = getTopicMatches(item.answer)
+
+    matches.forEach(topic => {
+      const record = map.get(topic.key)
+      const sentiment = classifyResponseSentiment(item.response)
+
+      record.mentions += 1
+      record[sentiment.toLowerCase()] += 1
+
+      if (record.examples.length < 5) {
+        record.examples.push(item.answer)
+      }
+    })
+  })
+
+  return Array.from(map.values())
+    .filter(item => item.mentions > 0)
+    .map(item => {
+      const total = item.mentions || 1
+      const negativePercentage =
+        (item.negative / total) * 100
+      const positivePercentage =
+        (item.positive / total) * 100
+      const neutralPercentage =
+        (item.neutral / total) * 100
+
+      let priority = 'Low'
+
+      if (
+        negativePercentage >= 40 ||
+        (item.negative >= 3 && negativePercentage >= 30)
+      ) {
+        priority = 'High'
+      } else if (
+        negativePercentage >= 20 ||
+        item.negative >= 2
+      ) {
+        priority = 'Medium'
+      }
+
+      const priorityScore =
+        item.negative * 4 +
+        item.neutral * 1.25 +
+        item.mentions * 0.5
+
+      return {
+        ...item,
+        negativePercentage,
+        positivePercentage,
+        neutralPercentage,
+        priority,
+        priorityScore,
+        recommendedAction: item.action
+      }
+    })
+    .sort((a, b) => {
+      if (b.priorityScore !== a.priorityScore) {
+        return b.priorityScore - a.priorityScore
+      }
+
+      return b.mentions - a.mentions
+    })
+})
+
+const priorityIssues = computed(() =>
+  topicInsights.value
+    .filter(item =>
+      item.negative > 0 ||
+      item.priority !== 'Low'
+    )
+    .slice(0, 6)
+)
+
+const priorityColor = (priority: any) => {
+  const value = String(priority || '').toLowerCase()
+
+  if (value === 'high') {
+    return 'error'
+  }
+
+  if (value === 'medium') {
+    return 'warning'
+  }
+
+  return 'neutral'
+}
+
+const compactInsight = (value: string, max = 170) => {
+  const cleaned = String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (cleaned.length <= max) {
+    return cleaned
+  }
+
+  return `${cleaned.slice(0, max - 3)}...`
+}
+
+const strengthInsights = computed(() => {
+  const values = allFilteredAnswers.value
+    .filter(item =>
+      classifyResponseSentiment(item.response) === 'Positive'
+    )
+    .map(item => compactInsight(item.answer))
+    .filter(Boolean)
+
+  return Array.from(new Set(values)).slice(0, 6)
+})
+
+const concernInsights = computed(() => {
+  const values = allFilteredAnswers.value
+    .filter(item => {
+      const sentiment =
+        classifyResponseSentiment(item.response)
+
+      const answer = item.answer.toLowerCase()
+
+      return (
+        sentiment === 'Negative' ||
+        [
+          'need',
+          'needs',
+          'improve',
+          'problem',
+          'issue',
+          'lack',
+          'limited',
+          'slow',
+          'broken',
+          'dirty',
+          'crowded',
+          'unavailable',
+          'insufficient'
+        ].some(word => answer.includes(word))
+      )
+    })
+    .map(item => compactInsight(item.answer))
+    .filter(Boolean)
+
+  return Array.from(new Set(values)).slice(0, 6)
+})
+
+const executiveSummary = computed(() => {
+  const topMentioned = [...topicInsights.value]
+    .sort((a, b) => b.mentions - a.mentions)[0]
+
+  const topPositive = [...topicInsights.value]
+    .filter(item => item.positive > 0)
+    .sort((a, b) => {
+      if (b.positivePercentage !== a.positivePercentage) {
+        return b.positivePercentage - a.positivePercentage
+      }
+
+      return b.positive - a.positive
+    })[0]
+
+  const topConcern = priorityIssues.value[0]
+
+  return {
+    topStrength:
+      topPositive?.label ||
+      (strengthInsights.value.length
+        ? 'Positive written feedback'
+        : 'No dominant strength detected'),
+
+    topConcern:
+      topConcern?.label ||
+      'No major concern detected',
+
+    mostMentionedTheme:
+      topMentioned?.label ||
+      'No recurring theme detected',
+
+    highestPriority:
+      topConcern?.label ||
+      'No priority issue detected',
+
+    highestPriorityLevel:
+      topConcern?.priority || 'Low',
+
+    recommendedAction:
+      topConcern?.recommendedAction ||
+      'Continue monitoring written feedback and compare the same questions in the next evaluation period.'
+  }
+})
 
 const includesAny = (
   value: string,
@@ -3030,11 +3731,48 @@ const formatDate = (value: any) => {
   })
 }
 
+const getEvaluationType = async () => {
+  const response: any = await $api(
+    '/evaluation-types',
+    {
+      query: {
+        'filters[code][$eq]': 'student-school',
+        'pagination[pageSize]': 1
+      }
+    }
+  )
+
+  evaluationType.value =
+    response?.data?.[0] || null
+
+  if (!evaluationType.value) {
+    throw new Error(
+      'Student-School evaluation type is not configured.'
+    )
+  }
+
+  if (!isTextEvaluation.value) {
+    throw new Error(
+      'Student-School must use a Text / Comment response type.'
+    )
+  }
+}
+
 const getOverallFeedbacks = async () => {
   loading.value = true
   loadError.value = ''
 
   try {
+    if (!evaluationType.value) {
+      await getEvaluationType()
+    }
+
+    if (!isTextEvaluation.value) {
+      throw new Error(
+        'The Student-School evaluation type is not configured as Text / Comment.'
+      )
+    }
+
     const query: any = {
       'populate[student]':
         true,
@@ -3154,8 +3892,24 @@ watch(
   }
 )
 
-onMounted(() => {
-  getOverallFeedbacks()
+onMounted(async () => {
+  try {
+    await getEvaluationType()
+    await getOverallFeedbacks()
+  } catch (error: any) {
+    console.error(
+      'Student-School results initialization error:',
+      error
+    )
+
+    feedbacks.value = []
+
+    loadError.value =
+      error?.data?.error?.message ||
+      error?.data?.message ||
+      error?.message ||
+      'Failed to initialize Student - School overall feedback results.'
+  }
 })
 </script>
 

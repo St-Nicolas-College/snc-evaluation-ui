@@ -1,526 +1,519 @@
 <template>
-      <div class="space-y-6 pb-8">
-        <section
-          class="relative overflow-hidden rounded-[28px] border border-emerald-200 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 px-5 py-6 text-white shadow-xl shadow-emerald-900/10 sm:px-7 sm:py-7"
-        >
-          <div
-            class="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-white/10 blur-3xl"
-          />
-          <div
-            class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-cyan-300/15 blur-3xl"
-          />
+  <div class="space-y-6 pb-8">
+    <section
+      class="relative overflow-hidden rounded-[28px] border border-emerald-200 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 px-5 py-6 text-white shadow-xl shadow-emerald-900/10 sm:px-7 sm:py-7"
+    >
+      <div
+        class="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-white/10 blur-3xl"
+      />
+      <div
+        class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-cyan-300/15 blur-3xl"
+      />
 
+      <div
+        class="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between"
+      >
+        <div class="flex min-w-0 items-start gap-4">
           <div
-            class="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between"
+            class="hidden size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur sm:flex"
           >
-            <div class="flex min-w-0 items-start gap-4">
-              <div
-                class="hidden size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur sm:flex"
-              >
-                <UIcon name="i-lucide-layout-list" class="size-7" />
-              </div>
-
-              <div class="min-w-0">
-                <div
-                  class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-emerald-50"
-                >
-                  <span
-                    class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1"
-                    >Administrator Portal</span
-                  >
-                  <span
-                    class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1"
-                    >Evaluation Builder</span
-                  >
-                </div>
-                <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
-                  Evaluation Sections
-                </h1>
-                <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
-                  Organise evaluation questions into clear categories and assign
-                  every section to the correct evaluation type.
-                </p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-2 sm:min-w-[390px]">
-              <HeroStat label="Sections" :value="summary.total" />
-              <HeroStat label="Types Used" :value="summary.typesUsed" />
-              <HeroStat label="Unassigned" :value="summary.unassigned" />
-            </div>
-          </div>
-        </section>
-
-        <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label="Total Sections"
-            :value="summary.total"
-            description="All configured categories"
-            icon="i-lucide-layout-list"
-            tone="emerald"
-          />
-          <StatCard
-            label="Evaluation Types"
-            :value="summary.availableTypes"
-            description="Available questionnaire types"
-            icon="i-lucide-tags"
-            tone="violet"
-          />
-          <StatCard
-            label="Types in Use"
-            :value="summary.typesUsed"
-            description="Types with assigned sections"
-            icon="i-lucide-link-2"
-            tone="blue"
-          />
-          <StatCard
-            label="Largest Group"
-            :value="mostUsedType?.count || 0"
-            :description="mostUsedType?.label || 'No data available'"
-            icon="i-lucide-bar-chart-3"
-            tone="amber"
-          />
-        </section>
-
-        <section
-          class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-        >
-          <div
-            class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
-          >
-            <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
-              <UInput
-                v-model="globalFilter"
-                icon="i-lucide-search"
-                placeholder="Search section title, order, or evaluation type..."
-                class="w-full"
-              />
-              <USelectMenu
-                v-model="selectedEvaluationType"
-                :items="evaluationTypeFilterOptions"
-                value-key="value"
-                class="w-full"
-              />
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-              <UButton
-                v-if="selectedCount"
-                color="error"
-                variant="soft"
-                icon="i-lucide-trash-2"
-                @click="requestDeleteSelected"
-              >
-                Delete Selected
-                <template #trailing
-                  ><UKbd>{{ selectedCount }}</UKbd></template
-                >
-              </UButton>
-              <UButton icon="i-lucide-plus" @click="openCreateModal"
-                >New Section</UButton
-              >
-            </div>
+            <UIcon name="i-lucide-layout-list" class="size-7" />
           </div>
 
-          <div
-            v-if="hasActiveFilters"
-            class="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4 dark:border-gray-800"
-          >
-            <span class="text-xs font-medium text-gray-500 dark:text-gray-400"
-              >Active filters:</span
-            >
-            <UBadge v-if="globalFilter" color="neutral" variant="subtle"
-              >Search: {{ globalFilter }}</UBadge
-            >
-            <UBadge
-              v-if="selectedEvaluationType !== 'all'"
-              color="primary"
-              variant="subtle"
-              >{{ selectedEvaluationTypeLabel }}</UBadge
-            >
-            <UButton
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-x"
-              @click="clearFilters"
-              >Clear filters</UButton
-            >
-          </div>
-        </section>
-
-        <section
-          class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
-        >
-          <div
-            class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
-          >
-            <div>
-              <h2 class="text-lg font-bold text-gray-900 dark:text-white">
-                Section Directory
-              </h2>
-              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Showing {{ filteredSections.length }} of
-                {{ sections.length }} section{{
-                  sections.length === 1 ? "" : "s"
-                }}.
-              </p>
-            </div>
-            <USelect
-              v-model="itemsPerPage"
-              :items="pageSizeOptions"
-              class="w-full sm:w-32"
-            />
-          </div>
-
-          <div v-if="loading" class="space-y-3 p-5">
-            <USkeleton
-              v-for="index in 6"
-              :key="index"
-              class="h-16 w-full rounded-xl"
-            />
-          </div>
-
-          <div v-else-if="loadError" class="px-6 py-14 text-center">
+          <div class="min-w-0">
             <div
-              class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400"
+              class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-emerald-50"
             >
-              <UIcon name="i-lucide-triangle-alert" class="size-7" />
+              <span
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1"
+                >Administrator Portal</span
+              >
+              <span
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1"
+                >Evaluation Builder</span
+              >
             </div>
-            <h3 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">
-              Unable to load evaluation sections
-            </h3>
-            <p
-              class="mx-auto mt-2 max-w-lg text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ loadError }}
+            <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
+              Evaluation Sections
+            </h1>
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
+              Organise evaluation questions into clear categories and assign
+              every section to the correct evaluation type.
             </p>
-            <UButton
-              class="mt-5"
-              icon="i-lucide-refresh-cw"
-              @click="getEvaluationSections"
-              >Try Again</UButton
-            >
           </div>
+        </div>
 
-          <div
-            v-else-if="!filteredSections.length"
-            class="px-6 py-16 text-center"
-          >
-            <div
-              class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
-            >
-              <UIcon
-                :name="
-                  sections.length ? 'i-lucide-search-x' : 'i-lucide-layout-list'
-                "
-                class="size-8"
-              />
-            </div>
-            <h3 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
-              {{
-                sections.length
-                  ? "No matching sections found"
-                  : "No evaluation sections yet"
-              }}
-            </h3>
-            <p
-              class="mx-auto mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{
-                sections.length
-                  ? "Try changing or clearing the current filters."
-                  : "Create the first section to begin organising your evaluation criteria."
-              }}
-            </p>
-            <UButton
-              v-if="!sections.length"
-              class="mt-5"
-              icon="i-lucide-plus"
-              @click="openCreateModal"
-              >Create First Section</UButton
-            >
-          </div>
-
-          <div v-else class="overflow-x-auto">
-            <table class="w-full min-w-[850px] text-sm">
-              <thead
-                class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
-              >
-                <tr>
-                  <th class="w-12 px-4 py-3 text-center">
-                    <UCheckbox
-                      :model-value="isCurrentPageSelected"
-                      :indeterminate="isCurrentPagePartiallySelected"
-                      @update:model-value="toggleCurrentPageSelection(!!$event)"
-                    />
-                  </th>
-                  <th class="w-24 px-4 py-3 text-center">Order</th>
-                  <th class="px-4 py-3 text-left">Evaluation Section</th>
-                  <th class="px-4 py-3 text-left">Evaluation Type</th>
-                  <th class="w-20 px-4 py-3 text-center">Action</th>
-                </tr>
-              </thead>
-
-              <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                <tr
-                  v-for="row in paginatedSections"
-                  :key="getRowKey(row)"
-                  class="transition hover:bg-gray-50/80 dark:hover:bg-gray-950/30"
-                >
-                  <td class="px-4 py-4 text-center">
-                    <UCheckbox
-                      :model-value="isRowSelected(row)"
-                      @update:model-value="toggleRowSelection(row, !!$event)"
-                    />
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <div
-                      class="mx-auto flex size-9 items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                    >
-                      {{ row.order ?? "—" }}
-                    </div>
-                  </td>
-                  <td class="px-4 py-4">
-                    <div class="flex min-w-0 items-center gap-3">
-                      <div
-                        class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm"
-                      >
-                        <UIcon name="i-lucide-list-tree" class="size-5" />
-                      </div>
-                      <div class="min-w-0">
-                        <p class="font-bold text-gray-900 dark:text-white">
-                          {{ row.title || "Untitled Section" }}
-                        </p>
-                        <p
-                          class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"
-                        >
-                          Display order #{{ row.order ?? "—" }}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-4 py-4">
-                    <UBadge
-                      v-if="row.evaluation_type"
-                      color="primary"
-                      variant="subtle"
-                      >{{
-                        row.evaluation_type?.name ||
-                        row.evaluation_type?.title ||
-                        row.evaluation_type?.code ||
-                        "Evaluation Type"
-                      }}</UBadge
-                    >
-                    <UBadge v-else color="warning" variant="subtle"
-                      >Not assigned</UBadge
-                    >
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <UDropdownMenu :items="getDropdownActions(row)">
-                      <UButton
-                        icon="i-lucide-ellipsis-vertical"
-                        color="neutral"
-                        variant="ghost"
-                        square
-                        aria-label="Section actions"
-                      />
-                    </UDropdownMenu>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div
-            v-if="filteredSections.length"
-            class="flex flex-col gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
-          >
-            <div
-              class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
-            >
-              Showing {{ paginationStart }}–{{ paginationEnd }} of
-              {{ filteredSections.length }} records
-              <span v-if="selectedCount">• {{ selectedCount }} selected</span>
-            </div>
-            <div class="flex items-center justify-center gap-2">
-              <UButton
-                color="neutral"
-                variant="outline"
-                icon="i-lucide-chevron-left"
-                square
-                :disabled="page <= 1"
-                @click="page -= 1"
-              />
-              <div
-                class="min-w-28 rounded-xl bg-gray-100 px-3 py-2 text-center text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-              >
-                Page {{ page }} of {{ totalPages }}
-              </div>
-              <UButton
-                color="neutral"
-                variant="outline"
-                icon="i-lucide-chevron-right"
-                square
-                :disabled="page >= totalPages"
-                @click="page += 1"
-              />
-            </div>
-          </div>
-        </section>
-
-        <UModal
-          v-model:open="createModal"
-          title="Add Evaluation Section"
-          description="Create a new category for an evaluation form."
-          :ui="{ content: 'max-w-2xl' }"
-        >
-          <template #content>
-            <FormModalHeader
-              title="Add Evaluation Section"
-              description="Create a category for grouping evaluation criteria."
-              icon="i-lucide-list-plus"
-              @close="createModal = false"
-            />
-            <UForm
-              :state="createForm"
-              class="space-y-5 rounded-b-[28px] bg-white p-6 dark:bg-gray-900"
-              @submit="createSection"
-            >
-              <SectionFields
-                :form="createForm"
-                :evaluation-type-options="evaluationTypeOptions"
-              />
-              <div
-                class="flex flex-col-reverse gap-2 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end dark:border-gray-800"
-              >
-                <UButton
-                  color="neutral"
-                  variant="outline"
-                  type="button"
-                  @click="createModal = false"
-                  >Cancel</UButton
-                >
-                <UButton
-                  type="submit"
-                  icon="i-lucide-save"
-                  :loading="loadingCreate"
-                  :disabled="loadingCreate"
-                  >Save Section</UButton
-                >
-              </div>
-            </UForm>
-          </template>
-        </UModal>
-
-        <UModal
-          v-model:open="editModal"
-          title="Edit Evaluation Section"
-          description="Update the selected evaluation section."
-          :ui="{ content: 'max-w-2xl' }"
-        >
-          <template #content>
-            <FormModalHeader
-              title="Edit Evaluation Section"
-              description="Update the selected section and evaluation type."
-              icon="i-lucide-list-restart"
-              tone="blue"
-              @close="editModal = false"
-            />
-            <UForm
-              :state="editForm"
-              class="space-y-5 rounded-b-[28px] bg-white p-6 dark:bg-gray-900"
-              @submit="updateSection"
-            >
-              <SectionFields
-                :form="editForm"
-                :evaluation-type-options="evaluationTypeOptions"
-              />
-              <div
-                class="flex flex-col-reverse gap-2 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end dark:border-gray-800"
-              >
-                <UButton
-                  color="neutral"
-                  variant="outline"
-                  type="button"
-                  @click="editModal = false"
-                  >Cancel</UButton
-                >
-                <UButton
-                  type="submit"
-                  icon="i-lucide-save"
-                  :loading="loadingUpdate"
-                  :disabled="loadingUpdate"
-                  >Save Changes</UButton
-                >
-              </div>
-            </UForm>
-          </template>
-        </UModal>
-
-        <UModal
-          v-model:open="deleteModal"
-          title="Confirm Section Deletion"
-          description="Confirm deletion of the selected evaluation section record or records."
-          :ui="{ content: 'max-w-md' }"
-        >
-          <template #content>
-            <div class="rounded-[24px] bg-white p-6 dark:bg-gray-900">
-              <div
-                class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400"
-              >
-                <UIcon name="i-lucide-trash-2" class="size-7" />
-              </div>
-              <h2
-                class="mt-4 text-center text-xl font-bold text-gray-900 dark:text-white"
-              >
-                {{
-                  deleteTargetType === "multiple"
-                    ? "Delete selected sections?"
-                    : "Delete evaluation section?"
-                }}
-              </h2>
-              <p
-                class="mt-2 text-center text-sm leading-6 text-gray-500 dark:text-gray-400"
-              >
-                {{
-                  deleteTargetType === "multiple"
-                    ? `This will permanently delete ${selectedCount} selected section${selectedCount === 1 ? "" : "s"}.`
-                    : `This will permanently delete ${deleteTarget?.title || "this evaluation section"}.`
-                }}
-              </p>
-              <div
-                class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300"
-              >
-                Make sure the section is not needed by an existing evaluation
-                form before deleting it.
-              </div>
-              <div class="mt-6 flex gap-2">
-                <UButton
-                  color="neutral"
-                  variant="outline"
-                  class="flex-1 justify-center"
-                  @click="closeDeleteModal"
-                  >Cancel</UButton
-                >
-                <UButton
-                  color="error"
-                  icon="i-lucide-trash-2"
-                  class="flex-1 justify-center"
-                  :loading="loadingDelete"
-                  @click="confirmDelete"
-                  >Delete</UButton
-                >
-              </div>
-            </div>
-          </template>
-        </UModal>
+        <div class="grid grid-cols-3 gap-2 sm:min-w-[390px]">
+          <HeroStat label="Sections" :value="summary.total" />
+          <HeroStat label="Types Used" :value="summary.typesUsed" />
+          <HeroStat label="Unassigned" :value="summary.unassigned" />
+        </div>
       </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <StatCard
+        label="Total Sections"
+        :value="summary.total"
+        description="All configured categories"
+        icon="i-lucide-layout-list"
+        tone="emerald"
+      />
+      <StatCard
+        label="Evaluation Types"
+        :value="summary.availableTypes"
+        description="Available questionnaire types"
+        icon="i-lucide-tags"
+        tone="violet"
+      />
+      <StatCard
+        label="Types in Use"
+        :value="summary.typesUsed"
+        description="Types with assigned sections"
+        icon="i-lucide-link-2"
+        tone="blue"
+      />
+      <StatCard
+        label="Largest Group"
+        :value="mostUsedType?.count || 0"
+        :description="mostUsedType?.label || 'No data available'"
+        icon="i-lucide-bar-chart-3"
+        tone="amber"
+      />
+    </section>
+
+    <section
+      class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+    >
+      <div
+        class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+      >
+        <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+          <UInput
+            v-model="globalFilter"
+            icon="i-lucide-search"
+            placeholder="Search section title, order, or evaluation type..."
+            class="w-full"
+          />
+          <USelectMenu
+            v-model="selectedEvaluationType"
+            :items="evaluationTypeFilterOptions"
+            value-key="value"
+            class="w-full"
+          />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <UButton
+            v-if="selectedCount"
+            color="error"
+            variant="soft"
+            icon="i-lucide-trash-2"
+            @click="requestDeleteSelected"
+          >
+            Delete Selected
+            <template #trailing
+              ><UKbd>{{ selectedCount }}</UKbd></template
+            >
+          </UButton>
+          <UButton icon="i-lucide-plus" @click="openCreateModal"
+            >New Section</UButton
+          >
+        </div>
+      </div>
+
+      <div
+        v-if="hasActiveFilters"
+        class="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4 dark:border-gray-800"
+      >
+        <span class="text-xs font-medium text-gray-500 dark:text-gray-400"
+          >Active filters:</span
+        >
+        <UBadge v-if="globalFilter" color="neutral" variant="subtle"
+          >Search: {{ globalFilter }}</UBadge
+        >
+        <UBadge
+          v-if="selectedEvaluationType !== 'all'"
+          color="primary"
+          variant="subtle"
+          >{{ selectedEvaluationTypeLabel }}</UBadge
+        >
+        <UButton
+          size="xs"
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-x"
+          @click="clearFilters"
+          >Clear filters</UButton
+        >
+      </div>
+    </section>
+
+    <section
+      class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+    >
+      <div
+        class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
+      >
+        <div>
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+            Section Directory
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Showing {{ filteredSections.length }} of
+            {{ sections.length }} section{{ sections.length === 1 ? "" : "s" }}.
+          </p>
+        </div>
+        <USelect
+          v-model="itemsPerPage"
+          :items="pageSizeOptions"
+          class="w-full sm:w-32"
+        />
+      </div>
+
+      <div v-if="loading" class="space-y-3 p-5">
+        <USkeleton
+          v-for="index in 6"
+          :key="index"
+          class="h-16 w-full rounded-xl"
+        />
+      </div>
+
+      <div v-else-if="loadError" class="px-6 py-14 text-center">
+        <div
+          class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400"
+        >
+          <UIcon name="i-lucide-triangle-alert" class="size-7" />
+        </div>
+        <h3 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">
+          Unable to load evaluation sections
+        </h3>
+        <p
+          class="mx-auto mt-2 max-w-lg text-sm text-gray-500 dark:text-gray-400"
+        >
+          {{ loadError }}
+        </p>
+        <UButton
+          class="mt-5"
+          icon="i-lucide-refresh-cw"
+          @click="getEvaluationSections"
+          >Try Again</UButton
+        >
+      </div>
+
+      <div v-else-if="!filteredSections.length" class="px-6 py-16 text-center">
+        <div
+          class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+        >
+          <UIcon
+            :name="
+              sections.length ? 'i-lucide-search-x' : 'i-lucide-layout-list'
+            "
+            class="size-8"
+          />
+        </div>
+        <h3 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
+          {{
+            sections.length
+              ? "No matching sections found"
+              : "No evaluation sections yet"
+          }}
+        </h3>
+        <p
+          class="mx-auto mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400"
+        >
+          {{
+            sections.length
+              ? "Try changing or clearing the current filters."
+              : "Create the first section to begin organising your evaluation criteria."
+          }}
+        </p>
+        <UButton
+          v-if="!sections.length"
+          class="mt-5"
+          icon="i-lucide-plus"
+          @click="openCreateModal"
+          >Create First Section</UButton
+        >
+      </div>
+
+      <div v-else class="overflow-x-auto">
+        <table class="w-full min-w-[850px] text-sm">
+          <thead
+            class="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-950/40 dark:text-gray-400"
+          >
+            <tr>
+              <th class="w-12 px-4 py-3 text-center">
+                <UCheckbox
+                  :model-value="isCurrentPageSelected"
+                  :indeterminate="isCurrentPagePartiallySelected"
+                  @update:model-value="toggleCurrentPageSelection(!!$event)"
+                />
+              </th>
+              <th class="w-24 px-4 py-3 text-center">Order</th>
+              <th class="px-4 py-3 text-left">Evaluation Section</th>
+              <th class="px-4 py-3 text-left">Evaluation Type</th>
+              <th class="w-20 px-4 py-3 text-center">Action</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+            <tr
+              v-for="row in paginatedSections"
+              :key="getRowKey(row)"
+              class="transition hover:bg-gray-50/80 dark:hover:bg-gray-950/30"
+            >
+              <td class="px-4 py-4 text-center">
+                <UCheckbox
+                  :model-value="isRowSelected(row)"
+                  @update:model-value="toggleRowSelection(row, !!$event)"
+                />
+              </td>
+              <td class="px-4 py-4 text-center">
+                <div
+                  class="mx-auto flex size-9 items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                >
+                  {{ row.order ?? "—" }}
+                </div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="flex min-w-0 items-center gap-3">
+                  <div
+                    class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm"
+                  >
+                    <UIcon name="i-lucide-list-tree" class="size-5" />
+                  </div>
+                  <div class="min-w-0">
+                    <p class="font-bold text-gray-900 dark:text-white">
+                      {{ row.title || "Untitled Section" }}
+                    </p>
+                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                      Display order #{{ row.order ?? "—" }}
+                    </p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4">
+                <UBadge
+                  v-if="row.evaluation_type"
+                  color="primary"
+                  variant="subtle"
+                  >{{
+                    row.evaluation_type?.name ||
+                    row.evaluation_type?.title ||
+                    row.evaluation_type?.code ||
+                    "Evaluation Type"
+                  }}</UBadge
+                >
+                <UBadge v-else color="warning" variant="subtle"
+                  >Not assigned</UBadge
+                >
+              </td>
+              <td class="px-4 py-4 text-center">
+                <UDropdownMenu :items="getDropdownActions(row)">
+                  <UButton
+                    icon="i-lucide-ellipsis-vertical"
+                    color="neutral"
+                    variant="ghost"
+                    square
+                    aria-label="Section actions"
+                  />
+                </UDropdownMenu>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        v-if="filteredSections.length"
+        class="flex flex-col gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
+      >
+        <div
+          class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
+        >
+          Showing {{ paginationStart }}–{{ paginationEnd }} of
+          {{ filteredSections.length }} records
+          <span v-if="selectedCount">• {{ selectedCount }} selected</span>
+        </div>
+        <div class="flex items-center justify-center gap-2">
+          <UButton
+            color="neutral"
+            variant="outline"
+            icon="i-lucide-chevron-left"
+            square
+            :disabled="page <= 1"
+            @click="page -= 1"
+          />
+          <div
+            class="min-w-28 rounded-xl bg-gray-100 px-3 py-2 text-center text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          >
+            Page {{ page }} of {{ totalPages }}
+          </div>
+          <UButton
+            color="neutral"
+            variant="outline"
+            icon="i-lucide-chevron-right"
+            square
+            :disabled="page >= totalPages"
+            @click="page += 1"
+          />
+        </div>
+      </div>
+    </section>
+
+    <UModal
+      v-model:open="createModal"
+      title="Add Evaluation Section"
+      description="Create a new category for an evaluation form."
+      :ui="{ content: 'max-w-2xl' }"
+    >
+      <template #content>
+        <FormModalHeader
+          title="Add Evaluation Section"
+          description="Create a category for grouping evaluation criteria."
+          icon="i-lucide-list-plus"
+          @close="createModal = false"
+        />
+        <UForm
+          :state="createForm"
+          class="space-y-5 rounded-b-[28px] bg-white p-6 dark:bg-gray-900"
+          @submit="createSection"
+        >
+          <SectionFields
+            :form="createForm"
+            :evaluation-type-options="evaluationTypeOptions"
+          />
+          <div
+            class="flex flex-col-reverse gap-2 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end dark:border-gray-800"
+          >
+            <UButton
+              color="neutral"
+              variant="outline"
+              type="button"
+              @click="createModal = false"
+              >Cancel</UButton
+            >
+            <UButton
+              type="submit"
+              icon="i-lucide-save"
+              :loading="loadingCreate"
+              :disabled="loadingCreate"
+              >Save Section</UButton
+            >
+          </div>
+        </UForm>
+      </template>
+    </UModal>
+
+    <UModal
+      v-model:open="editModal"
+      title="Edit Evaluation Section"
+      description="Update the selected evaluation section."
+      :ui="{ content: 'max-w-2xl' }"
+    >
+      <template #content>
+        <FormModalHeader
+          title="Edit Evaluation Section"
+          description="Update the selected section and evaluation type."
+          icon="i-lucide-list-restart"
+          tone="blue"
+          @close="editModal = false"
+        />
+        <UForm
+          :state="editForm"
+          class="space-y-5 rounded-b-[28px] bg-white p-6 dark:bg-gray-900"
+          @submit="updateSection"
+        >
+          <SectionFields
+            :form="editForm"
+            :evaluation-type-options="evaluationTypeOptions"
+          />
+          <div
+            class="flex flex-col-reverse gap-2 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end dark:border-gray-800"
+          >
+            <UButton
+              color="neutral"
+              variant="outline"
+              type="button"
+              @click="editModal = false"
+              >Cancel</UButton
+            >
+            <UButton
+              type="submit"
+              icon="i-lucide-save"
+              :loading="loadingUpdate"
+              :disabled="loadingUpdate"
+              >Save Changes</UButton
+            >
+          </div>
+        </UForm>
+      </template>
+    </UModal>
+
+    <UModal
+      v-model:open="deleteModal"
+      title="Confirm Section Deletion"
+      description="Confirm deletion of the selected evaluation section record or records."
+      :ui="{ content: 'max-w-md' }"
+    >
+      <template #content>
+        <div class="rounded-[24px] bg-white p-6 dark:bg-gray-900">
+          <div
+            class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400"
+          >
+            <UIcon name="i-lucide-trash-2" class="size-7" />
+          </div>
+          <h2
+            class="mt-4 text-center text-xl font-bold text-gray-900 dark:text-white"
+          >
+            {{
+              deleteTargetType === "multiple"
+                ? "Delete selected sections?"
+                : "Delete evaluation section?"
+            }}
+          </h2>
+          <p
+            class="mt-2 text-center text-sm leading-6 text-gray-500 dark:text-gray-400"
+          >
+            {{
+              deleteTargetType === "multiple"
+                ? `This will permanently delete ${selectedCount} selected section${selectedCount === 1 ? "" : "s"}.`
+                : `This will permanently delete ${deleteTarget?.title || "this evaluation section"}.`
+            }}
+          </p>
+          <div
+            class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300"
+          >
+            Make sure the section is not needed by an existing evaluation form
+            before deleting it.
+          </div>
+          <div class="mt-6 flex gap-2">
+            <UButton
+              color="neutral"
+              variant="outline"
+              class="flex-1 justify-center"
+              @click="closeDeleteModal"
+              >Cancel</UButton
+            >
+            <UButton
+              color="error"
+              icon="i-lucide-trash-2"
+              class="flex-1 justify-center"
+              :loading="loadingDelete"
+              @click="confirmDelete"
+              >Delete</UButton
+            >
+          </div>
+        </div>
+      </template>
+    </UModal>
+  </div>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
-definePageMeta({ middleware: ["auth", "role"], role: ["Admin"] });
+definePageMeta({ middleware: ["auth", "role"], role: ["Admin", "HR"] });
 
 import type { DropdownMenuItem } from "@nuxt/ui";
 

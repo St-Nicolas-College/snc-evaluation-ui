@@ -635,7 +635,7 @@
       id="delete-faculty-modal"
       v-model:open="deleteModal"
       title="Confirm Faculty Deletion"
-      description="Permanently delete the selected faculty record or records."
+      description="Permanently delete the selected faculty record or records together with their linked user accounts."
       :ui="{ content: 'max-w-md' }"
     >
       <template #content>
@@ -653,8 +653,8 @@
           <p class="mt-2 text-center text-sm leading-6 text-gray-500 dark:text-gray-400">
             {{
               deleteTargetType === 'multiple'
-                ? `This will permanently delete ${selectedCount} selected record${selectedCount === 1 ? '' : 's'}.`
-                : `This will permanently delete ${deleteTarget?.name || 'this faculty record'}.`
+                ? `This will permanently delete ${selectedCount} selected faculty account${selectedCount === 1 ? '' : 's'}, including the linked login account${selectedCount === 1 ? '' : 's'}.`
+                : `This will permanently delete ${deleteTarget?.name || 'this faculty'} and the linked login account.`
             }}
           </p>
 
@@ -689,7 +689,7 @@
 
 definePageMeta({
   middleware: ['auth', 'role'],
-  role: ['Admin']
+  role: ['Admin', 'HR']
 })
 
 import type { DropdownMenuItem } from '@nuxt/ui'
@@ -1475,8 +1475,23 @@ const closeDeleteModal = () => {
 }
 
 const deleteOne = async (row: any) => {
+  if (!row?.id) {
+    throw new Error(
+      'Unable to delete faculty because the teacher ID is missing.'
+    )
+  }
+
+  /*
+   * Use the custom backend route so the Teacher record
+   * and the linked Users & Permissions account are both deleted.
+   *
+   * IMPORTANT:
+   * The custom controller currently uses entityService.findOne()
+   * with the numeric Strapi ID, so use row.id here instead of
+   * getTeacherKey(row), which may return documentId.
+   */
   await $api(
-    `/teachers/${getTeacherKey(row)}`,
+    `/teachers/delete-with-user/${row.id}`,
     {
       method: 'DELETE'
     }
@@ -1489,6 +1504,7 @@ const deleteOne = async (row: any) => {
   }
 
   delete next[key]
+
   selectedRows.value = next
 }
 
@@ -1500,16 +1516,31 @@ const deleteSelected = async () => {
       ]
     )
 
-  await Promise.all(
-    selectedItems.map(item =>
-      $api(
-        `/teachers/${getTeacherKey(item)}`,
-        {
-          method: 'DELETE'
-        }
-      )
+  if (!selectedItems.length) {
+    return
+  }
+
+  const invalidItems =
+    selectedItems.filter(item => !item?.id)
+
+  if (invalidItems.length) {
+    throw new Error(
+      'One or more selected faculty records do not have a valid teacher ID.'
     )
-  )
+  }
+
+  /*
+   * Delete one account at a time so each Teacher + User pair
+   * is completely removed before the next request starts.
+   */
+  for (const item of selectedItems) {
+    await $api(
+      `/teachers/delete-with-user/${item.id}`,
+      {
+        method: 'DELETE'
+      }
+    )
+  }
 
   selectedRows.value = {}
 }
@@ -1524,9 +1555,9 @@ const confirmDelete = async () => {
       await deleteSelected()
 
       toast.add({
-        title: 'Faculty records deleted',
+        title: 'Faculty accounts deleted',
         description:
-          'The selected faculty records were deleted successfully.',
+          'The selected faculty records and linked user accounts were deleted successfully.',
         icon: 'i-lucide-circle-check',
         color: 'success'
       })
@@ -1534,9 +1565,9 @@ const confirmDelete = async () => {
       await deleteOne(deleteTarget.value)
 
       toast.add({
-        title: 'Faculty deleted',
+        title: 'Faculty account deleted',
         description:
-          'The faculty record was deleted successfully.',
+          'The faculty record and linked user account were deleted successfully.',
         icon: 'i-lucide-circle-check',
         color: 'success'
       })

@@ -614,7 +614,7 @@
 
 definePageMeta({
   middleware: ["auth", "role"],
-  role: ["Admin"],
+  role: ["Admin", "HR"],
 });
 
 const { $api } = useNuxtApp();

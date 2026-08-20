@@ -16,8 +16,11 @@ const logoutOpen = ref(false);
 const openGroups = ref<string[]>([
   "Evaluation",
   "Management",
+  "Evaluation Results",
+  "Management",
   "Portfolio Management",
   "Ranking",
+  "Ranking Configuration",
   "Reports",
 ]);
 
@@ -284,6 +287,81 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
     },
 
     {
+      label: "Evaluation Results",
+      icon: "i-lucide-chart-no-axes-combined",
+      children: [
+        {
+          label: "Student – Faculty",
+          icon: "i-lucide-graduation-cap",
+          to: "/admin/evaluation/student-faculty",
+        },
+        {
+          label: "Faculty – Dean",
+          icon: "i-lucide-building-2",
+          to: "/admin/evaluation/faculty-dean",
+        },
+        {
+          label: "Dean – Faculty",
+          icon: "i-lucide-presentation",
+          to: "/admin/evaluation/dean-faculty",
+        },
+        {
+          label: "Overall Feedback",
+          icon: "i-lucide-message-square-text",
+          to: "/admin/evaluation/overall-feedbacks",
+        },
+      ],
+    },
+
+    {
+      label: "Management",
+      icon: "i-lucide-settings-2",
+      children: [
+        {
+          label: "Faculty",
+          icon: "i-lucide-users-round",
+          to: "/admin/management/faculty",
+          exact: true,
+        },
+        {
+          label: "Students",
+          icon: "i-lucide-graduation-cap",
+          to: "/admin/management/student",
+          exact: true,
+        },
+        {
+          label: "Departments",
+          icon: "i-lucide-building-2",
+          to: "/admin/management/department",
+          exact: true,
+        },
+        {
+          label: "Courses",
+          icon: "i-lucide-book-copy",
+          to: "/admin/management/course",
+          exact: true,
+        },
+        {
+          label: "Evaluation Types",
+          icon: "i-lucide-workflow",
+          to: "/admin/management/evaluation-type",
+        },
+        {
+          label: "Evaluation Sections",
+          icon: "i-lucide-panels-top-left",
+          to: "/admin/management/section",
+          exact: true,
+        },
+        {
+          label: "Evaluation Criteria",
+          icon: "i-lucide-list-checks",
+          to: "/admin/management/criteria",
+          exact: true,
+        },
+      ],
+    },
+
+    {
       label: "Faculty Portfolios",
       icon: "i-lucide-folder-kanban",
       to: "/hr/portfolio",
@@ -467,21 +545,33 @@ const pageInformationMap: Record<string, any> = {
     icon: "i-lucide-clipboard-check",
   },
 
+  "/admin/evaluation/student-faculty": {
+    title: "Student – Faculty Results",
+    description: "Review student evaluations of faculty members.",
+    icon: "i-lucide-graduation-cap",
+  },
+
   "/admin/evaluation/faculty-dean": {
-    title: "Faculty – Dean Evaluations",
-    description: "Review faculty feedback for deans.",
+    title: "Faculty – Dean Results",
+    description: "Review faculty evaluations of Deans and Coordinators.",
     icon: "i-lucide-building-2",
   },
 
   "/admin/evaluation/dean-faculty": {
-    title: "Dean – Faculty Evaluations",
-    description: "Review dean evaluations of faculty.",
+    title: "Dean – Faculty Results",
+    description: "Review Dean evaluations of faculty members.",
     icon: "i-lucide-presentation",
   },
 
   "/admin/evaluation/overall-feedback": {
     title: "Overall Feedback",
     description: "Review institution-wide feedback.",
+    icon: "i-lucide-message-square-text",
+  },
+
+  "/admin/evaluation/overall-feedbacks": {
+    title: "Overall Feedback Results",
+    description: "Review Student – School written feedback and school-wide insights.",
     icon: "i-lucide-message-square-text",
   },
 
@@ -495,6 +585,18 @@ const pageInformationMap: Record<string, any> = {
     title: "Student Management",
     description: "Manage student records and accounts.",
     icon: "i-lucide-graduation-cap",
+  },
+
+  "/admin/management/department": {
+    title: "Department Management",
+    description: "Manage academic departments.",
+    icon: "i-lucide-building-2",
+  },
+
+  "/admin/management/evaluation-type": {
+    title: "Evaluation Type Management",
+    description: "Manage evaluation response types, scales, and labels.",
+    icon: "i-lucide-workflow",
   },
 
   "/admin/management/course": {

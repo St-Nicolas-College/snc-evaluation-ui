@@ -1598,7 +1598,7 @@ const SNC_LOGO_DATA_URL =
 
 definePageMeta({
   middleware: ["auth", "role"],
-  role: ["Admin"],
+  role: ["Admin", "HR"],
 });
 
 const route = useRoute();

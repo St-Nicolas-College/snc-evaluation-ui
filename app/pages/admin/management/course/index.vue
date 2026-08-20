@@ -623,7 +623,7 @@
 
 definePageMeta({
   middleware: ['auth', 'role'],
-  role: ['Admin']
+  role: ['Admin', 'HR']
 })
 
 import type { DropdownMenuItem } from '@nuxt/ui'
