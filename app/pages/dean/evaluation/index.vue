@@ -219,7 +219,7 @@
                       <UIcon name="i-lucide-building-2" class="size-7" />
                     </div>
                     <div class="min-w-0">
-                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">Dean-to-Faculty Evaluation</p>
+                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">Dean-Faculty Evaluation</p>
                       <h2 class="mt-1 truncate text-xl font-bold">{{ targetMap[String(evaluation.teacherId)]?.name || 'Unknown' }}</h2>
                       <p class="mt-1 text-xs text-slate-300">Evaluation {{ currentPage }} of {{ totalPages }}</p>
                     </div>
@@ -247,8 +247,15 @@
                     </div>
                     <div class="min-w-0 flex-1">
                       <h3 class="text-sm font-bold text-gray-900 dark:text-white">Rating Guide</h3>
-                      <p class="mt-1 text-xs leading-5 text-gray-600 dark:text-gray-400">Select one rating for every criterion.</p>
-                      <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <p class="mt-1 text-xs leading-5 text-gray-600 dark:text-gray-400">
+                        Select one rating for every criterion. This scale is loaded
+                        from the <strong>{{ evaluationType?.name }}</strong>
+                        evaluation type configuration.
+                      </p>
+                      <div
+                        class="mt-3 grid gap-2"
+                        :style="ratingGridStyle"
+                      >
                         <div v-for="rating in ratingGuide" :key="rating.score" class="rounded-xl border border-blue-100 bg-white px-3 py-2 text-center dark:border-blue-900 dark:bg-gray-900">
                           <p class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ rating.score }}</p>
                           <p class="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">{{ rating.label }}</p>
@@ -277,10 +284,25 @@
                           <p class="text-sm leading-6 text-gray-700 dark:text-gray-300">{{ criterion.statement }}</p>
                         </div>
 
-                        <div class="grid grid-cols-4 gap-1.5 rounded-xl bg-gray-100 p-1.5 dark:bg-gray-800">
-                          <label v-for="score in [4, 3, 2, 1]" :key="score" class="group cursor-pointer">
-                            <input v-model="evaluation.responses[criterion.id]" :value="Number(score)" type="radio" class="peer sr-only">
-                            <span class="flex h-10 items-center justify-center rounded-lg text-sm font-bold text-gray-500 transition-all group-hover:bg-white group-hover:text-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:shadow-md dark:text-gray-400 dark:group-hover:bg-gray-700 dark:group-hover:text-emerald-400">{{ score }}</span>
+                        <div
+                          class="grid gap-1.5 rounded-xl bg-gray-100 p-1.5 dark:bg-gray-800"
+                          :style="ratingGridStyle"
+                        >
+                          <label
+                            v-for="rating in ratingGuide"
+                            :key="rating.score"
+                            class="group cursor-pointer"
+                            :title="`${rating.score} - ${rating.label}`"
+                          >
+                            <input
+                              v-model="evaluation.responses[criterion.id]"
+                              :value="Number(rating.score)"
+                              type="radio"
+                              class="peer sr-only"
+                            >
+                            <span class="flex h-10 items-center justify-center rounded-lg text-sm font-bold text-gray-500 transition-all group-hover:bg-white group-hover:text-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:shadow-md dark:text-gray-400 dark:group-hover:bg-gray-700 dark:group-hover:text-emerald-400">
+                              {{ rating.score }}
+                            </span>
                           </label>
                         </div>
                       </div>
@@ -391,7 +413,7 @@
                   </div>
                   <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Average Score</p>
-                    <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ getAverageScore(evaluation) }} <span class="text-sm font-medium text-gray-400">/ 4</span></p>
+                    <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ getAverageScore(evaluation) }} <span class="text-sm font-medium text-gray-400">/ {{ ratingMaxScore ?? '—' }}</span></p>
                   </div>
                 </div>
               </div>
@@ -506,13 +528,6 @@ const semesterOptions = [
   { label: 'Summer', value: 'Summer' }
 ]
 
-const ratingGuide = [
-  { score: 4, label: 'Excellent' },
-  { score: 3, label: 'Satisfactory' },
-  { score: 2, label: 'Fair' },
-  { score: 1, label: 'Needs Improvement' }
-]
-
 const form = reactive({
   semester: '',
   school_year: '',
@@ -553,6 +568,79 @@ const targetMap = computed(() => {
 const filteredCriteria = computed(() =>
   sections.value.flatMap((section: any) => section.evaluation_criteria || [])
 )
+
+/* =========================================================
+   DYNAMIC RATING SCALE FROM EVALUATION TYPE
+========================================================= */
+
+const evaluationResponseType = computed(() => {
+  return evaluationType.value?.response_type || 'rating'
+})
+
+const normalizedScaleLabels = computed<Record<string, string>>(() => {
+  const labels = evaluationType.value?.scale_labels
+
+  if (!labels || typeof labels !== 'object' || Array.isArray(labels)) {
+    return {}
+  }
+
+  return labels
+})
+
+const ratingGuide = computed(() => {
+  if (evaluationResponseType.value !== 'rating') {
+    return []
+  }
+
+  const labels = normalizedScaleLabels.value
+
+  const configuredScores = Object.keys(labels)
+    .map((score) => Number(score))
+    .filter((score) => Number.isFinite(score))
+    .sort((a, b) => b - a)
+
+  if (configuredScores.length) {
+    return configuredScores.map((score) => ({
+      score,
+      label: String(labels[String(score)] || `Rating ${score}`)
+    }))
+  }
+
+  const minScore = Number(evaluationType.value?.min_score)
+  const maxScore = Number(evaluationType.value?.max_score)
+
+  if (
+    Number.isFinite(minScore) &&
+    Number.isFinite(maxScore) &&
+    maxScore >= minScore
+  ) {
+    const rows = []
+
+    for (let score = maxScore; score >= minScore; score -= 1) {
+      rows.push({
+        score,
+        label: `Rating ${score}`
+      })
+    }
+
+    return rows
+  }
+
+  return []
+})
+
+const ratingScores = computed(() =>
+  ratingGuide.value.map((item) => Number(item.score))
+)
+
+const ratingMaxScore = computed(() => {
+  if (!ratingScores.value.length) return null
+  return Math.max(...ratingScores.value)
+})
+
+const ratingGridStyle = computed(() => ({
+  gridTemplateColumns: `repeat(${Math.max(ratingGuide.value.length, 1)}, minmax(0, 1fr))`
+}))
 
 const totalCriteriaCount = computed(() => filteredCriteria.value.length)
 
@@ -620,7 +708,16 @@ const syncEvaluationsFromSelection = () => {
   if (!form.evaluations.length) currentPage.value = 1
 }
 
-const getAnsweredCount = (evaluation: any) => Object.keys(evaluation.responses).length
+const getAnsweredCount = (evaluation: any) => {
+  if (evaluationResponseType.value !== 'rating') {
+    return 0
+  }
+
+  return filteredCriteria.value.filter((criterion: any) => {
+    const value = Number(evaluation.responses[criterion.id])
+    return ratingScores.value.includes(value)
+  }).length
+}
 
 const getTotalScore = (evaluation: any) =>
   Object.values(evaluation.responses).reduce(
@@ -634,12 +731,21 @@ const getAverageScore = (evaluation: any) => {
   return Number((getTotalScore(evaluation) / answered).toFixed(2))
 }
 
-const isEvaluationComplete = (evaluation: any) =>
-  Boolean(
-    evaluation.teacherId &&
-    totalCriteriaCount.value > 0 &&
-    getAnsweredCount(evaluation) === totalCriteriaCount.value
-  )
+const isEvaluationComplete = (evaluation: any) => {
+  if (
+    !evaluation.teacherId ||
+    totalCriteriaCount.value <= 0 ||
+    evaluationResponseType.value !== 'rating' ||
+    !ratingScores.value.length
+  ) {
+    return false
+  }
+
+  return filteredCriteria.value.every((criterion: any) => {
+    const value = Number(evaluation.responses[criterion.id])
+    return ratingScores.value.includes(value)
+  })
+}
 
 const getEvaluationProgress = (evaluation: any) => {
   if (!totalCriteriaCount.value) return 0
@@ -651,9 +757,10 @@ const getEvaluationProgress = (evaluation: any) => {
 
 const getSectionAnsweredCount = (evaluation: any, section: any) => {
   const criteria = section.evaluation_criteria || []
-  return criteria.filter(
-    (criterion: any) => evaluation.responses[criterion.id] !== undefined
-  ).length
+  return criteria.filter((criterion: any) => {
+    const value = Number(evaluation.responses[criterion.id])
+    return ratingScores.value.includes(value)
+  }).length
 }
 
 const scrollToTop = async () => {
@@ -694,7 +801,7 @@ const getActiveSchoolYear = async () => {
 const getEvaluationType = async () => {
   const response = await $api('/evaluation-types', {
     query: {
-      'filters[code][$eq]': 'dean-to-faculty',
+      'filters[code][$eq]': 'dean-faculty',
       'pagination[pageSize]': 1
     }
   })
@@ -767,20 +874,47 @@ const getExistingEvaluations = async () => {
   try {
     checkingExistingEvaluations.value = true
 
+    /*
+     * IMPORTANT:
+     * Do not filter previous evaluations by evaluation_type.code here.
+     *
+     * The purpose of this query is duplicate prevention for this Dean during
+     * the active semester and school year. Older evaluation batches may still
+     * reference a previous Evaluation Type record/code even though the current
+     * configured Evaluation Type is now "dean-faculty".
+     *
+     * Filtering only by evaluator + period lets us correctly restore the
+     * disabled faculty list after a page reload.
+     */
     const response = await $api('/evaluations', {
       query: {
         'filters[evaluator_user][id][$eq]': user.value.id,
         'filters[batch][semester][$eq]': form.semester,
         'filters[batch][school_year][$eq]': form.school_year,
-        'filters[batch][evaluation_type][code][$eq]': 'dean-to-faculty',
         'populate[teacher]': true,
+        'populate[batch][populate][evaluation_type]': true,
         'pagination[pageSize]': 100
       }
     })
 
-    existingEvaluations.value = response.data || []
+    /*
+     * Keep only evaluation records that actually target Faculty members shown
+     * on this page. This avoids unrelated evaluation records from disabling
+     * anything accidentally.
+     */
+    const targetIds = new Set(
+      targets.value.map((target: any) => Number(target.id))
+    )
+
+    existingEvaluations.value = (response.data || []).filter(
+      (evaluation: any) =>
+        evaluation.teacher?.id &&
+        targetIds.has(Number(evaluation.teacher.id))
+    )
   } catch (error) {
     console.error('Existing evaluation check error:', error)
+    existingEvaluations.value = []
+
     toast.add({
       title: 'Unable to check previous evaluations',
       description: 'Please refresh the page and try again.',
@@ -806,7 +940,19 @@ const loadData = async () => {
     }
 
     if (!evaluationType.value) {
-      throw new Error('Faculty-Faculty evaluation type is not configured.')
+      throw new Error('Dean-Faculty evaluation type is not configured.')
+    }
+
+    if (evaluationResponseType.value !== 'rating') {
+      throw new Error(
+        'Dean-Faculty must use a Rating Scale response type.'
+      )
+    }
+
+    if (!ratingGuide.value.length) {
+      throw new Error(
+        'The Dean-Faculty evaluation type has no valid rating scale configured.'
+      )
     }
 
     await getLoggedInDean()
@@ -867,6 +1013,15 @@ const submitEvaluation = async () => {
     return
   }
 
+  if (
+    evaluationResponseType.value !== 'rating' ||
+    !ratingScores.value.length
+  ) {
+    submitError.value =
+      'The Dean-Faculty rating scale is not configured correctly.'
+    return
+  }
+
   if (!isFormValid.value) {
     confirmationOpen.value = false
     submitError.value = 'Please complete all required ratings.'
@@ -902,7 +1057,7 @@ const submitEvaluation = async () => {
 
     toast.add({
       title: 'Evaluations submitted',
-      description: 'Dean-to-Faculty evaluations were submitted successfully.',
+      description: 'Dean-Faculty evaluations were submitted successfully.',
       icon: 'i-lucide-circle-check',
       color: 'success'
     })

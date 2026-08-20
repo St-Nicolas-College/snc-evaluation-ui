@@ -85,6 +85,9 @@
           >
             <p class="text-2xl font-bold">
               {{ summary.averageScore }}
+              <span class="text-sm font-medium text-emerald-100">
+                / {{ ratingMaxScore ?? "—" }}
+              </span>
             </p>
 
             <p
@@ -178,7 +181,9 @@
 
             <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
               {{ summary.averageScore }}
-              <span class="text-sm font-medium text-gray-400"> / 5 </span>
+              <span class="text-sm font-medium text-gray-400">
+                / {{ ratingMaxScore ?? "—" }}
+              </span>
             </p>
           </div>
 
@@ -223,6 +228,17 @@
             icon="i-lucide-graduation-cap"
           >
             Current School Year: {{ activeSchoolYear }}
+          </UBadge>
+
+          <UBadge
+            v-if="evaluationType"
+            color="info"
+            variant="subtle"
+            icon="i-lucide-star"
+          >
+            {{ evaluationType.name }} · {{ ratingMinScore ?? "—" }}–{{
+              ratingMaxScore ?? "—"
+            }}
           </UBadge>
         </div>
       </div>
@@ -500,7 +516,9 @@
                     {{ formatNumber(group.averageScore) }}
                   </div>
 
-                  <div class="text-[10px] text-gray-400">out of 5</div>
+                  <div class="text-[10px] text-gray-400">
+                    out of {{ ratingMaxScore ?? "—" }}
+                  </div>
                 </td>
 
                 <td class="px-4 py-4 text-center">
@@ -606,6 +624,7 @@ const pending = ref(false);
 const loadError = ref("");
 
 const evaluations = ref<any[]>([]);
+const evaluationType = ref<any>(null);
 
 const activeSchoolYear = ref("all");
 const activeSemester = ref("all");
@@ -719,6 +738,107 @@ const schoolYearOptions = computed(() => {
   ];
 });
 
+/* =========================================================
+   DYNAMIC RATING SCALE FROM EVALUATION TYPE
+========================================================= */
+
+const evaluationResponseType = computed(() => {
+  return evaluationType.value?.response_type || "rating";
+});
+
+const normalizedScaleLabels = computed<Record<string, string>>(() => {
+  const labels = evaluationType.value?.scale_labels;
+  if (!labels || typeof labels !== "object" || Array.isArray(labels)) return {};
+  return labels;
+});
+
+const ratingScale = computed(() => {
+  const labels = normalizedScaleLabels.value;
+
+  const configuredScores = Object.keys(labels)
+    .map((score) => Number(score))
+    .filter((score) => Number.isFinite(score))
+    .sort((a, b) => a - b);
+
+  if (configuredScores.length) {
+    return configuredScores.map((score) => ({
+      score,
+      label: String(labels[String(score)] || `Rating ${score}`),
+    }));
+  }
+
+  const minScore = Number(evaluationType.value?.min_score);
+  const maxScore = Number(evaluationType.value?.max_score);
+
+  if (
+    Number.isFinite(minScore) &&
+    Number.isFinite(maxScore) &&
+    maxScore >= minScore
+  ) {
+    const rows = [];
+    for (let score = minScore; score <= maxScore; score += 1) {
+      rows.push({ score, label: `Rating ${score}` });
+    }
+    return rows;
+  }
+
+  return [];
+});
+
+const ratingScores = computed(() =>
+  ratingScale.value.map((item) => Number(item.score)),
+);
+
+const ratingMinScore = computed(() =>
+  ratingScores.value.length ? Math.min(...ratingScores.value) : null,
+);
+
+const ratingMaxScore = computed(() =>
+  ratingScores.value.length ? Math.max(...ratingScores.value) : null,
+);
+
+const isConfiguredRatingScore = (value: any) => {
+  const score = Number(value);
+  return Number.isFinite(score) && ratingScores.value.includes(score);
+};
+
+const createEmptyRatingDistribution = () => {
+  const distribution: Record<number, number> = {};
+  ratingScores.value.forEach((score) => {
+    distribution[score] = 0;
+  });
+  return distribution;
+};
+
+const getNearestRating = (average: number) => {
+  const avg = Number(average);
+
+  if (!Number.isFinite(avg) || avg <= 0 || !ratingScale.value.length) {
+    return null;
+  }
+
+  return (
+    [...ratingScale.value].sort((a, b) => {
+      const da = Math.abs(Number(a.score) - avg);
+      const db = Math.abs(Number(b.score) - avg);
+
+      if (da === db) return Number(b.score) - Number(a.score);
+      return da - db;
+    })[0] || null
+  );
+};
+
+const getRatingPosition = (average: number) => {
+  const nearest = getNearestRating(average);
+  if (!nearest) return 0;
+  if (ratingScale.value.length <= 1) return 1;
+
+  const index = ratingScale.value.findIndex(
+    (item) => Number(item.score) === Number(nearest.score),
+  );
+
+  return index < 0 ? 0 : index / (ratingScale.value.length - 1);
+};
 
 type NormalizedResponse = {
   criteriaId: string;
@@ -781,26 +901,13 @@ const normalizeResponses = (responses: any): NormalizedResponse[] => {
           score: Number(rawScore),
         };
       })
-      .filter(
-        (item) =>
-          item.criteriaId &&
-          Number.isFinite(item.score) &&
-          item.score >= 1 &&
-          item.score <= 5,
-      );
+      .filter((item) => item.criteriaId && isConfiguredRatingScore(item.score));
   }
 
-  if (
-    typeof parsedResponses === "object" &&
-    parsedResponses !== null
-  ) {
+  if (typeof parsedResponses === "object" && parsedResponses !== null) {
     return Object.entries(parsedResponses)
       .map(([criteriaId, value]: [string, any]) => {
-        if (
-          value &&
-          typeof value === "object" &&
-          !Array.isArray(value)
-        ) {
+        if (value && typeof value === "object" && !Array.isArray(value)) {
           const rawCriteriaId =
             value?.criteria_id ??
             value?.criteriaId ??
@@ -845,13 +952,7 @@ const normalizeResponses = (responses: any): NormalizedResponse[] => {
           score: Number(value),
         };
       })
-      .filter(
-        (item) =>
-          item.criteriaId &&
-          Number.isFinite(item.score) &&
-          item.score >= 1 &&
-          item.score <= 5,
-      );
+      .filter((item) => item.criteriaId && isConfiguredRatingScore(item.score));
   }
 
   return [];
@@ -879,8 +980,7 @@ const filteredEvaluationRecords = computed(() => {
       department === selectedDepartment.value;
 
     const matchesSemester =
-      selectedSemester.value === "all" ||
-      semester === selectedSemester.value;
+      selectedSemester.value === "all" || semester === selectedSemester.value;
 
     const matchesSchoolYear =
       selectedSchoolYear.value === "all" ||
@@ -909,16 +1009,11 @@ const groupedResults = computed(() => {
     if (!groups.has(teacherKey)) {
       groups.set(teacherKey, {
         key: teacherKey,
-        teacherDocumentId:
-          evaluation?.teacher?.documentId || "",
+        teacherDocumentId: evaluation?.teacher?.documentId || "",
         teacherId:
-          evaluation?.teacher?.documentId ||
-          evaluation?.teacher?.id ||
-          "",
+          evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
         documentId:
-          evaluation?.teacher?.documentId ||
-          evaluation?.teacher?.id ||
-          "",
+          evaluation?.teacher?.documentId || evaluation?.teacher?.id || "",
         name: evaluation?.teacher?.name || "Unknown Faculty",
         department: getEvaluationDepartment(evaluation),
         records: [],
@@ -926,13 +1021,7 @@ const groupedResults = computed(() => {
         semesterValues: new Set<string>(),
         schoolYearValues: new Set<string>(),
         criteriaMap: new Map<string, any>(),
-        ratingDistribution: {
-          5: 0,
-          4: 0,
-          3: 0,
-          2: 0,
-          1: 0,
-        },
+        ratingDistribution: createEmptyRatingDistribution(),
         totalRatingScore: 0,
         totalRatingResponses: 0,
       });
@@ -969,13 +1058,7 @@ const groupedResults = computed(() => {
           statement: response.statement,
           totalScore: 0,
           responseCount: 0,
-          distribution: {
-            5: 0,
-            4: 0,
-            3: 0,
-            2: 0,
-            1: 0,
-          },
+          distribution: createEmptyRatingDistribution(),
         });
       }
 
@@ -990,8 +1073,15 @@ const groupedResults = computed(() => {
 
       criterion.totalScore += response.score;
       criterion.responseCount += 1;
+
+      if (criterion.distribution[response.score] === undefined) {
+        criterion.distribution[response.score] = 0;
+      }
       criterion.distribution[response.score] += 1;
 
+      if (group.ratingDistribution[response.score] === undefined) {
+        group.ratingDistribution[response.score] = 0;
+      }
       group.ratingDistribution[response.score] += 1;
       group.totalRatingScore += response.score;
       group.totalRatingResponses += 1;
@@ -1062,9 +1152,7 @@ const groupedResults = computed(() => {
       const completionRate = expectedResponses
         ? Math.min(
             100,
-            Math.round(
-              (group.totalRatingResponses / expectedResponses) * 100,
-            ),
+            Math.round((group.totalRatingResponses / expectedResponses) * 100),
           )
         : 0;
 
@@ -1259,6 +1347,31 @@ const formatDate = (value: any) => {
   });
 };
 
+const getEvaluationType = async () => {
+  const response: any = await $api("/evaluation-types", {
+    query: {
+      "filters[code][$eq]": "student-faculty",
+      "pagination[pageSize]": 1,
+    },
+  });
+
+  evaluationType.value = response?.data?.[0] || null;
+
+  if (!evaluationType.value) {
+    throw new Error("Student-Faculty evaluation type is not configured.");
+  }
+
+  if (evaluationResponseType.value !== "rating") {
+    throw new Error("Student-Faculty must use a Rating Scale response type.");
+  }
+
+  if (!ratingScale.value.length) {
+    throw new Error(
+      "The Student-Faculty evaluation type has no valid rating scale configured.",
+    );
+  }
+};
+
 const loadActiveAcademicPeriod = async () => {
   try {
     const response: any = await $api("/school-years", {
@@ -1271,24 +1384,15 @@ const loadActiveAcademicPeriod = async () => {
 
     const activeRecord = response?.data?.[0] || null;
 
-    activeSchoolYear.value = String(
-      activeRecord?.school_year || "all",
-    ).trim();
+    activeSchoolYear.value = String(activeRecord?.school_year || "all").trim();
 
-    activeSemester.value = String(
-      activeRecord?.semester || "all",
-    ).trim();
+    activeSemester.value = String(activeRecord?.semester || "all").trim();
 
-    selectedSchoolYear.value =
-      activeSchoolYear.value || "all";
+    selectedSchoolYear.value = activeSchoolYear.value || "all";
 
-    selectedSemester.value =
-      activeSemester.value || "all";
+    selectedSemester.value = activeSemester.value || "all";
   } catch (error) {
-    console.error(
-      "Active academic period loading error:",
-      error,
-    );
+    console.error("Active academic period loading error:", error);
 
     activeSchoolYear.value = "all";
     activeSemester.value = "all";
@@ -1298,8 +1402,7 @@ const loadActiveAcademicPeriod = async () => {
 
     toast.add({
       title: "Current academic period unavailable",
-      description:
-        "The active school year and semester could not be loaded.",
+      description: "The active school year and semester could not be loaded.",
       icon: "i-lucide-info",
       color: "warning",
     });
@@ -1311,8 +1414,17 @@ const initializePage = async () => {
   loadError.value = "";
 
   try {
-    await loadActiveAcademicPeriod();
+    await Promise.all([loadActiveAcademicPeriod(), getEvaluationType()]);
+
     await getResults();
+  } catch (error: any) {
+    console.error("Student-Faculty result initialization error:", error);
+
+    loadError.value =
+      error?.data?.error?.message ||
+      error?.data?.message ||
+      error?.message ||
+      "Failed to initialize Student – Faculty evaluation results.";
   } finally {
     pending.value = false;
   }
@@ -1328,6 +1440,19 @@ const getResults = async () => {
   loadError.value = "";
 
   try {
+    if (!evaluationType.value) {
+      await getEvaluationType();
+    }
+
+    if (
+      evaluationResponseType.value !== "rating" ||
+      !ratingScale.value.length
+    ) {
+      throw new Error(
+        "The Student-Faculty rating scale is not configured correctly.",
+      );
+    }
+
     const query: any = {
       "filters[batch][evaluation_type][code][$eq]": "student-faculty",
 
@@ -1394,11 +1519,9 @@ const clearFilters = () => {
   selectedFaculty.value = "all";
   selectedDepartment.value = "all";
 
-  selectedSemester.value =
-    activeSemester.value || "all";
+  selectedSemester.value = activeSemester.value || "all";
 
-  selectedSchoolYear.value =
-    activeSchoolYear.value || "all";
+  selectedSchoolYear.value = activeSchoolYear.value || "all";
 
   page.value = 1;
 };
@@ -1445,9 +1568,7 @@ const viewFacultySummary = async (group: any) => {
 
   if (
     !documentId ||
-    ["undefined", "null", "unknown-faculty"].includes(
-      documentId.toLowerCase(),
-    )
+    ["undefined", "null", "unknown-faculty"].includes(documentId.toLowerCase())
   ) {
     toast.add({
       title: "Unable to open summary",
@@ -1461,9 +1582,7 @@ const viewFacultySummary = async (group: any) => {
   }
 
   await navigateTo({
-    path: `/admin/evaluation/student-faculty/${encodeURIComponent(
-      documentId,
-    )}`,
+    path: `/admin/evaluation/student-faculty/${encodeURIComponent(documentId)}`,
     query: {
       semester: selectedSemester.value,
       schoolYear: selectedSchoolYear.value,
@@ -1480,51 +1599,26 @@ const formatResponses = (responses: any) => {
 };
 
 const getRatingLabel = (average: number) => {
-  const avg = Number(average);
-
-  if (avg >= 4.5) {
-    return "Outstanding";
-  }
-
-  if (avg >= 3.5) {
-    return "Excellent";
-  }
-
-  if (avg >= 2.5) {
-    return "Satisfactory";
-  }
-
-  if (avg >= 1.5) {
-    return "Fair";
-  }
-
-  if (avg > 0) {
-    return "Needs Improvement";
-  }
-
-  return "N/A";
+  const nearest = getNearestRating(average);
+  return nearest?.label || "N/A";
 };
 
 const ratingBadge = (average: number) => {
-  const avg = Number(average);
+  const position = getRatingPosition(average);
 
-  if (avg >= 4.5) {
+  if (position >= 0.875) {
     return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400";
   }
-
-  if (avg >= 3.5) {
+  if (position >= 0.625) {
     return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
   }
-
-  if (avg >= 2.5) {
+  if (position >= 0.375) {
     return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
   }
-
-  if (avg >= 1.5) {
+  if (position > 0) {
     return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
   }
-
-  if (avg > 0) {
+  if (Number(average) > 0) {
     return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
   }
 
@@ -1532,24 +1626,12 @@ const ratingBadge = (average: number) => {
 };
 
 const ratingColor = (average: number) => {
-  const avg = Number(average);
+  const position = getRatingPosition(average);
 
-  if (avg >= 4.5) {
-    return "success";
-  }
-
-  if (avg >= 3.5) {
-    return "primary";
-  }
-
-  if (avg >= 2.5) {
-    return "info";
-  }
-
-  if (avg >= 1.5) {
-    return "warning";
-  }
-
+  if (position >= 0.875) return "success";
+  if (position >= 0.625) return "primary";
+  if (position >= 0.375) return "info";
+  if (position > 0) return "warning";
   return "error";
 };
 

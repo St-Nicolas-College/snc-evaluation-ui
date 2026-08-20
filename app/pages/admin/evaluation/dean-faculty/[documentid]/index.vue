@@ -160,6 +160,15 @@
                 <UBadge color="primary" variant="subtle">
                   {{ selectedGroup.recordCount }} Responses
                 </UBadge>
+
+                <UBadge
+                  v-if="evaluationType"
+                  color="info"
+                  variant="subtle"
+                >
+                  {{ evaluationType.name }} ·
+                  {{ ratingMinScore ?? "—" }}–{{ ratingMaxScore ?? "—" }}
+                </UBadge>
               </div>
 
               <h1
@@ -252,7 +261,7 @@
 
                 <p class="mt-1 text-4xl font-black tracking-tight">
                   {{ formatNumber(selectedGroup.averageScore) }}
-                  <span class="text-lg font-semibold text-slate-300">/4</span>
+                  <span class="text-lg font-semibold text-slate-300">/{{ ratingMaxScore ?? "—" }}</span>
                 </p>
               </div>
 
@@ -268,12 +277,13 @@
 
             <div class="mt-3 flex items-center gap-1">
               <UIcon
-                v-for="star in 4"
-                :key="star"
+                v-for="rating in ratingScale"
+                :key="`overall-rating-${rating.score}`"
                 name="i-lucide-star"
                 class="size-4"
+                :title="`${rating.score} - ${rating.label}`"
                 :class="
-                  star <= Math.round(selectedGroup.averageScore)
+                  Number(rating.score) <= Math.round(selectedGroup.averageScore)
                     ? 'fill-amber-400 text-amber-400'
                     : 'text-white/25'
                 "
@@ -453,7 +463,7 @@
                   variant="subtle"
                   size="lg"
                 >
-                  {{ formatNumber(selectedGroup.averageScore) }}/4 ·
+                  {{ formatNumber(selectedGroup.averageScore) }}/{{ ratingMaxScore ?? "—" }} ·
                   {{ getRatingLabel(selectedGroup.averageScore) }}
                 </UBadge>
               </div>
@@ -463,8 +473,8 @@
               class="grid grid-cols-1 gap-3 border-t border-gray-200 p-4 sm:grid-cols-2 xl:grid-cols-4 dark:border-gray-800"
             >
               <div
-                v-for="score in [4, 3, 2, 1]"
-                :key="score"
+                v-for="rating in ratingScaleDescending"
+                :key="`rating-${rating.score}`"
                 class="group rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:from-gray-900 dark:to-gray-950/60"
               >
                 <div class="flex items-start justify-between gap-3">
@@ -478,21 +488,21 @@
                       <p
                         class="text-xs font-bold text-gray-900 dark:text-white"
                       >
-                        {{ score }} Point
+                        {{ rating.score }} Point
                       </p>
                     </div>
 
                     <p
                       class="mt-1 text-[10px] text-gray-500 dark:text-gray-400"
                     >
-                      {{ getRatingLabel(score) }}
+                      {{ rating.label }}
                     </p>
                   </div>
 
                   <p
                     class="text-xl font-black tracking-tight text-gray-900 dark:text-white"
                   >
-                    {{ selectedGroup.ratingDistribution[score] || 0 }}
+                    {{ selectedGroup.ratingDistribution[rating.score] || 0 }}
                   </p>
                 </div>
 
@@ -503,7 +513,7 @@
                     class="h-full rounded-full bg-amber-400 transition-all"
                     :style="{
                       width: `${getRatingPercentage(
-                        selectedGroup.ratingDistribution[score] || 0,
+                        selectedGroup.ratingDistribution[rating.score] || 0,
                         selectedGroup.totalRatingResponses,
                       )}%`,
                     }"
@@ -521,7 +531,7 @@
                     {{
                       formatNumber(
                         getRatingPercentage(
-                          selectedGroup.ratingDistribution[score] || 0,
+                          selectedGroup.ratingDistribution[rating.score] || 0,
                           selectedGroup.totalRatingResponses,
                         ),
                       )
@@ -1013,10 +1023,14 @@
                     <th class="px-4 py-3 text-left">Criterion</th>
                     <th class="px-3 py-3 text-center">Responses</th>
                     <th class="px-3 py-3 text-center">Average</th>
-                    <th class="px-3 py-3 text-center">4</th>
-                    <th class="px-3 py-3 text-center">3</th>
-                    <th class="px-3 py-3 text-center">2</th>
-                    <th class="px-3 py-3 text-center">1</th>
+                    <th
+                      v-for="rating in ratingScaleDescending"
+                      :key="`criterion-rating-head-${rating.score}`"
+                      class="px-3 py-3 text-center"
+                      :title="rating.label"
+                    >
+                      {{ rating.score }}
+                    </th>
                     <th class="px-4 py-3 text-center">Rating</th>
                   </tr>
                 </thead>
@@ -1042,17 +1056,12 @@
                       {{ formatNumber(criterion.averageScore) }}
                     </td>
 
-                    <td class="px-3 py-3 text-center">
-                      {{ criterion.distribution[4] || 0 }}
-                    </td>
-                    <td class="px-3 py-3 text-center">
-                      {{ criterion.distribution[3] || 0 }}
-                    </td>
-                    <td class="px-3 py-3 text-center">
-                      {{ criterion.distribution[2] || 0 }}
-                    </td>
-                    <td class="px-3 py-3 text-center">
-                      {{ criterion.distribution[1] || 0 }}
+                    <td
+                      v-for="rating in ratingScaleDescending"
+                      :key="`${criterion.criteriaId}-${rating.score}`"
+                      class="px-3 py-3 text-center"
+                    >
+                      {{ criterion.distribution[rating.score] || 0 }}
                     </td>
 
                     <td class="px-4 py-3 text-center">
@@ -1067,7 +1076,7 @@
 
                   <tr v-if="!selectedGroup.criteriaSummary.length">
                     <td
-                      colspan="8"
+                      :colspan="4 + ratingScaleDescending.length"
                       class="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
                     >
                       No criterion responses are available.
@@ -1179,6 +1188,7 @@
                         variant="subtle"
                       >
                         {{ formatNumber(getRecordAverage(record)) }}
+                        / {{ ratingMaxScore ?? "—" }}
                       </UBadge>
                     </td>
 
@@ -1330,6 +1340,7 @@
                   class="mt-1 text-lg font-bold text-violet-700 dark:text-violet-400"
                 >
                   {{ formatNumber(getRecordAverage(selectedEvaluation)) }}
+                  / {{ ratingMaxScore ?? "—" }}
                 </p>
               </div>
 
@@ -1382,6 +1393,7 @@
                         class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white"
                       >
                         {{ item.score }}
+                        / {{ ratingMaxScore ?? "—" }}
                       </td>
 
                       <td class="px-4 py-3 text-center">
@@ -1586,6 +1598,7 @@ const { $api } = useNuxtApp();
 const pending = ref(false);
 const loadError = ref("");
 const evaluations = ref<any[]>([]);
+const evaluationType = ref<any>(null);
 
 const activeTab = ref("overview");
 const recordSearch = ref("");
@@ -1620,13 +1633,161 @@ const summaryTabs = [
   },
 ];
 
-const ratingOptions = [
-  { label: "All Ratings", value: "all" },
-  { label: "Superior", value: "superior" },
-  { label: "Average", value: "average" },
-  { label: "Fair", value: "fair" },
-  { label: "Needs Improvement", value: "needs-improvement" },
-];
+/* =========================================================
+   DYNAMIC EVALUATION TYPE / RATING SCALE
+========================================================= */
+
+const evaluationResponseType = computed(() => {
+  return evaluationType.value?.response_type || "rating";
+});
+
+const normalizedScaleLabels = computed<Record<string, string>>(() => {
+  const labels = evaluationType.value?.scale_labels;
+
+  if (!labels || typeof labels !== "object" || Array.isArray(labels)) {
+    return {};
+  }
+
+  return labels;
+});
+
+const ratingScale = computed(() => {
+  if (evaluationResponseType.value !== "rating") {
+    return [];
+  }
+
+  const labels = normalizedScaleLabels.value;
+
+  const configuredScores = Object.keys(labels)
+    .map((score) => Number(score))
+    .filter((score) => Number.isFinite(score))
+    .sort((a, b) => a - b);
+
+  if (configuredScores.length) {
+    return configuredScores.map((score) => ({
+      score,
+      label: String(labels[String(score)] || `Rating ${score}`),
+    }));
+  }
+
+  const minScore = Number(evaluationType.value?.min_score);
+  const maxScore = Number(evaluationType.value?.max_score);
+
+  if (
+    Number.isFinite(minScore) &&
+    Number.isFinite(maxScore) &&
+    maxScore >= minScore
+  ) {
+    const rows = [];
+
+    for (let score = minScore; score <= maxScore; score += 1) {
+      rows.push({
+        score,
+        label: `Rating ${score}`,
+      });
+    }
+
+    return rows;
+  }
+
+  return [];
+});
+
+const ratingScaleDescending = computed(() =>
+  [...ratingScale.value].sort(
+    (a, b) => Number(b.score) - Number(a.score),
+  ),
+);
+
+const ratingScores = computed(() =>
+  ratingScale.value.map((item) => Number(item.score)),
+);
+
+const ratingMinScore = computed(() => {
+  if (!ratingScores.value.length) return null;
+
+  return Math.min(...ratingScores.value);
+});
+
+const ratingMaxScore = computed(() => {
+  if (!ratingScores.value.length) return null;
+
+  return Math.max(...ratingScores.value);
+});
+
+const ratingOptions = computed(() => [
+  {
+    label: "All Ratings",
+    value: "all",
+  },
+  ...ratingScaleDescending.value.map((item) => ({
+    label: `${item.score} - ${item.label}`,
+    value: String(item.score),
+  })),
+]);
+
+const isConfiguredRatingScore = (value: any) => {
+  const score = Number(value);
+
+  return (
+    Number.isFinite(score) &&
+    ratingScores.value.includes(score)
+  );
+};
+
+const createEmptyRatingDistribution = () => {
+  const distribution: Record<number, number> = {};
+
+  ratingScores.value.forEach((score) => {
+    distribution[score] = 0;
+  });
+
+  return distribution;
+};
+
+const getNearestRating = (average: number) => {
+  const avg = Number(average);
+
+  if (
+    !Number.isFinite(avg) ||
+    avg <= 0 ||
+    !ratingScale.value.length
+  ) {
+    return null;
+  }
+
+  return [...ratingScale.value].sort((a, b) => {
+    const distanceA = Math.abs(Number(a.score) - avg);
+    const distanceB = Math.abs(Number(b.score) - avg);
+
+    if (distanceA === distanceB) {
+      return Number(b.score) - Number(a.score);
+    }
+
+    return distanceA - distanceB;
+  })[0] || null;
+};
+
+const getRatingPosition = (average: number) => {
+  const nearest = getNearestRating(average);
+
+  if (!nearest) {
+    return 0;
+  }
+
+  if (ratingScale.value.length <= 1) {
+    return 1;
+  }
+
+  const index = ratingScale.value.findIndex(
+    (item) =>
+      Number(item.score) === Number(nearest.score),
+  );
+
+  return index < 0
+    ? 0
+    : index / (ratingScale.value.length - 1);
+};
 
 const pageSizeOptions = [
   { label: "10 rows", value: 10 },
@@ -1841,21 +2002,19 @@ const selectedGroup = computed(() => {
 
   const scores = responseRows
     .map((item: any) => Number(item.score))
-    .filter((score: number) => Number.isFinite(score) && score > 0);
+    .filter((score: number) =>
+      isConfiguredRatingScore(score),
+    );
 
-  const ratingDistribution: Record<number, number> = {
-    1: 0,
-    2: 0,
-    3: 0,
-    4: 0,
-  };
+  const ratingDistribution: Record<number, number> =
+    createEmptyRatingDistribution();
 
   scores.forEach((score: number) => {
-    const rounded = Math.round(score);
-
-    if (rounded >= 1 && rounded <= 4) {
-      ratingDistribution[rounded] += 1;
+    if (ratingDistribution[score] === undefined) {
+      ratingDistribution[score] = 0;
     }
+
+    ratingDistribution[score] += 1;
   });
 
   const criteriaMap = new Map<string, any>();
@@ -1869,25 +2028,20 @@ const selectedGroup = computed(() => {
           criteriaId: key,
           statement: item.statement,
           scores: [],
-          distribution: {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-          },
+          distribution: createEmptyRatingDistribution(),
         });
       }
 
       const criterion = criteriaMap.get(key);
 
-      if (Number.isFinite(item.score) && item.score > 0) {
+      if (isConfiguredRatingScore(item.score)) {
         criterion.scores.push(item.score);
 
-        const rounded = Math.round(item.score);
-
-        if (rounded >= 1 && rounded <= 4) {
-          criterion.distribution[rounded] += 1;
+        if (criterion.distribution[item.score] === undefined) {
+          criterion.distribution[item.score] = 0;
         }
+
+        criterion.distribution[item.score] += 1;
       }
     });
   });
@@ -2329,42 +2483,44 @@ const formatDate = (value: any) => {
 };
 
 const getRatingLabel = (average: any) => {
-  const avg = Number(average);
+  const nearest = getNearestRating(Number(average));
 
-  if (avg >= 3.5) return "Superior";
-  if (avg >= 2.5) return "Average";
-  if (avg >= 1.5) return "Fair";
-  if (avg > 0) return "Needs Improvement";
-
-  return "N/A";
+  return nearest?.label || "N/A";
 };
 
 const ratingColor = (average: any) => {
-  const avg = Number(average);
+  const position =
+    getRatingPosition(Number(average));
 
-  if (avg >= 3.5) return "success";
-  if (avg >= 2.5) return "primary";
-  if (avg >= 1.5) return "warning";
+  if (position >= 0.875) return "success";
+  if (position >= 0.625) return "primary";
+  if (position >= 0.375) return "info";
+  if (position > 0) return "warning";
 
   return "error";
 };
 
 const ratingBadge = (average: any) => {
-  const avg = Number(average);
+  const position =
+    getRatingPosition(Number(average));
 
-  if (avg >= 3.5) {
+  if (position >= 0.875) {
+    return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400";
+  }
+
+  if (position >= 0.625) {
     return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
   }
 
-  if (avg >= 2.5) {
+  if (position >= 0.375) {
     return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
   }
 
-  if (avg >= 1.5) {
+  if (position > 0) {
     return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
   }
 
-  if (avg > 0) {
+  if (Number(average) > 0) {
     return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
   }
 
@@ -2722,7 +2878,7 @@ const createPdfBlob = async (): Promise<Blob> => {
     [["Overall Rating", "Completion Rate", "Rating Responses", "AI Sentiment"]],
     [
       [
-        `${formatNumber(group.averageScore)} / 4.00\n${getRatingLabel(
+        `${formatNumber(group.averageScore)} / ${formatNumber(ratingMaxScore.value)}\n${getRatingLabel(
           group.averageScore,
         )}`,
         `${formatNumber(group.completionRate)}%`,
@@ -2763,15 +2919,20 @@ const createPdfBlob = async (): Promise<Blob> => {
 
   addSectionTitle("III. OVERALL RATING DISTRIBUTION");
 
-  const ratingRows = [4, 3, 2, 1].map((score) => {
-    const frequency = Number(group.ratingDistribution?.[score] || 0);
+  const ratingRows = ratingScaleDescending.value.map((rating) => {
+    const frequency = Number(
+      group.ratingDistribution?.[rating.score] || 0,
+    );
 
     return [
-      String(score),
-      getRatingLabel(score),
+      String(rating.score),
+      rating.label,
       String(frequency),
       `${formatNumber(
-        getRatingPercentage(frequency, Number(group.totalRatingResponses || 0)),
+        getRatingPercentage(
+          frequency,
+          Number(group.totalRatingResponses || 0),
+        ),
       )}%`,
     ];
   });
@@ -3039,14 +3200,56 @@ const closePdfPreview = () => {
   revokePdfPreviewUrl();
 };
 
+const getEvaluationType = async () => {
+  const response: any = await $api("/evaluation-types", {
+    query: {
+      "filters[code][$eq]": "dean-faculty",
+      "pagination[pageSize]": 1,
+    },
+  });
+
+  evaluationType.value = response?.data?.[0] || null;
+
+  if (!evaluationType.value) {
+    throw new Error(
+      "Dean-Faculty evaluation type is not configured.",
+    );
+  }
+
+  if (evaluationResponseType.value !== "rating") {
+    throw new Error(
+      "Dean-Faculty must use a Rating Scale response type.",
+    );
+  }
+
+  if (!ratingScale.value.length) {
+    throw new Error(
+      "The Dean-Faculty evaluation type has no valid rating scale configured.",
+    );
+  }
+};
+
 const getResults = async () => {
   pending.value = true;
   loadError.value = "";
 
   try {
+    if (!evaluationType.value) {
+      await getEvaluationType();
+    }
+
+    if (
+      evaluationResponseType.value !== "rating" ||
+      !ratingScale.value.length
+    ) {
+      throw new Error(
+        "The Dean-Faculty rating scale is not configured correctly.",
+      );
+    }
+
     const response: any = await $api("/evaluations", {
       query: {
-        "filters[batch][evaluation_type][code][$eq]": "dean-to-faculty",
+        "filters[batch][evaluation_type][code][$eq]": "dean-faculty",
 
         "populate[teacher][populate][department]": true,
         "populate[subject]": true,
@@ -3103,7 +3306,23 @@ onBeforeUnmount(() => {
   revokePdfPreviewUrl();
 });
 
-onMounted(getResults);
+onMounted(async () => {
+  try {
+    await getEvaluationType();
+    await getResults();
+  } catch (error: any) {
+    console.error(
+      "Dean-Faculty summary initialization error:",
+      error,
+    );
+
+    loadError.value =
+      error?.data?.error?.message ||
+      error?.data?.message ||
+      error?.message ||
+      "Failed to initialize the Dean – Faculty evaluation summary.";
+  }
+});
 </script>
 
 <style scoped>

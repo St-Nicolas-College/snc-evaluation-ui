@@ -46,8 +46,8 @@
             </h1>
 
             <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
-              Evaluate your assigned faculty members by answering all
-              evaluation criteria and providing constructive feedback.
+              Evaluate your assigned faculty members by answering all evaluation
+              criteria and providing constructive feedback.
             </p>
           </div>
         </div>
@@ -344,7 +344,8 @@
                 </h2>
 
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                  The semester and school year are based on the active academic period.
+                  The semester and school year are based on the active academic
+                  period.
                 </p>
               </div>
             </div>
@@ -421,8 +422,8 @@
               </h3>
 
               <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                The administrator has not configured an active semester and school year.
-                Faculty evaluations cannot be submitted yet.
+                The administrator has not configured an active semester and
+                school year. Faculty evaluations cannot be submitted yet.
               </p>
             </div>
           </div>
@@ -622,11 +623,13 @@
                     <p
                       class="mt-1 text-xs leading-5 text-gray-600 dark:text-gray-400"
                     >
-                      Select one rating for every criterion. Answer honestly
-                      based on your actual classroom experience.
+                      Select one rating for every criterion. This scale is
+                      loaded from the
+                      <strong>{{ evaluationType?.name }}</strong>
+                      evaluation type configuration.
                     </p>
 
-                    <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                    <div class="mt-3 grid gap-2" :style="ratingGridStyle">
                       <div
                         v-for="rating in ratingGuide"
                         :key="rating.score"
@@ -701,16 +704,18 @@
                       </div>
 
                       <div
-                        class="grid grid-cols-5 gap-1.5 rounded-xl bg-gray-100 p-1.5 dark:bg-gray-800"
+                        class="grid gap-1.5 rounded-xl bg-gray-100 p-1.5 dark:bg-gray-800"
+                        :style="ratingGridStyle"
                       >
                         <label
-                          v-for="score in [5, 4, 3, 2, 1]"
-                          :key="score"
+                          v-for="rating in ratingGuide"
+                          :key="rating.score"
                           class="group cursor-pointer"
+                          :title="`${rating.score} - ${rating.label}`"
                         >
                           <input
                             v-model="evaluation.responses[criterion.id]"
-                            :value="Number(score)"
+                            :value="Number(rating.score)"
                             type="radio"
                             class="peer sr-only"
                           />
@@ -718,7 +723,7 @@
                           <span
                             class="flex h-10 items-center justify-center rounded-lg text-sm font-bold text-gray-500 transition-all group-hover:bg-white group-hover:text-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:shadow-md dark:text-gray-400 dark:group-hover:bg-gray-700 dark:group-hover:text-emerald-400"
                           >
-                            {{ score }}
+                            {{ rating.score }}
                           </span>
                         </label>
                       </div>
@@ -855,7 +860,7 @@
                         {{ getAverageScore(evaluation) }}
 
                         <span class="text-sm font-medium text-gray-400">
-                          / 5
+                          / {{ ratingMaxScore ?? "—" }}
                         </span>
                       </p>
                     </div>
@@ -1021,7 +1026,8 @@
               >
                 You are submitting
                 <strong>{{ form.evaluations.length }}</strong>
-                faculty evaluation(s). Submitted evaluations may no longer be edited.
+                faculty evaluation(s). Submitted evaluations may no longer be
+                edited.
               </p>
             </div>
 
@@ -1035,9 +1041,7 @@
                   Semester
                 </p>
 
-                <p
-                  class="mt-1 text-sm font-bold text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-sm font-bold text-gray-900 dark:text-white">
                   {{ form.semester }}
                 </p>
               </div>
@@ -1051,9 +1055,7 @@
                   School Year
                 </p>
 
-                <p
-                  class="mt-1 text-sm font-bold text-gray-900 dark:text-white"
-                >
+                <p class="mt-1 text-sm font-bold text-gray-900 dark:text-white">
                   {{ form.schoolYear }}
                 </p>
               </div>
@@ -1187,29 +1189,6 @@ const semesterOptions = [
   },
 ];
 
-const ratingGuide = [
-  {
-    score: 5,
-    label: "Outstanding",
-  },
-  {
-    score: 4,
-    label: "Excellent",
-  },
-  {
-    score: 3,
-    label: "Satisfactory",
-  },
-  {
-    score: 2,
-    label: "Fair",
-  },
-  {
-    score: 1,
-    label: "Poor",
-  },
-];
-
 /* =========================================================
    FORM
 ========================================================= */
@@ -1266,6 +1245,90 @@ const teacherMap = computed(() => {
 const allCriteria = computed(() =>
   sections.value.flatMap((section: any) => section.evaluation_criteria || []),
 );
+
+/* =========================================================
+   DYNAMIC RATING SCALE FROM EVALUATION TYPE
+========================================================= */
+
+const evaluationResponseType = computed(() => {
+  return evaluationType.value?.response_type || "rating";
+});
+
+const normalizedScaleLabels = computed<Record<string, string>>(() => {
+  const labels = evaluationType.value?.scale_labels;
+
+  if (!labels || typeof labels !== "object" || Array.isArray(labels)) {
+    return {};
+  }
+
+  return labels;
+});
+
+const ratingGuide = computed(() => {
+  if (evaluationResponseType.value !== "rating") {
+    return [];
+  }
+
+  const labels = normalizedScaleLabels.value;
+
+  const configuredScores = Object.keys(labels)
+    .map((score) => Number(score))
+    .filter((score) => Number.isFinite(score))
+    .sort((a, b) => b - a);
+
+  if (configuredScores.length) {
+    return configuredScores.map((score) => ({
+      score,
+      label: String(labels[String(score)] || `Rating ${score}`),
+    }));
+  }
+
+  const minScore = Number(evaluationType.value?.min_score);
+  const maxScore = Number(evaluationType.value?.max_score);
+
+  if (
+    Number.isFinite(minScore) &&
+    Number.isFinite(maxScore) &&
+    maxScore >= minScore
+  ) {
+    const rows = [];
+
+    for (let score = maxScore; score >= minScore; score -= 1) {
+      rows.push({
+        score,
+        label: `Rating ${score}`,
+      });
+    }
+
+    return rows;
+  }
+
+  return [];
+});
+
+const ratingScores = computed(() =>
+  ratingGuide.value.map((item) => Number(item.score)),
+);
+
+const ratingMinScore = computed(() => {
+  if (!ratingScores.value.length) {
+    return null;
+  }
+
+  return Math.min(...ratingScores.value);
+});
+
+const ratingMaxScore = computed(() => {
+  if (!ratingScores.value.length) {
+    return null;
+  }
+
+  return Math.max(...ratingScores.value);
+});
+
+const ratingGridStyle = computed(() => ({
+  gridTemplateColumns: `repeat(${Math.max(ratingGuide.value.length, 1)}, minmax(0, 1fr))`,
+}));
 
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(form.evaluations.length / itemsPerPage)),
@@ -1368,7 +1431,15 @@ const syncEvaluationsFromSelection = () => {
 };
 
 const getAnsweredCount = (evaluation: EvaluationFormItem) => {
-  return Object.keys(evaluation.responses).length;
+  if (evaluationResponseType.value !== "rating") {
+    return 0;
+  }
+
+  return allCriteria.value.filter((criterion: any) => {
+    const value = Number(evaluation.responses[criterion.id]);
+
+    return ratingScores.value.includes(value);
+  }).length;
 };
 
 const getTotalScore = (evaluation: EvaluationFormItem) => {
@@ -1389,11 +1460,24 @@ const getAverageScore = (evaluation: EvaluationFormItem) => {
 };
 
 const isEvaluationComplete = (evaluation: EvaluationFormItem) => {
-  return Boolean(
-    evaluation.teacherId &&
-    allCriteria.value.length > 0 &&
-    getAnsweredCount(evaluation) === allCriteria.value.length,
+  if (
+    !evaluation.teacherId ||
+    !allCriteria.value.length ||
+    evaluationResponseType.value !== "rating" ||
+    !ratingScores.value.length
+  ) {
+    return false;
+  }
+
+  const criteriaIds = allCriteria.value.map((criterion: any) =>
+    String(criterion.id),
   );
+
+  return criteriaIds.every((criterionId) => {
+    const value = Number(evaluation.responses[criterionId]);
+
+    return ratingScores.value.includes(value);
+  });
 };
 
 const getEvaluationProgress = (evaluation: EvaluationFormItem) => {
@@ -1403,10 +1487,7 @@ const getEvaluationProgress = (evaluation: EvaluationFormItem) => {
 
   const answered = getAnsweredCount(evaluation);
 
-  return Math.min(
-    100,
-    Math.round((answered / allCriteria.value.length) * 100),
-  );
+  return Math.min(100, Math.round((answered / allCriteria.value.length) * 100));
 };
 
 const getSectionAnsweredCount = (
@@ -1415,9 +1496,11 @@ const getSectionAnsweredCount = (
 ) => {
   const criteria = section.evaluation_criteria || [];
 
-  return criteria.filter(
-    (criterion: any) => evaluation.responses[criterion.id] !== undefined,
-  ).length;
+  return criteria.filter((criterion: any) => {
+    const value = Number(evaluation.responses[criterion.id]);
+
+    return ratingScores.value.includes(value);
+  }).length;
 };
 
 /* =========================================================
@@ -1443,9 +1526,7 @@ const prevPage = async () => {
 
   await scrollEvaluationPage();
 };
-const scrollEvaluationPage = async (
-  behavior: ScrollBehavior = "smooth",
-) => {
+const scrollEvaluationPage = async (behavior: ScrollBehavior = "smooth") => {
   await nextTick();
 
   if (!import.meta.client) {
@@ -1606,8 +1687,16 @@ const loadData = async () => {
     await getEvaluationType();
 
     if (!evaluationType.value) {
+      throw new Error("Student-Faculty evaluation type is not configured.");
+    }
+
+    if (evaluationResponseType.value !== "rating") {
+      throw new Error("Student-Faculty must use a Rating Scale response type.");
+    }
+
+    if (!ratingGuide.value.length) {
       throw new Error(
-        "Student-Faculty evaluation type is not configured.",
+        "The Student-Faculty evaluation type has no valid rating scale configured.",
       );
     }
 
@@ -1675,10 +1764,15 @@ const submitEvaluation = async () => {
     return;
   }
 
+  if (evaluationResponseType.value !== "rating" || !ratingScores.value.length) {
+    submitError.value =
+      "The Student-Faculty rating scale is not configured correctly.";
+    return;
+  }
+
   if (!activeSchoolYear.value || !form.semester || !form.schoolYear) {
     confirmationOpen.value = false;
-    submitError.value =
-      "No active semester and school year are configured.";
+    submitError.value = "No active semester and school year are configured.";
     return;
   }
 
@@ -1711,7 +1805,6 @@ const submitEvaluation = async () => {
 
     const evaluations = form.evaluations.map((evaluation) => ({
       teacher: evaluation.teacherId,
-
 
       comment: evaluation.comment,
 

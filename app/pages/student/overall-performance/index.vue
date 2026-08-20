@@ -138,6 +138,10 @@
           <p class="mt-0.5 text-xs font-bold text-gray-800 dark:text-gray-200">
             Student – School
           </p>
+
+          <p class="mt-1 text-[10px] font-medium text-cyan-600 dark:text-cyan-400">
+            Text / Comment
+          </p>
         </div>
       </div>
     </section>
@@ -410,10 +414,24 @@
               <p
                 class="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400"
               >
-                Answer every question honestly and constructively. Your
-                responses will help SNC improve its services, facilities,
+                This evaluation uses the
+                <strong>{{ evaluationType?.name }}</strong>
+                <strong>Text / Comment</strong> response type. Answer every
+                question honestly and constructively using written feedback.
+                Your responses will help SNC improve its services, facilities,
                 processes, and student experience.
               </p>
+
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <UBadge color="info" variant="subtle">
+                  <UIcon name="i-lucide-message-square-text" class="mr-1 size-3.5" />
+                  Text / Comment
+                </UBadge>
+
+                <span class="text-[11px] text-gray-500 dark:text-gray-400">
+                  No numerical rating scale is required.
+                </span>
+              </div>
             </div>
           </div>
         </section>
@@ -822,6 +840,18 @@ const allCriteria = computed(() => {
   );
 });
 
+/* =========================================================
+   RESPONSE TYPE FROM EVALUATION TYPE
+========================================================= */
+
+const evaluationResponseType = computed(() => {
+  return evaluationType.value?.response_type || "text";
+});
+
+const isTextEvaluation = computed(() => {
+  return evaluationResponseType.value === "text";
+});
+
 const answeredCount = computed(() => {
   return allCriteria.value.filter(
     (criteria: any) =>
@@ -1023,6 +1053,12 @@ const loadData = async () => {
       throw new Error("Student-School evaluation type is not configured.");
     }
 
+    if (!isTextEvaluation.value) {
+      throw new Error(
+        "Student-School must use a Text / Comment response type.",
+      );
+    }
+
     await getSections();
 
     if (activeSchoolYear.value) {
@@ -1058,6 +1094,20 @@ const openSubmitConfirmation = async () => {
       description: "You already submitted your overall feedback.",
       icon: "i-lucide-circle-alert",
       color: "warning",
+    });
+
+    return;
+  }
+
+  if (!evaluationType.value || !isTextEvaluation.value) {
+    submitError.value =
+      "The Student-School evaluation type is not configured as Text / Comment.";
+
+    toast.add({
+      title: "Invalid evaluation configuration",
+      description: submitError.value,
+      icon: "i-lucide-triangle-alert",
+      color: "error",
     });
 
     return;
@@ -1100,6 +1150,22 @@ const submitOverallFeedback = async () => {
     return;
   }
 
+  if (!evaluationType.value || !isTextEvaluation.value) {
+    confirmationOpen.value = false;
+
+    submitError.value =
+      "The Student-School evaluation type is not configured as Text / Comment.";
+
+    toast.add({
+      title: "Invalid evaluation configuration",
+      description: submitError.value,
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
+
+    return;
+  }
+
   if (!isFormValid.value) {
     confirmationOpen.value = false;
 
@@ -1132,6 +1198,12 @@ const submitOverallFeedback = async () => {
           date: form.date,
 
           subject: null,
+
+          evaluation_type: evaluationType.value?.id || null,
+
+          evaluation_type_code: evaluationType.value?.code || "student-school",
+
+          response_type: evaluationResponseType.value,
 
           responses: formattedResponses,
         },

@@ -84,6 +84,9 @@
           >
             <p class="text-2xl font-bold">
               {{ summary.averageScore }}
+              <span class="text-sm font-medium text-amber-100">
+                / {{ ratingMaxScore ?? "—" }}
+              </span>
             </p>
 
             <p
@@ -177,7 +180,9 @@
 
             <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
               {{ summary.averageScore }}
-              <span class="text-sm font-medium text-gray-400"> / 4 </span>
+              <span class="text-sm font-medium text-gray-400">
+                / {{ ratingMaxScore ?? "—" }}
+              </span>
             </p>
           </div>
 
@@ -204,6 +209,18 @@
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Search and filter grouped faculty evaluation results submitted by Deans.
         </p>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <UBadge
+            v-if="evaluationType"
+            color="info"
+            variant="subtle"
+            icon="i-lucide-star"
+          >
+            {{ evaluationType.name }} ·
+            {{ ratingMinScore ?? "—" }}–{{ ratingMaxScore ?? "—" }}
+          </UBadge>
+        </div>
       </div>
 
       <div
@@ -482,7 +499,9 @@
                     {{ formatNumber(group.averageScore) }}
                   </div>
 
-                  <div class="text-[10px] text-gray-400">out of 4</div>
+                  <div class="text-[10px] text-gray-400">
+                    out of {{ ratingMaxScore ?? "—" }}
+                  </div>
                 </td>
 
                 <td class="px-4 py-4 text-center">
@@ -573,6 +592,7 @@ const pending = ref(false);
 const loadError = ref("");
 
 const evaluations = ref<any[]>([]);
+const evaluationType = ref<any>(null);
 
 const searchQuery = ref("");
 const selectedFaculty = ref("all");
@@ -636,6 +656,117 @@ const pageSizeOptions = [
     value: 100,
   },
 ];
+
+/* =========================================================
+   DYNAMIC EVALUATION TYPE / RATING SCALE
+========================================================= */
+
+const evaluationResponseType = computed(() => {
+  return evaluationType.value?.response_type || "rating";
+});
+
+const normalizedScaleLabels = computed<Record<string, string>>(() => {
+  const labels = evaluationType.value?.scale_labels;
+
+  if (!labels || typeof labels !== "object" || Array.isArray(labels)) {
+    return {};
+  }
+
+  return labels;
+});
+
+const ratingScale = computed(() => {
+  if (evaluationResponseType.value !== "rating") {
+    return [];
+  }
+
+  const labels = normalizedScaleLabels.value;
+
+  const configuredScores = Object.keys(labels)
+    .map((score) => Number(score))
+    .filter((score) => Number.isFinite(score))
+    .sort((a, b) => a - b);
+
+  if (configuredScores.length) {
+    return configuredScores.map((score) => ({
+      score,
+      label: String(labels[String(score)] || `Rating ${score}`),
+    }));
+  }
+
+  const minScore = Number(evaluationType.value?.min_score);
+  const maxScore = Number(evaluationType.value?.max_score);
+
+  if (
+    Number.isFinite(minScore) &&
+    Number.isFinite(maxScore) &&
+    maxScore >= minScore
+  ) {
+    const rows = [];
+
+    for (let score = minScore; score <= maxScore; score += 1) {
+      rows.push({
+        score,
+        label: `Rating ${score}`,
+      });
+    }
+
+    return rows;
+  }
+
+  return [];
+});
+
+const ratingScores = computed(() =>
+  ratingScale.value.map((item) => Number(item.score)),
+);
+
+const ratingMinScore = computed(() => {
+  if (!ratingScores.value.length) return null;
+  return Math.min(...ratingScores.value);
+});
+
+const ratingMaxScore = computed(() => {
+  if (!ratingScores.value.length) return null;
+  return Math.max(...ratingScores.value);
+});
+
+const getNearestRating = (average: number) => {
+  const avg = Number(average);
+
+  if (!Number.isFinite(avg) || avg <= 0 || !ratingScale.value.length) {
+    return null;
+  }
+
+  return [...ratingScale.value].sort((a, b) => {
+    const distanceA = Math.abs(Number(a.score) - avg);
+    const distanceB = Math.abs(Number(b.score) - avg);
+
+    if (distanceA === distanceB) {
+      return Number(b.score) - Number(a.score);
+    }
+
+    return distanceA - distanceB;
+  })[0] || null;
+};
+
+const getRatingPosition = (average: number) => {
+  const nearest = getNearestRating(average);
+
+  if (!nearest) return 0;
+
+  if (ratingScale.value.length <= 1) {
+    return 1;
+  }
+
+  const index = ratingScale.value.findIndex(
+    (item) => Number(item.score) === Number(nearest.score),
+  );
+
+  return index < 0
+    ? 0
+    : index / (ratingScale.value.length - 1);
+};
 
 const makeOptions = (values: any[], allLabel: string) => {
   const uniqueValues = Array.from(
@@ -1034,13 +1165,55 @@ const formatDate = (value: any) => {
   });
 };
 
+const getEvaluationType = async () => {
+  const response: any = await $api("/evaluation-types", {
+    query: {
+      "filters[code][$eq]": "dean-faculty",
+      "pagination[pageSize]": 1,
+    },
+  });
+
+  evaluationType.value = response?.data?.[0] || null;
+
+  if (!evaluationType.value) {
+    throw new Error(
+      "Dean-Faculty evaluation type is not configured.",
+    );
+  }
+
+  if (evaluationResponseType.value !== "rating") {
+    throw new Error(
+      "Dean-Faculty must use a Rating Scale response type.",
+    );
+  }
+
+  if (!ratingScale.value.length) {
+    throw new Error(
+      "The Dean-Faculty evaluation type has no valid rating scale configured.",
+    );
+  }
+};
+
 const getResults = async () => {
   pending.value = true;
   loadError.value = "";
 
   try {
+    if (!evaluationType.value) {
+      await getEvaluationType();
+    }
+
+    if (
+      evaluationResponseType.value !== "rating" ||
+      !ratingScale.value.length
+    ) {
+      throw new Error(
+        "The Dean-Faculty rating scale is not configured correctly.",
+      );
+    }
+
     const query: any = {
-      "filters[batch][evaluation_type][code][$eq]": "dean-to-faculty",
+      "filters[batch][evaluation_type][code][$eq]": "dean-faculty",
 
       "populate[teacher][populate][department]": true,
 
@@ -1183,32 +1356,31 @@ const formatResponses = (responses: any) => {
 };
 
 const getRatingLabel = (average: number) => {
-  const avg = Number(average);
+  const nearest = getNearestRating(average);
 
-  if (avg >= 3.5) return "Excellent";
-  if (avg >= 2.5) return "Satisfactory";
-  if (avg >= 1.5) return "Fair";
-  if (avg > 0) return "Needs Improvement";
-
-  return "N/A";
+  return nearest?.label || "N/A";
 };
 
 const ratingBadge = (average: number) => {
-  const avg = Number(average);
+  const position = getRatingPosition(average);
 
-  if (avg >= 3.5) {
+  if (position >= 0.875) {
+    return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400";
+  }
+
+  if (position >= 0.625) {
     return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
   }
 
-  if (avg >= 2.5) {
+  if (position >= 0.375) {
     return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
   }
 
-  if (avg >= 1.5) {
+  if (position > 0) {
     return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
   }
 
-  if (avg > 0) {
+  if (Number(average) > 0) {
     return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
   }
 
@@ -1216,11 +1388,12 @@ const ratingBadge = (average: number) => {
 };
 
 const ratingColor = (average: number) => {
-  const avg = Number(average);
+  const position = getRatingPosition(average);
 
-  if (avg >= 3.5) return "success";
-  if (avg >= 2.5) return "primary";
-  if (avg >= 1.5) return "warning";
+  if (position >= 0.875) return "success";
+  if (position >= 0.625) return "primary";
+  if (position >= 0.375) return "info";
+  if (position > 0) return "warning";
 
   return "error";
 };
@@ -1249,8 +1422,25 @@ watch(
 );
 
 onMounted(async () => {
-  await loadActiveAcademicPeriod();
-  await getResults();
+  try {
+    await Promise.all([
+      loadActiveAcademicPeriod(),
+      getEvaluationType(),
+    ]);
+
+    await getResults();
+  } catch (error: any) {
+    console.error(
+      "Dean-Faculty result initialization error:",
+      error,
+    );
+
+    loadError.value =
+      error?.data?.error?.message ||
+      error?.data?.message ||
+      error?.message ||
+      "Failed to initialize Dean – Faculty evaluation results.";
+  }
 });
 </script>
 

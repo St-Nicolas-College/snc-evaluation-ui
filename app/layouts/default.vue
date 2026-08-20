@@ -185,6 +185,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
         //   exact: true,
         // },
         {
+          label: "Evaluation Types",
+          icon: "i-lucide-workflow",
+          to: "/admin/management/evaluation-type",
+        },
+        {
           label: "Evaluation Sections",
           icon: "i-lucide-panels-top-left",
           to: "/admin/management/section",
@@ -292,7 +297,7 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
           label: "Ranking Management",
           icon: "i-lucide-list-ordered",
           to: "/hr/ranking",
-           exact: true,
+          exact: true,
         },
         {
           label: "Ranking Analytics",
@@ -302,17 +307,17 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       ],
     },
 
-     {
-    label: "Ranking Configuration",
-    icon: "i-lucide-settings-2",
-    children: [
-      {
-        label: "Ranking Schemes",
-        icon: "i-lucide-layers-3",
-        to: "/hr/ranking-schemes",
-      },
-    ],
-  },
+    {
+      label: "Ranking Configuration",
+      icon: "i-lucide-settings-2",
+      children: [
+        {
+          label: "Ranking Schemes",
+          icon: "i-lucide-layers-3",
+          to: "/hr/ranking-schemes",
+        },
+      ],
+    },
 
     {
       label: "Reports",
