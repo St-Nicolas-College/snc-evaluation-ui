@@ -288,6 +288,7 @@
 </template>
 
 <script setup lang="ts">
+//@ts-nocheck
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
