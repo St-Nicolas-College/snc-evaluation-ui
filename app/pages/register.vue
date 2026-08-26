@@ -72,9 +72,7 @@
               </span>
             </div>
 
-            <h1
-              class="mt-4 text-3xl font-black tracking-tight sm:text-4xl"
-            >
+            <h1 class="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
               Create your student account
             </h1>
 
@@ -99,11 +97,7 @@
               label="Account Security"
             />
 
-            <HeroStep
-              number="03"
-              icon="i-lucide-log-in"
-              label="Sign In"
-            />
+            <HeroStep number="03" icon="i-lucide-log-in" label="Sign In" />
           </div>
         </div>
       </section>
@@ -146,7 +140,9 @@
               name="i-lucide-badge-check"
               class="size-4 text-emerald-600"
             />
-            <p class="font-mono text-base font-bold text-gray-900 dark:text-white">
+            <p
+              class="font-mono text-base font-bold text-gray-900 dark:text-white"
+            >
               {{ registeredStudentId }}
             </p>
           </div>
@@ -165,12 +161,7 @@
       <!-- =====================================================
         REGISTRATION FORM
       ====================================================== -->
-      <UForm
-        v-else
-        :state="form"
-        class="mt-5"
-        @submit="registerStudent"
-      >
+      <UForm v-else :state="form" class="mt-5" @submit="registerStudent">
         <div class="grid gap-5 lg:grid-cols-2">
           <!-- STUDENT INFORMATION -->
           <section
@@ -196,9 +187,7 @@
                 </div>
               </div>
 
-              <UBadge color="info" variant="subtle">
-                Step 1
-              </UBadge>
+              <UBadge color="info" variant="subtle"> Step 1 </UBadge>
             </div>
 
             <div class="space-y-4 p-5 sm:p-6">
@@ -246,10 +235,16 @@
                 </UFormField>
 
                 <UFormField label="Section" name="section" required>
-                  <UInput
+                  <USelectMenu
                     v-model="form.section"
-                    placeholder="e.g. A"
-                    icon="i-lucide-panels-top-left"
+                    :items="sectionOptions"
+                    value-key="value"
+                    :disabled="!form.year_level"
+                    :placeholder="
+                      form.year_level
+                        ? 'Select section'
+                        : 'Select year level first'
+                    "
                     class="w-full"
                   />
                 </UFormField>
@@ -264,9 +259,7 @@
                     class="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400"
                   />
 
-                  <p
-                    class="text-xs leading-5 text-blue-800 dark:text-blue-300"
-                  >
+                  <p class="text-xs leading-5 text-blue-800 dark:text-blue-300">
                     Use the same Student ID, course, year level, and section
                     recorded by the school.
                   </p>
@@ -299,9 +292,7 @@
                 </div>
               </div>
 
-              <UBadge color="secondary" variant="subtle">
-                Step 2
-              </UBadge>
+              <UBadge color="secondary" variant="subtle"> Step 2 </UBadge>
             </div>
 
             <div class="space-y-4 p-5 sm:p-6">
@@ -345,7 +336,9 @@
                         color="neutral"
                         variant="ghost"
                         size="xs"
-                        :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                        :icon="
+                          showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'
+                        "
                         square
                         @click="showPassword = !showPassword"
                       />
@@ -372,7 +365,11 @@
                         color="neutral"
                         variant="ghost"
                         size="xs"
-                        :icon="showConfirmPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                        :icon="
+                          showConfirmPassword
+                            ? 'i-lucide-eye-off'
+                            : 'i-lucide-eye'
+                        "
                         square
                         @click="showConfirmPassword = !showConfirmPassword"
                       />
@@ -428,7 +425,9 @@
               <p class="text-xs font-bold text-gray-900 dark:text-white">
                 Student-only account
               </p>
-              <p class="mt-1 text-[11px] leading-5 text-gray-500 dark:text-gray-400">
+              <p
+                class="mt-1 text-[11px] leading-5 text-gray-500 dark:text-gray-400"
+              >
                 Public registration cannot create administrative accounts.
               </p>
             </div>
@@ -465,57 +464,74 @@
 // @ts-nocheck
 
 definePageMeta({
-  layout: false
-})
+  layout: false,
+});
 
-const { $api } = useNuxtApp()
-const toast = useToast()
-const router = useRouter()
+const { $api } = useNuxtApp();
+const toast = useToast();
+const router = useRouter();
 
-const loadingCourses = ref(false)
-const submitting = ref(false)
-const submitError = ref('')
+const loadingCourses = ref(false);
+const submitting = ref(false);
+const submitError = ref("");
 
-const registrationSuccess = ref(false)
-const registeredStudentId = ref('')
+const registrationSuccess = ref(false);
+const registeredStudentId = ref("");
 
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 
-const courses = ref<any[]>([])
+const courses = ref<any[]>([]);
 
 const form = reactive({
-  student_id: '',
-  name: '',
+  student_id: "",
+  name: "",
   course: null as any,
-  year_level: '',
-  section: '',
-  email: '',
-  password: '',
-  confirm_password: ''
-})
+  year_level: "",
+  section: "",
+  email: "",
+  password: "",
+  confirm_password: "",
+});
 
 const yearLevelOptions = [
-  { label: '1st Year', value: '1st Year' },
-  { label: '2nd Year', value: '2nd Year' },
-  { label: '3rd Year', value: '3rd Year' },
-  { label: '4th Year', value: '4th Year' },
-  { label: '5th Year', value: '5th Year' }
-]
+  { label: "1st Year", value: "1st Year" },
+  { label: "2nd Year", value: "2nd Year" },
+  { label: "3rd Year", value: "3rd Year" },
+  { label: "4th Year", value: "4th Year" },
+  { label: "5th Year", value: "5th Year" },
+];
+
+const sectionOptionsMap: Record<string, string[]> = {
+  "1st Year": ["1A", "1B", "1C", "1D", "1E", "1F", "1G", "1H", "1I", "1J", "1K", "1L"],
+  "2nd Year": ["2A", "2B", "2C", "2D", "2E", "2F", "2G", "2H", "2I"],
+  "3rd Year": ["3A", "3B", "3C", "3D", "3E", "3F", "3G", "3H", "3I"],
+  "4th Year": ["4A", "4B", "4C", "4D", "4E", "4F", "4G", "4H", "4I"],
+  "5th Year": ["5A", "5B", "5C", "5D", "5E", "5F", "5G", "5H", "5I"],
+};
+
+const sectionOptions = computed(() => {
+  const sections = sectionOptionsMap[form.year_level] || [];
+
+  return sections.map((section) => ({
+    label: section,
+    value: section,
+  }));
+});
 
 const normalizedStudentId = computed(() =>
-  String(form.student_id || '').trim()
-)
+  String(form.student_id || "").trim(),
+);
 
 const courseOptions = computed(() =>
-  courses.value.map(course => ({
-    label: `${course.code?.toUpperCase() || 'NO CODE'} - ${course.name}`,
-    value: course.id
-  }))
-)
+  courses.value.map((course) => ({
+    label: `${course.code?.toUpperCase() || "NO CODE"} - ${course.name}`,
+    value: course.id,
+  })),
+);
 
 const validateForm = () => {
-  submitError.value = ''
+  submitError.value = "";
 
   if (
     !normalizedStudentId.value ||
@@ -527,61 +543,61 @@ const validateForm = () => {
     !form.password ||
     !form.confirm_password
   ) {
-    submitError.value = 'Complete all required fields.'
-    return false
+    submitError.value = "Complete all required fields.";
+    return false;
   }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailPattern.test(form.email.trim())) {
-    submitError.value = 'Enter a valid email address.'
-    return false
+    submitError.value = "Enter a valid email address.";
+    return false;
   }
 
   if (form.password.length < 6) {
-    submitError.value = 'Password must contain at least 6 characters.'
-    return false
+    submitError.value = "Password must contain at least 6 characters.";
+    return false;
   }
 
   if (form.password !== form.confirm_password) {
-    submitError.value = 'Passwords do not match.'
-    return false
+    submitError.value = "Passwords do not match.";
+    return false;
   }
 
-  return true
-}
+  return true;
+};
 
 const getCourses = async () => {
-  loadingCourses.value = true
+  loadingCourses.value = true;
 
   try {
-    const response: any = await $api('/courses', {
+    const response: any = await $api("/courses", {
       query: {
-        'sort[0]': 'name:asc',
-        'pagination[pageSize]': 500
-      }
-    })
+        "sort[0]": "name:asc",
+        "pagination[pageSize]": 500,
+      },
+    });
 
-    courses.value = response?.data || []
+    courses.value = response?.data || [];
   } catch (error) {
-    console.error('Public course loading error:', error)
+    console.error("Public course loading error:", error);
 
-    courses.value = []
-    submitError.value = 'Unable to load the available courses.'
+    courses.value = [];
+    submitError.value = "Unable to load the available courses.";
   } finally {
-    loadingCourses.value = false
+    loadingCourses.value = false;
   }
-}
+};
 
 const registerStudent = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
-  submitting.value = true
-  submitError.value = ''
+  submitting.value = true;
+  submitError.value = "";
 
   try {
-    await $api('/students/register', {
-      method: 'POST',
+    await $api("/students/register", {
+      method: "POST",
 
       body: {
         student_id: normalizedStudentId.value,
@@ -590,120 +606,127 @@ const registerStudent = async () => {
         year_level: form.year_level,
         section: form.section.trim(),
         email: form.email.trim().toLowerCase(),
-        password: form.password
-      }
-    })
+        password: form.password,
+      },
+    });
 
-    registeredStudentId.value = normalizedStudentId.value
-    registrationSuccess.value = true
+    registeredStudentId.value = normalizedStudentId.value;
+    registrationSuccess.value = true;
 
     toast.add({
-      title: 'Registration successful',
-      description: 'Your student account has been created.',
-      icon: 'i-lucide-circle-check',
-      color: 'success'
-    })
+      title: "Registration successful",
+      description: "Your student account has been created.",
+      icon: "i-lucide-circle-check",
+      color: "success",
+    });
   } catch (error: any) {
-    console.error('Student registration error:', error)
+    console.error("Student registration error:", error);
 
     submitError.value =
       error?.data?.error?.message ||
       error?.data?.message ||
       error?.message ||
-      'Unable to create your student account.'
+      "Unable to create your student account.";
 
     toast.add({
-      title: 'Registration failed',
+      title: "Registration failed",
       description: submitError.value,
-      icon: 'i-lucide-triangle-alert',
-      color: 'error'
-    })
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
 const resetForm = () => {
-  form.student_id = ''
-  form.name = ''
-  form.course = null
-  form.year_level = ''
-  form.section = ''
-  form.email = ''
-  form.password = ''
-  form.confirm_password = ''
+  form.student_id = "";
+  form.name = "";
+  form.course = null;
+  form.year_level = "";
+  form.section = "";
+  form.email = "";
+  form.password = "";
+  form.confirm_password = "";
 
-  submitError.value = ''
-  showPassword.value = false
-  showConfirmPassword.value = false
-}
+  submitError.value = "";
+  showPassword.value = false;
+  showConfirmPassword.value = false;
+};
 
 const goToLogin = () => {
-  router.push('/auth/login')
-}
+  router.push("/auth/login");
+};
+
+watch(
+  () => form.year_level,
+  () => {
+    form.section = ''
+  }
+)
 
 onMounted(() => {
-  getCourses()
-})
+  getCourses();
+});
 
 const HeroStep = defineComponent({
   props: {
     number: String,
     icon: String,
-    label: String
+    label: String,
   },
 
   setup(props) {
     return () =>
       h(
-        'div',
+        "div",
         {
           class:
-            'rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur'
+            "rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur",
         },
         [
           h(
-            'div',
+            "div",
             {
-              class: 'flex items-center gap-2'
+              class: "flex items-center gap-2",
             },
             [
               h(
-                'div',
+                "div",
                 {
                   class:
-                    'flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/10'
+                    "flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/10",
                 },
                 [
-                  h(resolveComponent('UIcon'), {
+                  h(resolveComponent("UIcon"), {
                     name: props.icon,
-                    class: 'size-4'
-                  })
-                ]
+                    class: "size-4",
+                  }),
+                ],
               ),
 
               h(
-                'span',
+                "span",
                 {
                   class:
-                    'text-[9px] font-black tracking-[0.14em] text-emerald-100/70'
+                    "text-[9px] font-black tracking-[0.14em] text-emerald-100/70",
                 },
-                props.number
-              )
-            ]
+                props.number,
+              ),
+            ],
           ),
 
           h(
-            'p',
+            "p",
             {
-              class: 'mt-2 text-xs font-bold text-white'
+              class: "mt-2 text-xs font-bold text-white",
             },
-            props.label
-          )
-        ]
-      )
-  }
-})
+            props.label,
+          ),
+        ],
+      );
+  },
+});
 </script>
 
 <style scoped>

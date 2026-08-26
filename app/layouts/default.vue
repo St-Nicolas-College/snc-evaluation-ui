@@ -236,6 +236,12 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       to: "/dean/faculty",
       exact: true,
     },
+
+    {
+      label: "Class Assignments",
+      icon: "i-lucide-users-round",
+      to: "/dean/class-assignments",
+    },
     {
       label: "Faculty Ranking",
       icon: "i-lucide-trophy",
@@ -451,6 +457,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       icon: "i-lucide-history",
       to: "/student/my-evaluations",
     },
+    {
+      label: "My Teachers",
+      icon: "i-lucide-users-round",
+      to: "/student/my-teachers",
+    },
   ],
 };
 
@@ -571,7 +582,8 @@ const pageInformationMap: Record<string, any> = {
 
   "/admin/evaluation/overall-feedbacks": {
     title: "Overall Feedback Results",
-    description: "Review Student – School written feedback and school-wide insights.",
+    description:
+      "Review Student – School written feedback and school-wide insights.",
     icon: "i-lucide-message-square-text",
   },
 
