@@ -248,11 +248,6 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       to: "/dean/faculty-ranking",
       exact: true,
     },
-    {
-      label: "Faculty Portfolios",
-      icon: "i-lucide-folder-check",
-      to: "/dean/portfolio",
-    },
   ],
 
   Faculty: [
@@ -277,11 +272,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       icon: "i-lucide-file-clock",
       to: "/faculty/dean-evaluation-records",
     },
-    {
-      label: "My Portfolio",
-      icon: "i-lucide-folder-kanban",
-      to: "/faculty/portfolio",
-    },
+    // {
+    //   label: "My Portfolio",
+    //   icon: "i-lucide-folder-kanban",
+    //   to: "/faculty/portfolio",
+    // },
   ],
 
   HR: [
@@ -421,11 +416,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       ],
     },
 
-    {
-      label: "My Profile",
-      icon: "i-lucide-user-round",
-      to: "/hr/profile",
-    },
+    // {
+    //   label: "My Profile",
+    //   icon: "i-lucide-user-round",
+    //   to: "/hr/profile",
+    // },
   ],
 
   Student: [
@@ -461,6 +456,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       label: "My Teachers",
       icon: "i-lucide-users-round",
       to: "/student/my-teachers",
+    },
+    {
+      label: "Account Settings",
+      icon: "i-lucide-settings-2",
+      to: "/student/settings",
     },
   ],
 };
