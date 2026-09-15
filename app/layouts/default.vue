@@ -248,36 +248,41 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       to: "/dean/faculty-ranking",
       exact: true,
     },
+    {
+      label: "Account Settings",
+      icon: "i-lucide-settings",
+      to: "/dean/settings",
+    },
   ],
 
   Faculty: [
-    {
-      label: "Dashboard",
-      icon: "i-lucide-layout-dashboard",
-      to: "/",
-      exact: true,
-    },
-    {
-      label: "Evaluate Dean",
-      icon: "i-lucide-clipboard-pen-line",
-      to: "/faculty/evaluation",
-    },
-    {
-      label: "My Results",
-      icon: "i-lucide-chart-column-big",
-      to: "/faculty/results",
-    },
-    {
-      label: "My Dean Evaluations",
-      icon: "i-lucide-file-clock",
-      to: "/faculty/dean-evaluation-records",
-    },
-    // {
-    //   label: "My Portfolio",
-    //   icon: "i-lucide-folder-kanban",
-    //   to: "/faculty/portfolio",
-    // },
-  ],
+  {
+    label: "Dashboard",
+    icon: "i-lucide-layout-dashboard",
+    to: "/",
+    exact: true,
+  },
+  {
+    label: "Evaluate Dean",
+    icon: "i-lucide-clipboard-pen-line",
+    to: "/faculty/evaluation",
+  },
+  {
+    label: "My Results",
+    icon: "i-lucide-chart-column-big",
+    to: "/faculty/results",
+  },
+  {
+    label: "My Dean Evaluations",
+    icon: "i-lucide-file-clock",
+    to: "/faculty/dean-evaluation-records",
+  },
+  {
+    label: "Account Settings",
+    icon: "i-lucide-settings",
+    to: "/faculty/settings",
+  },
+],
 
   HR: [
     {
