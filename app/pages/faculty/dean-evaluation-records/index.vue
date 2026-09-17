@@ -1,19 +1,20 @@
 <template>
   <div class="space-y-6 pb-10">
     <!-- =====================================================
+
       HERO
+
     ====================================================== -->
+
     <section
       class="relative overflow-hidden rounded-[28px] border border-emerald-100 bg-gradient-to-br from-emerald-600 via-green-600 to-teal-700 px-5 py-6 text-white shadow-xl shadow-emerald-900/10 sm:px-7 sm:py-7 dark:border-emerald-900"
     >
       <div
         class="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl"
-      />
-
+      ></div>
       <div
         class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-teal-300/15 blur-3xl"
-      />
-
+      ></div>
       <div
         class="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between"
       >
@@ -21,10 +22,7 @@
           <div
             class="hidden size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur sm:flex"
           >
-            <UIcon
-              name="i-lucide-file-clock"
-              class="size-7"
-            />
+            <UIcon name="i-lucide-file-clock" class="size-7" />
           </div>
 
           <div class="min-w-0">
@@ -48,55 +46,9 @@
               My Dean Evaluation Records
             </h1>
 
-            <p
-              class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90"
-            >
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-emerald-50/90">
               Review the evaluations you submitted for your Dean or Coordinator,
               including ratings, written feedback, and academic-period details.
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2 sm:min-w-[390px]">
-          <div
-            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
-          >
-            <p class="text-2xl font-bold">
-              {{ totalRecordCount }}
-            </p>
-
-            <p
-              class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100"
-            >
-              Records
-            </p>
-          </div>
-
-          <div
-            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
-          >
-            <p class="text-2xl font-bold">
-              {{ evaluatedDeanCount }}
-            </p>
-
-            <p
-              class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100"
-            >
-              Deans
-            </p>
-          </div>
-
-          <div
-            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
-          >
-            <p class="text-2xl font-bold">
-              {{ overallAverage }}
-            </p>
-
-            <p
-              class="mt-1 text-[10px] uppercase tracking-wide text-emerald-100"
-            >
-              Avg. Rating
             </p>
           </div>
         </div>
@@ -104,8 +56,11 @@
     </section>
 
     <!-- =====================================================
+
       FACULTY PROFILE
+
     ====================================================== -->
+
     <section
       class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
@@ -126,11 +81,7 @@
               {{ facultyName }}
             </h2>
 
-            <UBadge
-              color="success"
-              variant="subtle"
-              size="sm"
-            >
+            <UBadge color="success" variant="subtle" size="sm">
               Faculty
             </UBadge>
           </div>
@@ -139,22 +90,13 @@
             class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400"
           >
             <span class="flex items-center gap-1.5">
-              <UIcon
-                name="i-lucide-building-2"
-                class="size-3.5"
-              />
+              <UIcon name="i-lucide-building-2" class="size-3.5" />
 
               {{ facultyDepartment }}
             </span>
 
-            <span
-              v-if="facultyEmail"
-              class="flex items-center gap-1.5"
-            >
-              <UIcon
-                name="i-lucide-mail"
-                class="size-3.5"
-              />
+            <span v-if="facultyEmail" class="flex items-center gap-1.5">
+              <UIcon name="i-lucide-mail" class="size-3.5" />
 
               {{ facultyEmail }}
             </span>
@@ -171,9 +113,7 @@
             Active Period
           </p>
 
-          <p
-            class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200"
-          >
+          <p class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200">
             {{ activeSemester }} · {{ activeSchoolYearLabel }}
           </p>
         </div>
@@ -181,17 +121,15 @@
     </section>
 
     <!-- =====================================================
+
       LOADING
+
     ====================================================== -->
-    <div
-      v-if="pending"
-      class="space-y-5"
-    >
+
+    <div v-if="pending" class="space-y-5">
       <USkeleton class="h-24 w-full rounded-2xl" />
 
-      <div
-        class="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3"
-      >
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
         <USkeleton
           v-for="index in 6"
           :key="index"
@@ -201,8 +139,11 @@
     </div>
 
     <!-- =====================================================
+
       ERROR
+
     ====================================================== -->
+
     <section
       v-else-if="loadError"
       class="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center dark:border-red-900 dark:bg-red-950/20"
@@ -210,15 +151,10 @@
       <div
         class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400"
       >
-        <UIcon
-          name="i-lucide-triangle-alert"
-          class="size-7"
-        />
+        <UIcon name="i-lucide-triangle-alert" class="size-7" />
       </div>
 
-      <h2
-        class="mt-4 text-lg font-bold text-gray-900 dark:text-white"
-      >
+      <h2 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">
         Unable to load evaluation records
       </h2>
 
@@ -240,8 +176,11 @@
 
     <template v-else>
       <!-- ===================================================
+
         FILTERS
+
       ==================================================== -->
+
       <section
         class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
       >
@@ -254,7 +193,8 @@
             </h2>
 
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Search and filter the Dean or Coordinator evaluations you submitted.
+              Search and filter the Dean or Coordinator evaluations you
+              submitted.
             </p>
           </div>
 
@@ -292,11 +232,7 @@
             Active filters:
           </span>
 
-          <UBadge
-            v-if="searchQuery"
-            color="neutral"
-            variant="subtle"
-          >
+          <UBadge v-if="searchQuery" color="neutral" variant="subtle">
             Search: {{ searchQuery }}
           </UBadge>
 
@@ -329,8 +265,11 @@
       </section>
 
       <!-- ===================================================
+
         EMPTY STATE
+
       ==================================================== -->
+
       <section
         v-if="!filteredRecords.length"
         class="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-14 text-center dark:border-gray-700 dark:bg-gray-900"
@@ -347,8 +286,8 @@
         <h2 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
           {{
             records.length
-              ? 'No matching records found'
-              : 'No Dean evaluation records yet'
+              ? "No matching records found"
+              : "No Dean evaluation records yet"
           }}
         </h2>
 
@@ -357,8 +296,8 @@
         >
           {{
             records.length
-              ? 'Try changing or clearing the current search and filters.'
-              : 'Evaluations you submit for your Dean or Coordinator will appear here.'
+              ? "Try changing or clearing the current search and filters."
+              : "Evaluations you submit for your Dean or Coordinator will appear here."
           }}
         </p>
 
@@ -375,8 +314,11 @@
       </section>
 
       <!-- ===================================================
+
         RECORD CARDS
+
       ==================================================== -->
+
       <section
         v-else
         class="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3"
@@ -391,8 +333,7 @@
           >
             <div
               class="pointer-events-none absolute -right-10 -top-14 size-36 rounded-full bg-emerald-500/20 blur-3xl"
-            />
-
+            ></div>
             <div class="relative flex items-center justify-between gap-3">
               <div class="flex min-w-0 items-center gap-3">
                 <div
@@ -434,11 +375,15 @@
               <div
                 class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                <p
+                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
+                >
                   Semester
                 </p>
 
-                <p class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200">
+                <p
+                  class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200"
+                >
                   {{ getSemester(record) }}
                 </p>
               </div>
@@ -446,11 +391,15 @@
               <div
                 class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                <p
+                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
+                >
                   School Year
                 </p>
 
-                <p class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200">
+                <p
+                  class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200"
+                >
                   {{ getSchoolYear(record) }}
                 </p>
               </div>
@@ -458,11 +407,15 @@
               <div
                 class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                <p
+                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
+                >
                   Date
                 </p>
 
-                <p class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200">
+                <p
+                  class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200"
+                >
                   {{ formatDate(getEvaluationDate(record)) }}
                 </p>
               </div>
@@ -470,11 +423,15 @@
               <div
                 class="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <p class="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                <p
+                  class="text-[9px] font-semibold uppercase tracking-wide text-gray-400"
+                >
                   Responses
                 </p>
 
-                <p class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200">
+                <p
+                  class="mt-1 truncate text-xs font-bold text-gray-800 dark:text-gray-200"
+                >
                   {{ getResponses(record).length }}
                 </p>
               </div>
@@ -482,11 +439,15 @@
 
             <div
               class="rounded-xl border p-4"
-              :class="getScoreContainerClass(getAverageScore(record))"
+              :class="
+                getDynamicScoreContainerClass(record, getAverageScore(record))
+              "
             >
               <div class="flex items-center justify-between gap-3">
                 <div>
-                  <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                  <p
+                    class="text-[10px] font-medium text-gray-500 dark:text-gray-400"
+                  >
                     Average Rating
                   </p>
 
@@ -496,24 +457,28 @@
                     </p>
 
                     <span class="mb-1 text-xs font-medium text-gray-400">
-                      / 4
+                      / {{ getScaleMax(record) }}
                     </span>
                   </div>
 
                   <UBadge
-                    :color="getScoreColor(getAverageScore(record))"
+                    :color="
+                      getDynamicScoreColor(record, getAverageScore(record))
+                    "
                     variant="subtle"
                     size="sm"
                     class="mt-1.5"
                   >
-                    {{ getScoreLabel(getAverageScore(record)) }}
+                    {{ getDynamicScoreLabel(record, getAverageScore(record)) }}
                   </UBadge>
                 </div>
 
                 <UIcon
                   name="i-lucide-chart-no-axes-combined"
                   class="size-8"
-                  :class="getScoreIconClass(getAverageScore(record))"
+                  :class="
+                    getDynamicScoreIconClass(record, getAverageScore(record))
+                  "
                 />
               </div>
             </div>
@@ -526,14 +491,13 @@
                 <div
                   class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400"
                 >
-                  <UIcon
-                    name="i-lucide-message-square-text"
-                    class="size-3.5"
-                  />
+                  <UIcon name="i-lucide-message-square-text" class="size-3.5" />
                 </div>
 
                 <div class="min-w-0">
-                  <p class="text-[11px] font-bold text-gray-900 dark:text-white">
+                  <p
+                    class="text-[11px] font-bold text-gray-900 dark:text-white"
+                  >
                     Written Feedback
                   </p>
 
@@ -568,14 +532,20 @@
       </section>
 
       <!-- ===================================================
+
         PAGINATION
+
       ==================================================== -->
+
       <section
         v-if="filteredRecords.length > itemsPerPage"
         class="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800 dark:bg-gray-900"
       >
-        <p class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400">
+        <p
+          class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
+        >
           Showing {{ paginationStart }}–{{ paginationEnd }} of
+
           {{ filteredRecords.length }} records
         </p>
 
@@ -608,8 +578,11 @@
     </template>
 
     <!-- =====================================================
+
       DETAILS MODAL
+
     ====================================================== -->
+
     <UModal v-model:open="detailsOpen">
       <template #content>
         <div
@@ -621,8 +594,7 @@
           >
             <div
               class="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-emerald-500/20 blur-3xl"
-            />
-
+            ></div>
             <div class="relative flex items-start justify-between gap-4">
               <div class="flex min-w-0 items-center gap-4">
                 <div
@@ -664,11 +636,11 @@
               <div
                 class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <p class="text-[10px] uppercase text-gray-400">
-                  Semester
-                </p>
+                <p class="text-[10px] uppercase text-gray-400">Semester</p>
 
-                <p class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200">
+                <p
+                  class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200"
+                >
                   {{ getSemester(selectedRecord) }}
                 </p>
               </div>
@@ -676,11 +648,11 @@
               <div
                 class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <p class="text-[10px] uppercase text-gray-400">
-                  School Year
-                </p>
+                <p class="text-[10px] uppercase text-gray-400">School Year</p>
 
-                <p class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200">
+                <p
+                  class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200"
+                >
                   {{ getSchoolYear(selectedRecord) }}
                 </p>
               </div>
@@ -688,11 +660,11 @@
               <div
                 class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40"
               >
-                <p class="text-[10px] uppercase text-gray-400">
-                  Date
-                </p>
+                <p class="text-[10px] uppercase text-gray-400">Date</p>
 
-                <p class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200">
+                <p
+                  class="mt-1 text-xs font-bold text-gray-800 dark:text-gray-200"
+                >
                   {{ formatDate(getEvaluationDate(selectedRecord)) }}
                 </p>
               </div>
@@ -700,13 +672,33 @@
               <div
                 class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20"
               >
-                <p class="text-[10px] uppercase text-gray-400">
-                  Average
-                </p>
+                <p class="text-[10px] uppercase text-gray-400">Average</p>
 
-                <p class="mt-1 text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                  {{ formatScore(getAverageScore(selectedRecord)) }}/4
+                <p
+                  class="mt-1 text-xs font-bold text-emerald-700 dark:text-emerald-400"
+                >
+                  {{ formatScore(getAverageScore(selectedRecord)) }}/{{
+                    getScaleMax(selectedRecord)
+                  }}
                 </p>
+                <UBadge
+                  :color="
+                    getDynamicScoreColor(
+                      selectedRecord,
+                      getAverageScore(selectedRecord),
+                    )
+                  "
+                  variant="subtle"
+                  size="sm"
+                  class="mt-2"
+                >
+                  {{
+                    getDynamicScoreLabel(
+                      selectedRecord,
+                      getAverageScore(selectedRecord),
+                    )
+                  }}
+                </UBadge>
               </div>
             </div>
 
@@ -714,7 +706,9 @@
               v-if="getStrengths(selectedRecord)"
               class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20"
             >
-              <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
+              <h3
+                class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
+              >
                 <UIcon
                   name="i-lucide-thumbs-up"
                   class="size-4 text-emerald-500"
@@ -734,7 +728,9 @@
               v-if="getAreasForImprovement(selectedRecord)"
               class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 dark:border-amber-900 dark:bg-amber-950/20"
             >
-              <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
+              <h3
+                class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
+              >
                 <UIcon
                   name="i-lucide-lightbulb"
                   class="size-4 text-amber-500"
@@ -754,7 +750,9 @@
               v-if="getComment(selectedRecord)"
               class="rounded-2xl border border-violet-100 bg-violet-50/60 p-4 dark:border-violet-900 dark:bg-violet-950/20"
             >
-              <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
+              <h3
+                class="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white"
+              >
                 <UIcon
                   name="i-lucide-message-square-text"
                   class="size-4 text-violet-500"
@@ -795,7 +793,9 @@
                       {{ index + 1 }}
                     </span>
 
-                    <p class="text-sm leading-6 text-gray-600 dark:text-gray-400">
+                    <p
+                      class="text-sm leading-6 text-gray-600 dark:text-gray-400"
+                    >
                       {{ response.question || `Criterion ${index + 1}` }}
                     </p>
                   </div>
@@ -836,30 +836,40 @@
 // @ts-nocheck
 
 definePageMeta({
-  middleware: ['auth', 'role'],
-  role: ['Faculty']
-})
+  middleware: ["auth", "role"],
 
-const { $api } = useNuxtApp()
-const { user } = useAuth()
-const toast = useToast()
+  role: ["Faculty"],
+});
 
-const records = ref<any[]>([])
-const facultyProfile = ref<any>(null)
-const activeSchoolYear = ref<any>(null)
+const { $api } = useNuxtApp();
 
-const pending = ref(true)
-const loadError = ref('')
+const { user } = useAuth();
 
-const searchQuery = ref('')
-const selectedSemester = ref('all')
-const selectedSchoolYear = ref('all')
+const toast = useToast();
 
-const currentPage = ref(1)
-const itemsPerPage = 6
+const records = ref<any[]>([]);
 
-const detailsOpen = ref(false)
-const selectedRecord = ref<any>(null)
+const facultyProfile = ref<any>(null);
+
+const activeSchoolYear = ref<any>(null);
+
+const pending = ref(true);
+
+const loadError = ref("");
+
+const searchQuery = ref("");
+
+const selectedSemester = ref("all");
+
+const selectedSchoolYear = ref("all");
+
+const currentPage = ref(1);
+
+const itemsPerPage = 6;
+
+const detailsOpen = ref(false);
+
+const selectedRecord = ref<any>(null);
 
 const facultyName = computed(() => {
   return (
@@ -867,623 +877,654 @@ const facultyName = computed(() => {
     facultyProfile.value?.full_name ||
     user.value?.name ||
     user.value?.username ||
-    'Faculty Member'
-  )
-})
+    "Faculty Member"
+  );
+});
 
 const facultyDepartment = computed(() => {
-  return (
-    facultyProfile.value?.department?.name ||
-    'No department assigned'
-  )
-})
+  return facultyProfile.value?.department?.name || "No department assigned";
+});
 
 const facultyEmail = computed(() => {
   return (
     facultyProfile.value?.email ||
     facultyProfile.value?.user?.email ||
     user.value?.email ||
-    ''
-  )
-})
+    ""
+  );
+});
 
 const facultyInitials = computed(() => {
-  return createInitials(facultyName.value)
-})
+  return createInitials(facultyName.value);
+});
 
 const activeSemester = computed(() => {
-  return activeSchoolYear.value?.semester || ''
-})
+  return activeSchoolYear.value?.semester || "";
+});
 
 const activeSchoolYearLabel = computed(() => {
-  return activeSchoolYear.value?.school_year || ''
-})
+  return activeSchoolYear.value?.school_year || "";
+});
 
 const totalRecordCount = computed(() => {
-  return records.value.length
-})
+  return records.value.length;
+});
 
 const evaluatedDeanCount = computed(() => {
   const values = new Set(
     records.value
-      .map(record =>
-        record?.dean_coordinator?.documentId ||
-        record?.dean_coordinator?.id ||
-        record?.dean_coordinator?.name
-      )
-      .filter(Boolean)
-  )
 
-  return values.size
-})
+      .map(
+        (record) =>
+          record?.dean_coordinator?.documentId ||
+          record?.dean_coordinator?.id ||
+          record?.dean_coordinator?.name,
+      )
+
+      .filter(Boolean),
+  );
+
+  return values.size;
+});
 
 const overallAverage = computed(() => {
   const scores = records.value
-    .map(record => getAverageScore(record))
-    .filter(score => score > 0)
 
-  if (!scores.length) return '0.00'
+    .map((record) => getAverageScore(record))
+
+    .filter((score) => score > 0);
+
+  if (!scores.length) return "0.00";
 
   return (
-    scores.reduce((sum, score) => sum + score, 0) /
-    scores.length
-  ).toFixed(2)
-})
+    scores.reduce((sum, score) => sum + score, 0) / scores.length
+  ).toFixed(2);
+});
 
 const semesterFilterOptions = computed(() => {
   const values = Array.from(
     new Set(
       records.value
-        .map(record => getSemester(record))
-        .filter(
-          value =>
-            value &&
-            value !== 'Not specified'
-        )
-    )
-  )
+
+        .map((record) => getSemester(record))
+
+        .filter((value) => value && value !== "Not specified"),
+    ),
+  );
 
   return [
     {
-      label: 'All Semesters',
-      value: 'all'
+      label: "All Semesters",
+
+      value: "all",
     },
-    ...values.map(value => ({
+
+    ...values.map((value) => ({
       label: value,
-      value
-    }))
-  ]
-})
+
+      value,
+    })),
+  ];
+});
 
 const schoolYearFilterOptions = computed(() => {
   const values = Array.from(
     new Set(
       records.value
-        .map(record => getSchoolYear(record))
-        .filter(
-          value =>
-            value &&
-            value !== 'Not specified'
-        )
-    )
+
+        .map((record) => getSchoolYear(record))
+
+        .filter((value) => value && value !== "Not specified"),
+    ),
   )
+
     .sort()
-    .reverse()
+
+    .reverse();
 
   return [
     {
-      label: 'All School Years',
-      value: 'all'
+      label: "All School Years",
+
+      value: "all",
     },
-    ...values.map(value => ({
+
+    ...values.map((value) => ({
       label: value,
-      value
-    }))
-  ]
-})
+
+      value,
+    })),
+  ];
+});
 
 const filteredRecords = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase()
+  const query = searchQuery.value.trim().toLowerCase();
 
-  return records.value.filter(record => {
-    const deanName = getDeanName(record).toLowerCase()
-    const department = getDepartment(record).toLowerCase()
-    const semester = getSemester(record)
-    const schoolYear = getSchoolYear(record)
+  return records.value.filter((record) => {
+    const deanName = getDeanName(record).toLowerCase();
+
+    const department = getDepartment(record).toLowerCase();
+
+    const semester = getSemester(record);
+
+    const schoolYear = getSchoolYear(record);
 
     const matchesSearch =
-      !query ||
-      deanName.includes(query) ||
-      department.includes(query)
+      !query || deanName.includes(query) || department.includes(query);
 
     const matchesSemester =
-      selectedSemester.value === 'all' ||
-      semester === selectedSemester.value
+      selectedSemester.value === "all" || semester === selectedSemester.value;
 
     const matchesSchoolYear =
-      selectedSchoolYear.value === 'all' ||
-      schoolYear === selectedSchoolYear.value
+      selectedSchoolYear.value === "all" ||
+      schoolYear === selectedSchoolYear.value;
 
-    return (
-      matchesSearch &&
-      matchesSemester &&
-      matchesSchoolYear
-    )
-  })
-})
+    return matchesSearch && matchesSemester && matchesSchoolYear;
+  });
+});
 
 const totalPages = computed(() => {
   return Math.max(
     1,
-    Math.ceil(
-      filteredRecords.value.length /
-      itemsPerPage
-    )
-  )
-})
+
+    Math.ceil(filteredRecords.value.length / itemsPerPage),
+  );
+});
 
 const paginatedRecords = computed(() => {
-  const start =
-    (currentPage.value - 1) *
-    itemsPerPage
+  const start = (currentPage.value - 1) * itemsPerPage;
 
   return filteredRecords.value.slice(
     start,
-    start + itemsPerPage
-  )
-})
+
+    start + itemsPerPage,
+  );
+});
 
 const paginationStart = computed(() => {
-  if (!filteredRecords.value.length) return 0
+  if (!filteredRecords.value.length) return 0;
 
-  return (
-    (currentPage.value - 1) *
-    itemsPerPage +
-    1
-  )
-})
+  return (currentPage.value - 1) * itemsPerPage + 1;
+});
 
 const paginationEnd = computed(() => {
   return Math.min(
     currentPage.value * itemsPerPage,
-    filteredRecords.value.length
-  )
-})
+
+    filteredRecords.value.length,
+  );
+});
 
 const hasActiveFilters = computed(() => {
   return Boolean(
     searchQuery.value ||
-    selectedSemester.value !== 'all' ||
-    selectedSchoolYear.value !== 'all'
-  )
-})
+    selectedSemester.value !== "all" ||
+    selectedSchoolYear.value !== "all",
+  );
+});
 
 const createInitials = (value: string) => {
-  return String(value || '')
+  return String(value || "")
     .trim()
+
     .split(/\s+/)
+
     .slice(0, 2)
-    .map(part =>
-      part.charAt(0).toUpperCase()
-    )
-    .join('')
-}
+
+    .map((part) => part.charAt(0).toUpperCase())
+
+    .join("");
+};
 
 const getDeanName = (record: any) => {
   return (
     record?.dean_coordinator?.name ||
     record?.dean_coordinator?.full_name ||
-    'Dean/Coordinator'
-  )
-}
+    "Dean/Coordinator"
+  );
+};
 
 const getDeanInitials = (record: any) => {
-  return createInitials(getDeanName(record))
-}
+  return createInitials(getDeanName(record));
+};
 
 const getDepartment = (record: any) => {
   return (
     record?.dean_coordinator?.department?.name ||
     record?.batch?.department ||
     facultyDepartment.value
-  )
-}
+  );
+};
 
 const getSemester = (record: any) => {
-  return (
-    record?.batch?.semester ||
-    record?.semester ||
-    'Not specified'
-  )
-}
+  return record?.batch?.semester || record?.semester || "Not specified";
+};
 
 const getSchoolYear = (record: any) => {
-  return (
-    record?.batch?.school_year ||
-    record?.school_year ||
-    'Not specified'
-  )
-}
+  return record?.batch?.school_year || record?.school_year || "Not specified";
+};
 
 const getEvaluationDate = (record: any) => {
-  return (
-    record?.batch?.date ||
-    record?.date ||
-    record?.createdAt
-  )
-}
+  return record?.batch?.date || record?.date || record?.createdAt;
+};
 
 const getStrengths = (record: any) => {
-  return record?.strengths || ''
-}
+  return record?.strengths || "";
+};
 
 const getAreasForImprovement = (record: any) => {
-  return (
-    record?.areas_for_improvement ||
-    record?.areasForImprovement ||
-    ''
-  )
-}
+  return record?.areas_for_improvement || record?.areasForImprovement || "";
+};
 
 const getComment = (record: any) => {
-  return (
-    record?.comment ||
-    record?.feedback ||
-    ''
-  )
-}
+  return record?.comment || record?.feedback || "";
+};
 
 const getPrimaryFeedback = (record: any) => {
   return (
-    getComment(record) ||
-    getStrengths(record) ||
-    getAreasForImprovement(record)
-  )
-}
+    getComment(record) || getStrengths(record) || getAreasForImprovement(record)
+  );
+};
 
 const getResponses = (record: any) => {
-  const rawResponses = record?.responses
+  const rawResponses = record?.responses;
 
-  if (!rawResponses) return []
+  if (!rawResponses) return [];
 
   if (Array.isArray(rawResponses)) {
-    return rawResponses.map(
-      (response: any, index: number) => ({
-        criterionId:
-          response.criterion_id ||
-          response.criterionId ||
-          response.id ||
-          index,
+    return rawResponses.map((response: any, index: number) => ({
+      criterionId:
+        response.criterion_id || response.criterionId || response.id || index,
 
-        question:
-          response.question ||
-          response.statement ||
-          '',
+      question: response.question || response.statement || "",
 
-        score: Number(
-          response.score ??
-          response.value ??
-          response.rating
-        )
-      })
-    )
+      score: Number(response.score ?? response.value ?? response.rating),
+    }));
   }
 
-  if (typeof rawResponses === 'object') {
-    return Object.entries(rawResponses).map(
-      ([criterionId, score]) => ({
-        criterionId,
-        question: '',
-        score: Number(score)
-      })
-    )
+  if (typeof rawResponses === "object") {
+    return Object.entries(rawResponses).map(([criterionId, score]) => ({
+      criterionId,
+
+      question: "",
+
+      score: Number(score),
+    }));
   }
 
-  return []
-}
+  return [];
+};
+
+const getEvaluationType = (record: any) => {
+  return record?.batch?.evaluation_type || null;
+};
+
+const getScaleMin = (record: any) => {
+  const value = Number(getEvaluationType(record)?.min_score);
+  return Number.isFinite(value) ? value : 1;
+};
+
+const getScaleMax = (record: any) => {
+  const value = Number(getEvaluationType(record)?.max_score);
+  return Number.isFinite(value) && value > 0 ? value : 4;
+};
+
+const getScaleLabels = (record: any): Record<string, string> => {
+  const labels = getEvaluationType(record)?.scale_labels;
+  if (!labels) return {};
+
+  if (typeof labels === "string") {
+    try {
+      const parsed = JSON.parse(labels);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  return typeof labels === "object" ? labels : {};
+};
+
+const getDynamicScoreLabel = (record: any, score: number) => {
+  if (!score) return "No Score";
+
+  const labels = getScaleLabels(record);
+  const rounded = Math.round(score);
+  const configuredLabel = labels[String(rounded)];
+
+  if (configuredLabel) return String(configuredLabel);
+
+  const min = getScaleMin(record);
+  const max = getScaleMax(record);
+  const range = Math.max(max - min, 1);
+  const normalized = (score - min) / range;
+
+  if (normalized >= 0.83) return "Excellent";
+  if (normalized >= 0.66) return "Very Good";
+  if (normalized >= 0.49) return "Good";
+  if (normalized >= 0.32) return "Fair";
+  return "Needs Improvement";
+};
+
+const getNormalizedScore = (record: any, score: number) => {
+  if (!score) return 0;
+
+  const min = getScaleMin(record);
+  const max = getScaleMax(record);
+
+  if (max <= min) return 0;
+
+  return Math.max(0, Math.min(1, (score - min) / (max - min)));
+};
+
+const getDynamicScoreColor = (record: any, score: number) => {
+  const normalized = getNormalizedScore(record, score);
+
+  if (normalized >= 0.75) return "success";
+  if (normalized >= 0.5) return "primary";
+  if (normalized >= 0.25) return "warning";
+  return score > 0 ? "error" : "neutral";
+};
+
+const getDynamicScoreContainerClass = (record: any, score: number) => {
+  const normalized = getNormalizedScore(record, score);
+
+  if (normalized >= 0.75) {
+    return [
+      "border-emerald-100",
+      "bg-emerald-50/70",
+      "dark:border-emerald-900",
+      "dark:bg-emerald-950/20",
+    ];
+  }
+
+  if (normalized >= 0.5) {
+    return [
+      "border-blue-100",
+      "bg-blue-50/70",
+      "dark:border-blue-900",
+      "dark:bg-blue-950/20",
+    ];
+  }
+
+  if (normalized >= 0.25) {
+    return [
+      "border-amber-100",
+      "bg-amber-50/70",
+      "dark:border-amber-900",
+      "dark:bg-amber-950/20",
+    ];
+  }
+
+  return [
+    "border-red-100",
+    "bg-red-50/70",
+    "dark:border-red-900",
+    "dark:bg-red-950/20",
+  ];
+};
+
+const getDynamicScoreIconClass = (record: any, score: number) => {
+  const normalized = getNormalizedScore(record, score);
+
+  if (normalized >= 0.75) return "text-emerald-500";
+  if (normalized >= 0.5) return "text-blue-500";
+  if (normalized >= 0.25) return "text-amber-500";
+  return "text-red-500";
+};
 
 const getAverageScore = (record: any) => {
   const directScore = Number(
-    record?.average_score ??
-    record?.average ??
-    record?.score
-  )
+    record?.average_score ?? record?.average ?? record?.score,
+  );
 
-  if (
-    Number.isFinite(directScore) &&
-    directScore > 0
-  ) {
-    return directScore
+  if (Number.isFinite(directScore) && directScore > 0) {
+    return directScore;
   }
 
   const scores = getResponses(record)
-    .map(response => Number(response.score))
-    .filter(score => Number.isFinite(score))
+    .map((response) => Number(response.score))
 
-  if (!scores.length) return 0
+    .filter((score) => Number.isFinite(score));
+
+  if (!scores.length) return 0;
 
   return (
     scores.reduce(
       (sum, score) => sum + score,
-      0
+
+      0,
     ) / scores.length
-  )
-}
+  );
+};
 
 const getRecordReference = (record: any) => {
-  const value =
-    record?.documentId ||
-    record?.id
+  const value = record?.documentId || record?.id;
 
-  if (!value) return 'N/A'
+  if (!value) return "N/A";
 
-  return String(value).slice(-8)
-}
+  return String(value).slice(-8);
+};
 
 const formatDate = (value: any) => {
-  if (!value) return 'Not specified'
+  if (!value) return "Not specified";
 
-  const date = new Date(value)
+  const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return String(value)
+    return String(value);
   }
 
-  return date.toLocaleDateString('en-PH', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  })
-}
+  return date.toLocaleDateString("en-PH", {
+    month: "short",
+
+    day: "numeric",
+
+    year: "numeric",
+  });
+};
 
 const formatScore = (score: number) => {
-  if (!score) return '0.00'
+  if (!score) return "0.00";
 
-  return Number(score).toFixed(2)
-}
-
-const getScoreLabel = (score: number) => {
-  if (score >= 3.5) return 'Superior'
-  if (score >= 2.5) return 'Average'
-  if (score >= 1.5) return 'Fair'
-  if (score > 0) return 'Needs Improvement'
-  return 'No Score'
-}
-
-const getScoreColor = (score: number) => {
-  if (score >= 3.5) return 'success'
-  if (score >= 2.5) return 'primary'
-  if (score >= 1.5) return 'warning'
-  return 'error'
-}
-
-const getScoreContainerClass = (score: number) => {
-  if (score >= 3.5) {
-    return [
-      'border-emerald-100',
-      'bg-emerald-50/70',
-      'dark:border-emerald-900',
-      'dark:bg-emerald-950/20'
-    ]
-  }
-
-  if (score >= 2.5) {
-    return [
-      'border-blue-100',
-      'bg-blue-50/70',
-      'dark:border-blue-900',
-      'dark:bg-blue-950/20'
-    ]
-  }
-
-  if (score >= 1.5) {
-    return [
-      'border-amber-100',
-      'bg-amber-50/70',
-      'dark:border-amber-900',
-      'dark:bg-amber-950/20'
-    ]
-  }
-
-  return [
-    'border-red-100',
-    'bg-red-50/70',
-    'dark:border-red-900',
-    'dark:bg-red-950/20'
-  ]
-}
-
-const getScoreIconClass = (score: number) => {
-  if (score >= 3.5) return 'text-emerald-500'
-  if (score >= 2.5) return 'text-blue-500'
-  if (score >= 1.5) return 'text-amber-500'
-  return 'text-red-500'
-}
+  return Number(score).toFixed(2);
+};
 
 const clearFilters = () => {
-  searchQuery.value = ''
-  selectedSemester.value = 'all'
-  selectedSchoolYear.value = 'all'
-  currentPage.value = 1
-}
+  searchQuery.value = "";
+
+  selectedSemester.value = "all";
+
+  selectedSchoolYear.value = "all";
+
+  currentPage.value = 1;
+};
 
 const scrollToTop = async () => {
-  await nextTick()
+  await nextTick();
 
-  if (!import.meta.client) return
+  if (!import.meta.client) return;
 
   window.scrollTo({
     top: 0,
-    behavior: 'smooth'
-  })
-}
+
+    behavior: "smooth",
+  });
+};
 
 const previousPage = async () => {
-  if (currentPage.value <= 1) return
+  if (currentPage.value <= 1) return;
 
-  currentPage.value -= 1
-  await scrollToTop()
-}
+  currentPage.value -= 1;
+
+  await scrollToTop();
+};
 
 const nextPage = async () => {
-  if (currentPage.value >= totalPages.value) return
+  if (currentPage.value >= totalPages.value) return;
 
-  currentPage.value += 1
-  await scrollToTop()
-}
+  currentPage.value += 1;
+
+  await scrollToTop();
+};
 
 const openRecordDetails = (record: any) => {
-  selectedRecord.value = record
-  detailsOpen.value = true
-}
+  selectedRecord.value = record;
+
+  detailsOpen.value = true;
+};
 
 const getActiveSchoolYear = async () => {
   try {
-    const response = await $api('/school-years', {
+    const response = await $api("/school-years", {
       query: {
-        'filters[active_sy][$eq]': true,
-        'pagination[pageSize]': 1
-      }
-    })
+        "filters[active_sy][$eq]": true,
 
-    activeSchoolYear.value =
-      response.data?.[0] || null
+        "pagination[pageSize]": 1,
+      },
+    });
+
+    activeSchoolYear.value = response.data?.[0] || null;
   } catch (error) {
-    console.error('Active school year error:', error)
-    activeSchoolYear.value = null
+    console.error("Active school year error:", error);
+
+    activeSchoolYear.value = null;
   }
-}
+};
 
 const getFacultyProfile = async () => {
   if (!user.value?.id) {
-    facultyProfile.value = null
-    return
+    facultyProfile.value = null;
+
+    return;
   }
 
-  const response = await $api('/teachers', {
+  const response = await $api("/teachers", {
     query: {
-      'filters[user][id][$eq]':
-        user.value.id,
+      "filters[user][id][$eq]": user.value.id,
 
-      'populate[department]':
-        true,
+      "populate[department]": true,
 
-      'populate[user]':
-        true,
+      "populate[user]": true,
 
-      'pagination[pageSize]':
-        1
-    }
-  })
+      "pagination[pageSize]": 1,
+    },
+  });
 
-  facultyProfile.value =
-    response.data?.[0] || null
-}
+  facultyProfile.value = response.data?.[0] || null;
+};
 
 const getDeanEvaluationRecords = async () => {
   if (!user.value?.id) {
-    records.value = []
-    return
+    records.value = [];
+
+    return;
   }
 
-  const response = await $api('/evaluations', {
+  const response = await $api("/evaluations", {
     query: {
-      'filters[evaluator_user][id][$eq]':
-        user.value.id,
+      "filters[evaluator_user][id][$eq]": user.value.id,
 
-      'filters[batch][evaluation_type][code][$eq]':
-        'faculty-dean-coordinator',
+      "filters[batch][evaluation_type][code][$eq]": "faculty-dean-coordinator",
 
-      'populate[dean_coordinator][populate][department]':
-        true,
+      "populate[dean_coordinator][populate][department]": true,
 
-      'populate[batch][populate][evaluation_type]':
-        true,
+      "populate[batch][populate][evaluation_type]": true,
 
-      'sort[0]':
-        'createdAt:desc',
+      "sort[0]": "createdAt:desc",
 
-      'pagination[pageSize]':
-        500
-    }
-  })
+      "pagination[pageSize]": 500,
+    },
+  });
 
-  records.value =
-    response.data || []
-}
+  records.value = response.data || [];
+};
 
 const loadData = async () => {
   try {
-    pending.value = true
-    loadError.value = ''
+    pending.value = true;
+
+    loadError.value = "";
 
     await Promise.all([
       getActiveSchoolYear(),
+
       getFacultyProfile(),
-      getDeanEvaluationRecords()
-    ])
+
+      getDeanEvaluationRecords(),
+    ]);
 
     if (!facultyProfile.value) {
-      throw new Error(
-        'The logged-in faculty profile could not be found.'
-      )
+      throw new Error("The logged-in faculty profile could not be found.");
     }
 
-    currentPage.value = 1
+    // Open this page on the currently active academic period.
+    // The Faculty can still switch the filters back to "All".
+    if (activeSchoolYear.value) {
+      selectedSemester.value = activeSchoolYear.value.semester || "all";
+
+      selectedSchoolYear.value = activeSchoolYear.value.school_year || "all";
+    }
+
+    currentPage.value = 1;
   } catch (error: any) {
     console.error(
-      'Dean evaluation records loading error:',
-      error
-    )
+      "Dean evaluation records loading error:",
+
+      error,
+    );
 
     loadError.value =
       error?.data?.error?.message ||
       error?.data?.message ||
       error?.message ||
-      'Failed to load Dean evaluation records.'
+      "Failed to load Dean evaluation records.";
 
     toast.add({
-      title: 'Unable to load records',
+      title: "Unable to load records",
+
       description: loadError.value,
-      icon: 'i-lucide-triangle-alert',
-      color: 'error'
-    })
+
+      icon: "i-lucide-triangle-alert",
+
+      color: "error",
+    });
   } finally {
-    pending.value = false
+    pending.value = false;
   }
-}
+};
 
 watch(
-  [
-    searchQuery,
-    selectedSemester,
-    selectedSchoolYear
-  ],
+  [searchQuery, selectedSemester, selectedSchoolYear],
+
   () => {
-    currentPage.value = 1
-  }
-)
+    currentPage.value = 1;
+  },
+);
 
 watch(
   () => totalPages.value,
-  value => {
+
+  (value) => {
     if (currentPage.value > value) {
-      currentPage.value = value
+      currentPage.value = value;
     }
-  }
-)
+  },
+);
 
 watch(
   user,
-  async value => {
+
+  async (value) => {
     if (value?.id) {
-      await loadData()
+      await loadData();
     }
   },
+
   {
-    immediate: true
-  }
-)
+    immediate: true,
+  },
+);
 </script>
 
 <style scoped>
