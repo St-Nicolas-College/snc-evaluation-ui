@@ -329,6 +329,148 @@
         </div>
       </section>
 
+
+      <!-- EVALUATION CHARTS -->
+      <section v-if="activeSchoolYear" class="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+        <!-- Evaluation volume -->
+        <div
+          class="rounded-[26px] border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6"
+        >
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
+              >
+                <UIcon name="i-lucide-chart-column-big" class="size-5" />
+              </div>
+
+              <div>
+                <h2 class="font-bold text-gray-900 dark:text-white">
+                  Evaluation Activity
+                </h2>
+                <p class="mt-1 text-xs text-gray-500">
+                  Number of submitted evaluations for {{ activePeriodLabel }}.
+                </p>
+              </div>
+            </div>
+
+            <UBadge color="primary" variant="subtle">
+              {{ stats.activeEvaluations }} Total
+            </UBadge>
+          </div>
+
+          <div class="mt-7">
+            <div class="flex h-64 items-end gap-4 sm:gap-7">
+              <div
+                v-for="item in evaluationVolumeChart"
+                :key="item.code"
+                class="flex min-w-0 flex-1 flex-col items-center"
+              >
+                <div class="mb-2 text-center">
+                  <p class="text-xl font-black text-gray-900 dark:text-white">
+                    {{ item.value }}
+                  </p>
+                </div>
+
+                <div
+                  class="relative flex h-44 w-full max-w-[110px] items-end overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-gray-800"
+                >
+                  <div
+                    class="w-full rounded-t-2xl bg-gradient-to-t transition-all duration-500"
+                    :class="item.barClass"
+                    :style="{ height: `${item.height}%` }"
+                  ></div>
+                </div>
+
+                <div class="mt-3 text-center">
+                  <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                    {{ item.shortLabel }}
+                  </p>
+                  <p class="mt-1 hidden text-[10px] text-gray-400 sm:block">
+                    {{ item.label }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="stats.activeEvaluations === 0"
+              class="mt-4 rounded-2xl border border-dashed border-gray-200 px-4 py-3 text-center text-xs text-gray-500 dark:border-gray-800"
+            >
+              No evaluation submissions have been recorded for the active period yet.
+            </div>
+          </div>
+        </div>
+
+        <!-- Average score comparison -->
+        <div
+          class="rounded-[26px] border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+            >
+              <UIcon name="i-lucide-chart-no-axes-combined" class="size-5" />
+            </div>
+
+            <div>
+              <h2 class="font-bold text-gray-900 dark:text-white">
+                Average Score Comparison
+              </h2>
+              <p class="mt-1 text-xs text-gray-500">
+                Each bar is normalized using its evaluation type's configured scale.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-7 space-y-6">
+            <div
+              v-for="item in evaluationAverageChart"
+              :key="item.code"
+            >
+              <div class="mb-2 flex items-end justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    {{ item.label }}
+                  </p>
+                  <p v-if="item.scoreLabel" class="mt-0.5 text-[10px] text-gray-400">
+                    {{ item.scoreLabel }}
+                  </p>
+                </div>
+
+                <p class="shrink-0 text-sm font-black text-gray-900 dark:text-white">
+                  <template v-if="item.hasScore">
+                    {{ item.average.toFixed(2) }}
+                    <span class="font-semibold text-gray-400">/ {{ item.maxScore }}</span>
+                  </template>
+                  <template v-else>—</template>
+                </p>
+              </div>
+
+              <div class="h-3 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                <div
+                  class="h-full rounded-full bg-gradient-to-r transition-all duration-500"
+                  :class="item.barClass"
+                  :style="{ width: `${item.percentage}%` }"
+                ></div>
+              </div>
+
+              <div class="mt-1.5 flex items-center justify-between text-[10px] text-gray-400">
+                <span>{{ item.count }} record{{ item.count === 1 ? "" : "s" }}</span>
+                <span>{{ item.hasScore ? `${item.percentage.toFixed(0)}% of scale` : "No score yet" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="mt-6 rounded-2xl border border-gray-100 bg-gray-50/70 p-3 text-[11px] leading-5 text-gray-500 dark:border-gray-800 dark:bg-gray-950/30"
+          >
+            These averages are shown separately because Student → Faculty, Dean → Faculty,
+            and Faculty → Dean may use different maximum scores.
+          </div>
+        </div>
+      </section>
+
       <!-- SECONDARY STATUS -->
 
       <section
@@ -889,13 +1031,7 @@
 
               :key="ranking.documentId || ranking.id"
 
-              :to="
-
-                ranking.teacher?.documentId
-
-                  ? `/hr/ranking/faculty/${ranking.teacher.documentId}?ranking=${ranking.documentId}`
-
-                  : '/hr/ranking'
+              :to="ranking.teacher?.documentId ? `/hr/ranking/faculty/${ranking.teacher.documentId}?ranking=${ranking.documentId}` : '/hr/ranking'
 
               "
 
@@ -1259,6 +1395,86 @@ const deanFacultySummary = computed(() =>
 const facultyDeanSummary = computed(() =>
   getEvaluationSummary("faculty-dean-coordinator"),
 )
+
+
+const evaluationVolumeChart = computed(() => {
+  const items = [
+    {
+      code: "student-faculty",
+      shortLabel: "Student",
+      label: "Student → Faculty",
+      value: studentFacultySummary.value.count,
+      barClass: "from-blue-600 to-cyan-400",
+    },
+    {
+      code: "dean-faculty",
+      shortLabel: "Dean",
+      label: "Dean → Faculty",
+      value: deanFacultySummary.value.count,
+      barClass: "from-violet-600 to-fuchsia-400",
+    },
+    {
+      code: "faculty-dean-coordinator",
+      shortLabel: "Faculty",
+      label: "Faculty → Dean",
+      value: facultyDeanSummary.value.count,
+      barClass: "from-emerald-600 to-teal-400",
+    },
+  ]
+
+  const maximum = Math.max(...items.map((item) => item.value), 1)
+
+  return items.map((item) => ({
+    ...item,
+    height: item.value > 0
+      ? Math.max((item.value / maximum) * 100, 8)
+      : 0,
+  }))
+})
+
+const evaluationAverageChart = computed(() => {
+  const items = [
+    {
+      code: "student-faculty",
+      label: "Student → Faculty",
+      summary: studentFacultySummary.value,
+      barClass: "from-blue-600 to-cyan-400",
+    },
+    {
+      code: "dean-faculty",
+      label: "Dean → Faculty",
+      summary: deanFacultySummary.value,
+      barClass: "from-violet-600 to-fuchsia-400",
+    },
+    {
+      code: "faculty-dean-coordinator",
+      label: "Faculty → Dean",
+      summary: facultyDeanSummary.value,
+      barClass: "from-emerald-600 to-teal-400",
+    },
+  ]
+
+  return items.map((item) => {
+    const average = Number(item.summary.average || 0)
+    const maxScore = Number(item.summary.maxScore || 0)
+    const hasScore = average > 0 && maxScore > 0
+    const percentage = hasScore
+      ? Math.max(0, Math.min((average / maxScore) * 100, 100))
+      : 0
+
+    return {
+      code: item.code,
+      label: item.label,
+      count: Number(item.summary.count || 0),
+      average,
+      maxScore,
+      scoreLabel: item.summary.label || "",
+      hasScore,
+      percentage,
+      barClass: item.barClass,
+    }
+  })
+})
 
 // DASHBOARD COMPUTED
 
@@ -2320,7 +2536,6 @@ const loadDashboard = async () => {
             "dean-faculty",
           "filters[batch][evaluation_type][code][$in][2]":
             "faculty-dean-coordinator",
-        
           "populate[batch][populate][evaluation_type]": true,
           "pagination[page]": 1,
           "pagination[pageSize]": 5000,
