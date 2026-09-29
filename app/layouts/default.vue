@@ -211,6 +211,12 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       icon: "i-lucide-file-chart-column",
       to: "/admin/reports/evaluations",
     },
+    {
+      label: "Account Settings",
+      icon: "i-lucide-settings",
+      to: "/admin/account-settings",
+      exact: true,
+    },
   ],
 
   Dean: [
@@ -421,11 +427,11 @@ const roleMenus: Record<string, NavigationMenuItem[]> = {
       ],
     },
 
-    // {
-    //   label: "My Profile",
-    //   icon: "i-lucide-user-round",
-    //   to: "/hr/profile",
-    // },
+    {
+      label: "Account Settings",
+      icon: "i-lucide-settings",
+      to: "/hr/settings",
+    },
   ],
 
   Student: [

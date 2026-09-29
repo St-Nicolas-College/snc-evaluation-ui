@@ -15,7 +15,7 @@
         :style="{
           backgroundImage:
             'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
-          backgroundSize: '40px 40px'
+          backgroundSize: '40px 40px',
         }"
       />
     </div>
@@ -40,9 +40,7 @@
             <p class="text-lg font-bold tracking-tight">
               Faculty Evaluation System
             </p>
-            <p class="text-sm text-slate-300">
-              St. Nicolas College
-            </p>
+            <p class="text-sm text-slate-300">St. Nicolas College</p>
           </div>
         </div>
 
@@ -60,7 +58,9 @@
             Supporting better teaching through meaningful feedback.
           </h1>
 
-          <p class="mt-6 max-w-xl text-base leading-7 text-slate-300 xl:text-lg">
+          <p
+            class="mt-6 max-w-xl text-base leading-7 text-slate-300 xl:text-lg"
+          >
             A secure platform for students, faculty members, deans, and
             administrators to participate in structured evaluations and
             data-driven institutional improvement.
@@ -102,9 +102,7 @@
         <div
           class="relative z-10 flex items-center justify-between text-xs text-slate-400"
         >
-          <span>
-            © {{ currentYear }} St. Nicolas College
-          </span>
+          <span> © {{ currentYear }} St. Nicolas College </span>
 
           <span class="flex items-center gap-2">
             <UIcon name="i-lucide-shield-check" class="size-4" />
@@ -134,16 +132,14 @@
               Faculty Evaluation System
             </h1>
 
-            <p class="mt-1 text-sm text-slate-400">
-              St. Nicolas College
-            </p>
+            <p class="mt-1 text-sm text-slate-400">St. Nicolas College</p>
           </div>
 
           <UPageCard
             class="border border-white/10 bg-white shadow-2xl shadow-black/20 dark:bg-slate-900"
             :ui="{
               root: 'rounded-3xl',
-              body: 'p-6 sm:p-8'
+              body: 'p-6 sm:p-8',
             }"
           >
             <!-- Header -->
@@ -160,7 +156,9 @@
                 Welcome back
               </h2>
 
-              <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
+              <p
+                class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400"
+              >
                 Enter your credentials to access the evaluation system.
               </p>
             </div>
@@ -172,11 +170,7 @@
               class="space-y-5"
               @submit="onSubmit"
             >
-              <UFormField
-                label="Username"
-                name="username"
-                required
-              >
+              <UFormField label="Username" name="username" required>
                 <UInput
                   v-model="state.username"
                   icon="i-lucide-user"
@@ -188,11 +182,7 @@
                 />
               </UFormField>
 
-              <UFormField
-                label="Password"
-                name="password"
-                required
-              >
+              <UFormField label="Password" name="password" required>
                 <UInput
                   id="password"
                   v-model="state.password"
@@ -213,15 +203,9 @@
                       variant="link"
                       size="sm"
                       tabindex="-1"
-                      :icon="
-                        showPassword
-                          ? 'i-lucide-eye-off'
-                          : 'i-lucide-eye'
-                      "
+                      :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
                       :aria-label="
-                        showPassword
-                          ? 'Hide password'
-                          : 'Show password'
+                        showPassword ? 'Hide password' : 'Show password'
                       "
                       :aria-pressed="showPassword"
                       aria-controls="password"
@@ -238,9 +222,7 @@
                   :disabled="loading"
                 />
 
-                <span
-                  class="flex items-center gap-1 text-xs text-gray-400"
-                >
+                <span class="flex items-center gap-1 text-xs text-gray-400">
                   <UIcon name="i-lucide-lock" class="size-3.5" />
                   Secure login
                 </span>
@@ -255,12 +237,14 @@
                 :disabled="loading"
                 trailing-icon="i-lucide-arrow-right"
               >
-                {{ loading ? 'Signing in...' : 'Sign in' }}
+                {{ loading ? "Signing in..." : "Sign in" }}
               </UButton>
             </UForm>
 
             <!-- Information footer -->
-            <div class="mt-8 border-t border-gray-200 pt-5 dark:border-gray-800">
+            <div
+              class="mt-8 border-t border-gray-200 pt-5 dark:border-gray-800"
+            >
               <div
                 class="flex items-start gap-3 rounded-xl bg-gray-50 p-3 dark:bg-gray-800/60"
               >
@@ -277,10 +261,26 @@
             </div>
           </UPageCard>
 
-          <p class="mt-6 text-center text-xs text-slate-400">
-            Authorized users only. Your activity may be recorded for security
-            and audit purposes.
-          </p>
+          <div class="mt-6 text-center">
+            <p class="text-xs text-slate-400">
+              Authorized users only. Your activity may be recorded for security
+              and audit purposes.
+            </p>
+
+            <div
+              class="mt-3 flex items-center justify-center gap-2 text-[11px] text-slate-500"
+            >
+              <UIcon name="i-lucide-code-2" class="size-3.5" />
+
+              <span> SNC Evaluation System </span>
+
+              <span class="text-slate-600">•</span>
+
+              <span class="font-medium text-slate-400">
+                Version {{ appVersion }}
+              </span>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -289,98 +289,94 @@
 
 <script setup lang="ts">
 //@ts-nocheck
-import * as z from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import * as z from "zod";
+import type { FormSubmitEvent } from "@nuxt/ui";
 
 definePageMeta({
-  layout: 'auth',
-  middleware: 'guest'
-})
+  layout: "auth",
+  middleware: "guest",
+});
 
-const { login } = useAuth()
-const toast = useToast()
+const { login } = useAuth();
+const toast = useToast();
 
-const loading = ref(false)
-const showPassword = ref(false)
-const rememberMe = ref(false)
+const loading = ref(false);
+const showPassword = ref(false);
+const rememberMe = ref(false);
 
-const currentYear = new Date().getFullYear()
+const currentYear = new Date().getFullYear();
+
+// Version numbering
+// 1.0.0 — Initial completed system
+// 1.0.1 — Small bug fixes
+// 1.1.0 — New minor features/modules
+// 2.0.0 — Major system revision
+const appVersion = "1.0.0";
 
 const schema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(1, 'Username is required'),
+  username: z.string().trim().min(1, "Username is required"),
 
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters')
-})
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters"),
+});
 
-type Schema = z.output<typeof schema>
+type Schema = z.output<typeof schema>;
 
 const state = reactive<Partial<Schema>>({
-  username: '',
-  password: ''
-})
+  username: "",
+  password: "",
+});
 
 onMounted(() => {
-  const savedUsername = localStorage.getItem('evaluation_username')
+  const savedUsername = localStorage.getItem("evaluation_username");
 
   if (savedUsername) {
-    state.username = savedUsername
-    rememberMe.value = true
+    state.username = savedUsername;
+    rememberMe.value = true;
   }
-})
+});
 
 const handleEnter = () => {
-  if (loading.value) return
-}
+  if (loading.value) return;
+};
 
-const onSubmit = async (
-  payload: FormSubmitEvent<Schema>
-) => {
-  if (loading.value) return
+const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
+  if (loading.value) return;
 
-  loading.value = true
+  loading.value = true;
 
   try {
-    await login(
-      payload.data.username,
-      payload.data.password
-    )
+    await login(payload.data.username, payload.data.password);
 
     if (rememberMe.value) {
-      localStorage.setItem(
-        'evaluation_username',
-        payload.data.username
-      )
+      localStorage.setItem("evaluation_username", payload.data.username);
     } else {
-      localStorage.removeItem('evaluation_username')
+      localStorage.removeItem("evaluation_username");
     }
 
     toast.add({
-      title: 'Welcome back',
-      description: 'You have successfully signed in.',
-      icon: 'i-lucide-circle-check',
-      color: 'success'
-    })
+      title: "Welcome back",
+      description: "You have successfully signed in.",
+      icon: "i-lucide-circle-check",
+      color: "success",
+    });
 
-    await navigateTo('/')
+    await navigateTo("/");
   } catch (error) {
-    console.error('Login error:', error)
+    console.error("Login error:", error);
 
     toast.add({
-      title: 'Unable to sign in',
-      description: 'The username or password you entered is incorrect.',
-      icon: 'i-lucide-triangle-alert',
-      color: 'error'
-    })
+      title: "Unable to sign in",
+      description: "The username or password you entered is incorrect.",
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
