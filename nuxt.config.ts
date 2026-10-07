@@ -1,3 +1,5 @@
+import { version } from "./package.json";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   app: {
@@ -25,6 +27,7 @@ export default defineNuxtConfig({
     public: {
       //@ts-ignore
       strapiUrl: process.env.BASE_URL,
+      appVersion: version
     },
   },
 })

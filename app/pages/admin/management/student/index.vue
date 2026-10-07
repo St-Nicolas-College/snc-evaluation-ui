@@ -4,10 +4,16 @@
     <section
       class="relative overflow-hidden rounded-[28px] border border-blue-100 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 px-5 py-6 text-white shadow-xl shadow-blue-900/10 sm:px-7 sm:py-7"
     >
-      <div class="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl" />
-      <div class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-violet-300/15 blur-3xl" />
+      <div
+        class="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl"
+      />
+      <div
+        class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-violet-300/15 blur-3xl"
+      />
 
-      <div class="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+      <div
+        class="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between"
+      >
         <div class="flex min-w-0 items-start gap-4">
           <div
             class="hidden size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-lg backdrop-blur sm:flex"
@@ -16,12 +22,18 @@
           </div>
 
           <div class="min-w-0">
-            <div class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-blue-50">
-              <span class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur">
+            <div
+              class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-blue-50"
+            >
+              <span
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
+              >
                 Administrator Portal
               </span>
 
-              <span class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur">
+              <span
+                class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 backdrop-blur"
+              >
                 Student Management
               </span>
             </div>
@@ -38,21 +50,27 @@
         </div>
 
         <div class="grid grid-cols-3 gap-2 sm:min-w-[390px]">
-          <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
+          <div
+            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
+          >
             <p class="text-2xl font-bold">{{ summary.total }}</p>
             <p class="mt-1 text-[10px] uppercase tracking-wide text-blue-100">
               Students
             </p>
           </div>
 
-          <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
+          <div
+            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
+          >
             <p class="text-2xl font-bold">{{ summary.courses }}</p>
             <p class="mt-1 text-[10px] uppercase tracking-wide text-blue-100">
               Courses
             </p>
           </div>
 
-          <div class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
+          <div
+            class="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl"
+          >
             <p class="text-2xl font-bold">{{ summary.assignments }}</p>
             <p class="mt-1 text-[10px] uppercase tracking-wide text-blue-100">
               Assignments
@@ -97,8 +115,12 @@
     <section
       class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
-      <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+      >
+        <div
+          class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"
+        >
           <UInput
             v-model="globalFilter"
             icon="i-lucide-search"
@@ -161,15 +183,27 @@
           Search: {{ globalFilter }}
         </UBadge>
 
-        <UBadge v-if="selectedCourse !== 'all'" color="primary" variant="subtle">
+        <UBadge
+          v-if="selectedCourse !== 'all'"
+          color="primary"
+          variant="subtle"
+        >
           {{ selectedCourseLabel }}
         </UBadge>
 
-        <UBadge v-if="selectedYearLevel !== 'all'" color="success" variant="subtle">
+        <UBadge
+          v-if="selectedYearLevel !== 'all'"
+          color="success"
+          variant="subtle"
+        >
           {{ selectedYearLevel }}
         </UBadge>
 
-        <UBadge v-if="selectedSection !== 'all'" color="warning" variant="subtle">
+        <UBadge
+          v-if="selectedSection !== 'all'"
+          color="warning"
+          variant="subtle"
+        >
           {{ selectedSection }}
         </UBadge>
 
@@ -198,8 +232,8 @@
           </h2>
 
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Showing {{ filteredStudents.length }} of {{ students.length }}
-            student{{ students.length === 1 ? '' : 's' }}.
+            Showing {{ filteredStudents.length }} of
+            {{ students.length }} student{{ students.length === 1 ? "" : "s" }}.
           </p>
         </div>
 
@@ -211,7 +245,11 @@
       </div>
 
       <div v-if="loading" class="space-y-3 p-5">
-        <USkeleton v-for="index in 6" :key="index" class="h-14 w-full rounded-xl" />
+        <USkeleton
+          v-for="index in 6"
+          :key="index"
+          class="h-14 w-full rounded-xl"
+        />
       </div>
 
       <div v-else-if="loadError" class="px-6 py-14 text-center">
@@ -225,7 +263,9 @@
           Unable to load students
         </h3>
 
-        <p class="mx-auto mt-2 max-w-lg text-sm text-gray-500 dark:text-gray-400">
+        <p
+          class="mx-auto mt-2 max-w-lg text-sm text-gray-500 dark:text-gray-400"
+        >
           {{ loadError }}
         </p>
 
@@ -239,20 +279,28 @@
           class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
         >
           <UIcon
-            :name="students.length ? 'i-lucide-search-x' : 'i-lucide-graduation-cap'"
+            :name="
+              students.length ? 'i-lucide-search-x' : 'i-lucide-graduation-cap'
+            "
             class="size-8"
           />
         </div>
 
         <h3 class="mt-5 text-lg font-bold text-gray-900 dark:text-white">
-          {{ students.length ? 'No matching students found' : 'No student records yet' }}
-        </h3>
-
-        <p class="mx-auto mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400">
           {{
             students.length
-              ? 'Try changing or clearing the current filters.'
-              : 'Create the first student account to begin managing enrolment records.'
+              ? "No matching students found"
+              : "No student records yet"
+          }}
+        </h3>
+
+        <p
+          class="mx-auto mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400"
+        >
+          {{
+            students.length
+              ? "Try changing or clearing the current filters."
+              : "Create the first student account to begin managing enrolment records."
           }}
         </p>
       </div>
@@ -295,8 +343,10 @@
                 />
               </td>
 
-              <td class="px-4 py-4 font-mono text-xs text-gray-600 dark:text-gray-300">
-                {{ student.student_id || '—' }}
+              <td
+                class="px-4 py-4 font-mono text-xs text-gray-600 dark:text-gray-300"
+              >
+                {{ student.student_id || "—" }}
               </td>
 
               <td class="px-4 py-4">
@@ -309,11 +359,13 @@
 
                   <div class="min-w-0">
                     <p class="truncate font-bold text-gray-900 dark:text-white">
-                      {{ student.name || 'Unnamed Student' }}
+                      {{ student.name || "Unnamed Student" }}
                     </p>
 
-                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
-                      {{ student.user?.username || 'No username' }}
+                    <p
+                      class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      {{ student.user?.username || "No username" }}
                     </p>
                   </div>
                 </div>
@@ -322,33 +374,39 @@
               <td class="px-4 py-4">
                 <div>
                   <p class="font-medium text-gray-800 dark:text-gray-200">
-                    {{ student.course?.code || '—' }}
+                    {{ student.course?.code || "—" }}
                   </p>
 
-                  <p class="mt-0.5 max-w-[220px] truncate text-xs text-gray-500 dark:text-gray-400">
-                    {{ student.course?.name || 'Not assigned' }}
+                  <p
+                    class="mt-0.5 max-w-[220px] truncate text-xs text-gray-500 dark:text-gray-400"
+                  >
+                    {{ student.course?.name || "Not assigned" }}
                   </p>
                 </div>
               </td>
 
               <td class="px-4 py-4 text-gray-600 dark:text-gray-300">
-                {{ student.year_level || '—' }}
+                {{ student.year_level || "—" }}
               </td>
 
               <td class="px-4 py-4">
                 <UBadge color="neutral" variant="subtle">
-                  {{ student.section || 'No section' }}
+                  {{ student.section || "No section" }}
                 </UBadge>
               </td>
 
               <td class="px-4 py-4 text-gray-600 dark:text-gray-300">
-                {{ student.user?.email || '—' }}
+                {{ student.user?.email || "—" }}
               </td>
 
               <td class="px-4 py-4 text-center">
                 <UTooltip
                   v-if="student.assigned_teachers?.length"
-                  :text="student.assigned_teachers.map((teacher: any) => teacher.name).join(', ')"
+                  :text="
+                    student.assigned_teachers
+                      .map((teacher: any) => teacher.name)
+                      .join(', ')
+                  "
                 >
                   <UBadge color="primary" variant="subtle">
                     {{ student.assigned_teachers.length }}
@@ -377,7 +435,9 @@
         v-if="filteredStudents.length"
         class="flex flex-col gap-3 border-t border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
       >
-        <div class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400">
+        <div
+          class="text-center text-xs text-gray-500 sm:text-left dark:text-gray-400"
+        >
           Showing {{ paginationStart }}–{{ paginationEnd }} of
           {{ filteredStudents.length }} records
           <span v-if="selectedCount">• {{ selectedCount }} selected</span>
@@ -419,7 +479,9 @@
       :ui="{ content: 'max-w-3xl' }"
     >
       <template #content>
-        <div class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900">
+        <div
+          class="max-h-[88vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900"
+        >
           <ModalHeader
             title="Register Student"
             description="Create a new student account and academic profile."
@@ -427,7 +489,11 @@
             @close="createModal = false"
           />
 
-          <UForm :state="createForm" class="space-y-5 p-6" @submit="createStudent">
+          <UForm
+            :state="createForm"
+            class="space-y-5 p-6"
+            @submit="createStudent"
+          >
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <UFormField label="Student ID" name="student_id" required>
                 <UInput
@@ -466,9 +532,16 @@
               </UFormField>
 
               <UFormField label="Section" name="section" required>
-                <UInput
+                <USelectMenu
                   v-model="createForm.section"
-                  placeholder="e.g. A"
+                  :items="createSectionOptions"
+                  value-key="value"
+                  :disabled="!createForm.year_level"
+                  :placeholder="
+                    createForm.year_level
+                      ? 'Select section'
+                      : 'Select year level first'
+                  "
                   class="w-full"
                 />
               </UFormField>
@@ -512,7 +585,9 @@
                       color="neutral"
                       variant="ghost"
                       size="xs"
-                      :icon="showCreatePassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                      :icon="
+                        showCreatePassword ? 'i-lucide-eye-off' : 'i-lucide-eye'
+                      "
                       square
                       type="button"
                       @click="showCreatePassword = !showCreatePassword"
@@ -556,7 +631,9 @@
       :ui="{ content: 'max-w-4xl' }"
     >
       <template #content>
-        <div class="max-h-[90vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900">
+        <div
+          class="max-h-[90vh] overflow-y-auto rounded-[28px] bg-white dark:bg-gray-900"
+        >
           <ModalHeader
             title="Edit Student"
             description="Update student information and assigned faculty members."
@@ -565,7 +642,11 @@
             @close="editModal = false"
           />
 
-          <UForm :state="editForm" class="space-y-6 p-6" @submit="updateStudent">
+          <UForm
+            :state="editForm"
+            class="space-y-6 p-6"
+            @submit="updateStudent"
+          >
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <UFormField label="Student ID" name="student_id" required>
                 <UInput v-model="editForm.student_id" class="w-full" />
@@ -596,7 +677,18 @@
               </UFormField>
 
               <UFormField label="Section" name="section" required>
-                <UInput v-model="editForm.section" class="w-full" />
+                <USelectMenu
+                  v-model="editForm.section"
+                  :items="editSectionOptions"
+                  value-key="value"
+                  :disabled="!editForm.year_level"
+                  :placeholder="
+                    editForm.year_level
+                      ? 'Select section'
+                      : 'Select year level first'
+                  "
+                  class="w-full"
+                />
               </UFormField>
 
               <UFormField label="Email" name="email" required>
@@ -604,7 +696,9 @@
               </UFormField>
             </div>
 
-            <section class="rounded-2xl border border-gray-200 p-4 dark:border-gray-800">
+            <section
+              class="rounded-2xl border border-gray-200 p-4 dark:border-gray-800"
+            >
               <div class="mb-4">
                 <h3 class="text-sm font-bold text-gray-900 dark:text-white">
                   Assigned Teachers
@@ -634,7 +728,8 @@
                   class="border-b border-gray-200 bg-gray-50 px-4 py-3 text-xs font-medium text-gray-500 dark:border-gray-800 dark:bg-gray-950/40 dark:text-gray-400"
                 >
                   {{ assignedTeacherPreview.length }}
-                  teacher{{ assignedTeacherPreview.length === 1 ? '' : 's' }} assigned
+                  teacher{{ assignedTeacherPreview.length === 1 ? "" : "s" }}
+                  assigned
                 </div>
 
                 <div class="max-h-64 overflow-y-auto">
@@ -650,13 +745,15 @@
                       </tr>
                     </thead>
 
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    <tbody
+                      class="divide-y divide-gray-100 dark:divide-gray-800"
+                    >
                       <tr
                         v-for="teacher in assignedTeacherPreview"
                         :key="teacher.documentId || teacher.id"
                       >
                         <td class="px-4 py-3 font-mono text-xs">
-                          {{ teacher.employee_no || '—' }}
+                          {{ teacher.employee_no || "—" }}
                         </td>
 
                         <td class="px-4 py-3 font-medium">
@@ -664,7 +761,7 @@
                         </td>
 
                         <td class="px-4 py-3 text-gray-500">
-                          {{ teacher.department?.name || '—' }}
+                          {{ teacher.department?.name || "—" }}
                         </td>
 
                         <td class="px-4 py-3 text-center">
@@ -675,7 +772,9 @@
                             icon="i-lucide-x"
                             square
                             type="button"
-                            @click="removeTeacher(teacher.documentId || teacher.id)"
+                            @click="
+                              removeTeacher(teacher.documentId || teacher.id)
+                            "
                           />
                         </td>
                       </tr>
@@ -733,15 +832,23 @@
             <UIcon name="i-lucide-trash-2" class="size-7" />
           </div>
 
-          <h2 class="mt-4 text-center text-xl font-bold text-gray-900 dark:text-white">
-            {{ deleteTargetType === 'multiple' ? 'Delete selected students?' : 'Delete student?' }}
+          <h2
+            class="mt-4 text-center text-xl font-bold text-gray-900 dark:text-white"
+          >
+            {{
+              deleteTargetType === "multiple"
+                ? "Delete selected students?"
+                : "Delete student?"
+            }}
           </h2>
 
-          <p class="mt-2 text-center text-sm leading-6 text-gray-500 dark:text-gray-400">
+          <p
+            class="mt-2 text-center text-sm leading-6 text-gray-500 dark:text-gray-400"
+          >
             {{
-              deleteTargetType === 'multiple'
-                ? `This will permanently delete ${selectedCount} selected record${selectedCount === 1 ? '' : 's'} and their linked user accounts.`
-                : `This will permanently delete ${deleteTarget?.name || 'this student'} and the linked user account.`
+              deleteTargetType === "multiple"
+                ? `This will permanently delete ${selectedCount} selected record${selectedCount === 1 ? "" : "s"} and their linked user accounts.`
+                : `This will permanently delete ${deleteTarget?.name || "this student"} and the linked user account.`
             }}
           </p>
 
@@ -775,14 +882,14 @@
 // @ts-nocheck
 
 definePageMeta({
-  middleware: ['auth', 'role'],
-  role: ['Admin', 'HR']
-})
+  middleware: ["auth", "role"],
+  role: ["Admin", "HR"],
+});
 
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from "@nuxt/ui";
 
-const { $api } = useNuxtApp()
-const toast = useToast()
+const { $api } = useNuxtApp();
+const toast = useToast();
 
 const StatCard = defineComponent({
   props: {
@@ -791,81 +898,80 @@ const StatCard = defineComponent({
     icon: String,
     tone: {
       type: String,
-      default: 'blue'
-    }
+      default: "blue",
+    },
   },
 
   setup(props) {
     const tones: Record<string, string> = {
-      blue:
-        'border-blue-100 bg-blue-50/70 dark:border-blue-900 dark:bg-blue-950/20',
+      blue: "border-blue-100 bg-blue-50/70 dark:border-blue-900 dark:bg-blue-950/20",
       violet:
-        'border-violet-100 bg-violet-50/70 dark:border-violet-900 dark:bg-violet-950/20',
+        "border-violet-100 bg-violet-50/70 dark:border-violet-900 dark:bg-violet-950/20",
       emerald:
-        'border-emerald-100 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/20',
+        "border-emerald-100 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/20",
       amber:
-        'border-amber-100 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/20'
-    }
+        "border-amber-100 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/20",
+    };
 
     const iconTones: Record<string, string> = {
-      blue:
-        'bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
+      blue: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
       violet:
-        'bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400',
+        "bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400",
       emerald:
-        'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
+        "bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
       amber:
-        'bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400'
-    }
+        "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
+    };
 
     return () =>
       h(
-        'div',
+        "div",
         {
-          class: `rounded-2xl border p-5 ${tones[props.tone] || tones.blue}`
+          class: `rounded-2xl border p-5 ${tones[props.tone] || tones.blue}`,
         },
         [
-          h('div', { class: 'flex items-center justify-between' }, [
-            h('div', {}, [
+          h("div", { class: "flex items-center justify-between" }, [
+            h("div", {}, [
               h(
-                'p',
+                "p",
                 {
-                  class: 'text-xs font-medium text-gray-500 dark:text-gray-400'
+                  class: "text-xs font-medium text-gray-500 dark:text-gray-400",
                 },
-                props.label
+                props.label,
               ),
 
               h(
-                'p',
+                "p",
                 {
-                  class: 'mt-2 text-2xl font-bold text-gray-900 dark:text-white'
+                  class:
+                    "mt-2 text-2xl font-bold text-gray-900 dark:text-white",
                 },
-                String(props.value ?? 0)
-              )
+                String(props.value ?? 0),
+              ),
             ]),
 
             h(
-              'div',
+              "div",
               {
                 class: `flex size-11 items-center justify-center rounded-2xl ${
                   iconTones[props.tone] || iconTones.blue
-                }`
+                }`,
               },
               [
-                h(resolveComponent('UIcon'), {
+                h(resolveComponent("UIcon"), {
                   name: props.icon,
-                  class: 'size-5'
-                })
-              ]
-            )
-          ])
-        ]
-      )
-  }
-})
+                  class: "size-5",
+                }),
+              ],
+            ),
+          ]),
+        ],
+      );
+  },
+});
 
 const ModalHeader = defineComponent({
-  emits: ['close'],
+  emits: ["close"],
 
   props: {
     title: String,
@@ -873,254 +979,272 @@ const ModalHeader = defineComponent({
     icon: String,
     tone: {
       type: String,
-      default: 'indigo'
-    }
+      default: "indigo",
+    },
   },
 
   setup(props, { emit }) {
     return () =>
       h(
-        'div',
+        "div",
         {
           class:
-            props.tone === 'blue'
-              ? 'relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 px-6 py-6 text-white'
-              : 'relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 px-6 py-6 text-white'
+            props.tone === "blue"
+              ? "relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 px-6 py-6 text-white"
+              : "relative overflow-hidden rounded-t-[28px] bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 px-6 py-6 text-white",
         },
         [
-          h('div', {
+          h("div", {
             class:
-              'pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-white/10 blur-3xl'
+              "pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-white/10 blur-3xl",
           }),
 
           h(
-            'div',
+            "div",
             {
-              class: 'relative flex items-start justify-between gap-4'
+              class: "relative flex items-start justify-between gap-4",
             },
             [
               h(
-                'div',
+                "div",
                 {
-                  class: 'flex min-w-0 items-center gap-4'
+                  class: "flex min-w-0 items-center gap-4",
                 },
                 [
                   h(
-                    'div',
+                    "div",
                     {
                       class:
-                        'flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10'
+                        "flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10",
                     },
                     [
-                      h(resolveComponent('UIcon'), {
+                      h(resolveComponent("UIcon"), {
                         name: props.icon,
-                        class: 'size-6'
-                      })
-                    ]
+                        class: "size-6",
+                      }),
+                    ],
                   ),
 
-                  h('div', { class: 'min-w-0' }, [
+                  h("div", { class: "min-w-0" }, [
                     h(
-                      'h2',
+                      "h2",
                       {
-                        class: 'text-xl font-bold'
+                        class: "text-xl font-bold",
                       },
-                      props.title
+                      props.title,
                     ),
 
                     h(
-                      'p',
+                      "p",
                       {
-                        class: 'mt-1 text-xs text-slate-300'
+                        class: "mt-1 text-xs text-slate-300",
                       },
-                      props.description
-                    )
-                  ])
-                ]
+                      props.description,
+                    ),
+                  ]),
+                ],
               ),
 
-              h(resolveComponent('UButton'), {
-                color: 'neutral',
-                variant: 'ghost',
-                icon: 'i-lucide-x',
+              h(resolveComponent("UButton"), {
+                color: "neutral",
+                variant: "ghost",
+                icon: "i-lucide-x",
                 square: true,
-                class: 'text-white hover:bg-white/10',
-                onClick: () => emit('close')
-              })
-            ]
-          )
-        ]
-      )
-  }
-})
+                class: "text-white hover:bg-white/10",
+                onClick: () => emit("close"),
+              }),
+            ],
+          ),
+        ],
+      );
+  },
+});
 
-const loading = ref(true)
-const loadError = ref('')
-const loadingCreate = ref(false)
-const loadingUpdate = ref(false)
-const loadingDelete = ref(false)
+const loading = ref(true);
+const loadError = ref("");
+const loadingCreate = ref(false);
+const loadingUpdate = ref(false);
+const loadingDelete = ref(false);
 
-const createModal = ref(false)
-const editModal = ref(false)
-const deleteModal = ref(false)
-const showCreatePassword = ref(false)
+const createModal = ref(false);
+const editModal = ref(false);
+const deleteModal = ref(false);
+const showCreatePassword = ref(false);
 
-const page = ref(1)
-const itemsPerPage = ref(10)
+const page = ref(1);
+const itemsPerPage = ref(10);
 
-const globalFilter = ref('')
-const selectedCourse = ref('all')
-const selectedYearLevel = ref('all')
-const selectedSection = ref('all')
+const globalFilter = ref("");
+const selectedCourse = ref("all");
+const selectedYearLevel = ref("all");
+const selectedSection = ref("all");
 
-const students = ref<any[]>([])
-const teachers = ref<any[]>([])
-const courses = ref<any[]>([])
+const students = ref<any[]>([]);
+const teachers = ref<any[]>([]);
+const courses = ref<any[]>([]);
 
-const selectedId = ref<any>(null)
-const selectedRows = ref<Record<string | number, boolean>>({})
+const selectedId = ref<any>(null);
+const selectedRows = ref<Record<string | number, boolean>>({});
 
-const deleteTarget = ref<any>(null)
-const deleteTargetType = ref<'single' | 'multiple'>('single')
+const deleteTarget = ref<any>(null);
+const deleteTargetType = ref<"single" | "multiple">("single");
 
 const pageSizeOptions = [
-  { label: '10 rows', value: 10 },
-  { label: '20 rows', value: 20 },
-  { label: '50 rows', value: 50 },
-  { label: '100 rows', value: 100 }
-]
+  { label: "10 rows", value: 10 },
+  { label: "20 rows", value: 20 },
+  { label: "50 rows", value: 50 },
+  { label: "100 rows", value: 100 },
+];
 
 const yearLevelOptions = [
-  { label: '1st Year', value: '1st Year' },
-  { label: '2nd Year', value: '2nd Year' },
-  { label: '3rd Year', value: '3rd Year' },
-  { label: '4th Year', value: '4th Year' },
-  { label: '5th Year', value: '5th Year' }
-]
+  { label: "1st Year", value: "1st Year" },
+  { label: "2nd Year", value: "2nd Year" },
+  { label: "3rd Year", value: "3rd Year" },
+  { label: "4th Year", value: "4th Year" },
+  { label: "5th Year", value: "5th Year" },
+];
+
+const sectionOptionsMap: Record<string, string[]> = {
+  "1st Year": ["1A", "1B", "1C", "1D", "1E", "1F", "1G", "1H", "1I", "1J"],
+
+  "2nd Year": ["2A", "2B", "2C", "2D", "2E", "2F", "2G", "2H", "2I", "2J"],
+
+  "3rd Year": ["3A", "3B", "3C", "3D", "3E", "3F", "3G", "3H", "3I", "3J"],
+
+  "4th Year": ["4A", "4B", "4C", "4D", "4E", "4F", "4G", "4H", "4I", "4J"],
+
+  "5th Year": ["5A", "5B", "5C", "5D", "5E", "5F", "5G", "5H", "5I", "5J"],
+};
 
 const createForm = reactive({
-  student_id: '',
-  name: '',
+  student_id: "",
+  name: "",
   course: null as any,
-  year_level: '',
-  section: '',
-  username: '',
-  email: '',
-  password: ''
-})
+  year_level: "",
+  section: "",
+  username: "",
+  email: "",
+  password: "",
+});
 
 const editForm = reactive({
-  student_id: '',
-  name: '',
+  student_id: "",
+  name: "",
   course: null as any,
-  year_level: '',
-  section: '',
-  email: '',
-  assigned_teachers: [] as string[]
-})
+  year_level: "",
+  section: "",
+  email: "",
+  assigned_teachers: [] as string[],
+});
+
+const createSectionOptions = computed(() => {
+  const sections = sectionOptionsMap[String(createForm.year_level || "")] || [];
+
+  return sections.map((section) => ({
+    label: section,
+    value: section,
+  }));
+});
+
+const editSectionOptions = computed(() => {
+  const sections = sectionOptionsMap[String(editForm.year_level || "")] || [];
+
+  return sections.map((section) => ({
+    label: section,
+    value: section,
+  }));
+});
 
 const courseOptions = computed(() =>
-  courses.value.map(course => ({
-    label: `${course.code?.toUpperCase() || 'NO CODE'} - ${course.name}`,
-    value: course.id
-  }))
-)
+  courses.value.map((course) => ({
+    label: `${course.code?.toUpperCase() || "NO CODE"} - ${course.name}`,
+    value: course.id,
+  })),
+);
 
 const courseFilterOptions = computed(() => [
   {
-    label: 'All Courses',
-    value: 'all'
+    label: "All Courses",
+    value: "all",
   },
 
-  ...courses.value.map(course => ({
-    label: `${course.code?.toUpperCase() || 'NO CODE'} - ${course.name}`,
-    value: String(course.id)
-  }))
-])
+  ...courses.value.map((course) => ({
+    label: `${course.code?.toUpperCase() || "NO CODE"} - ${course.name}`,
+    value: String(course.id),
+  })),
+]);
 
-const selectedCourseLabel = computed(() =>
-  courseFilterOptions.value.find(
-    option => option.value === selectedCourse.value
-  )?.label || 'Course'
-)
+const selectedCourseLabel = computed(
+  () =>
+    courseFilterOptions.value.find(
+      (option) => option.value === selectedCourse.value,
+    )?.label || "Course",
+);
 
 const yearLevelFilterOptions = computed(() => {
   const values = Array.from(
     new Set(
-      students.value
-        .map(student => student.year_level)
-        .filter(Boolean)
-    )
-  ).sort((a, b) => String(a).localeCompare(String(b)))
+      students.value.map((student) => student.year_level).filter(Boolean),
+    ),
+  ).sort((a, b) => String(a).localeCompare(String(b)));
 
   return [
-    { label: 'All Year Levels', value: 'all' },
-    ...values.map(value => ({
+    { label: "All Year Levels", value: "all" },
+    ...values.map((value) => ({
       label: String(value),
-      value: String(value)
-    }))
-  ]
-})
+      value: String(value),
+    })),
+  ];
+});
 
 const sectionFilterOptions = computed(() => {
   const values = Array.from(
-    new Set(
-      students.value
-        .map(student => student.section)
-        .filter(Boolean)
-    )
-  ).sort((a, b) => String(a).localeCompare(String(b)))
+    new Set(students.value.map((student) => student.section).filter(Boolean)),
+  ).sort((a, b) => String(a).localeCompare(String(b)));
 
   return [
-    { label: 'All Sections', value: 'all' },
-    ...values.map(value => ({
+    { label: "All Sections", value: "all" },
+    ...values.map((value) => ({
       label: String(value),
-      value: String(value)
-    }))
-  ]
-})
+      value: String(value),
+    })),
+  ];
+});
 
 const teacherOptions = computed(() =>
-  teachers.value.map(teacher => ({
-    label: `${teacher.employee_no ? `${teacher.employee_no} - ` : ''}${teacher.name}`,
-    value: teacher.documentId || teacher.id
-  }))
-)
+  teachers.value.map((teacher) => ({
+    label: `${teacher.employee_no ? `${teacher.employee_no} - ` : ""}${teacher.name}`,
+    value: teacher.documentId || teacher.id,
+  })),
+);
 
 const assignedTeacherPreview = computed(() =>
-  teachers.value.filter(teacher =>
-    editForm.assigned_teachers.includes(
-      teacher.documentId || teacher.id
-    )
-  )
-)
+  teachers.value.filter((teacher) =>
+    editForm.assigned_teachers.includes(teacher.documentId || teacher.id),
+  ),
+);
 
 const summary = computed(() => ({
   total: students.value.length,
 
   courses: new Set(
-    students.value
-      .map(student => student.course?.id)
-      .filter(Boolean)
+    students.value.map((student) => student.course?.id).filter(Boolean),
   ).size,
 
   sections: new Set(
-    students.value
-      .map(student => student.section)
-      .filter(Boolean)
+    students.value.map((student) => student.section).filter(Boolean),
   ).size,
 
   assignments: students.value.reduce(
-    (sum, student) =>
-      sum + (student.assigned_teachers?.length || 0),
-    0
-  )
-}))
+    (sum, student) => sum + (student.assigned_teachers?.length || 0),
+    0,
+  ),
+}));
 
 const filteredStudents = computed(() => {
-  const keyword = globalFilter.value.trim().toLowerCase()
+  const keyword = globalFilter.value.trim().toLowerCase();
 
-  return students.value.filter(student => {
+  return students.value.filter((student) => {
     const searchable = [
       student.student_id,
       student.name,
@@ -1130,303 +1254,287 @@ const filteredStudents = computed(() => {
       student.section,
       student.user?.username,
       student.user?.email,
-      ...(student.assigned_teachers || []).map((teacher: any) => teacher.name)
+      ...(student.assigned_teachers || []).map((teacher: any) => teacher.name),
     ]
       .filter(Boolean)
-      .join(' ')
-      .toLowerCase()
+      .join(" ")
+      .toLowerCase();
 
-    const matchesSearch =
-      !keyword || searchable.includes(keyword)
+    const matchesSearch = !keyword || searchable.includes(keyword);
 
     const matchesCourse =
-      selectedCourse.value === 'all' ||
-      String(student.course?.id) === selectedCourse.value
+      selectedCourse.value === "all" ||
+      String(student.course?.id) === selectedCourse.value;
 
     const matchesYear =
-      selectedYearLevel.value === 'all' ||
-      String(student.year_level) === selectedYearLevel.value
+      selectedYearLevel.value === "all" ||
+      String(student.year_level) === selectedYearLevel.value;
 
     const matchesSection =
-      selectedSection.value === 'all' ||
-      String(student.section) === selectedSection.value
+      selectedSection.value === "all" ||
+      String(student.section) === selectedSection.value;
 
-    return matchesSearch && matchesCourse && matchesYear && matchesSection
-  })
-})
+    return matchesSearch && matchesCourse && matchesYear && matchesSection;
+  });
+});
 
 const totalPages = computed(() =>
   Math.max(
     1,
-    Math.ceil(
-      filteredStudents.value.length /
-      Number(itemsPerPage.value)
-    )
-  )
-)
+    Math.ceil(filteredStudents.value.length / Number(itemsPerPage.value)),
+  ),
+);
 
 const paginatedStudents = computed(() => {
-  const start =
-    (page.value - 1) *
-    Number(itemsPerPage.value)
+  const start = (page.value - 1) * Number(itemsPerPage.value);
 
   return filteredStudents.value.slice(
     start,
-    start + Number(itemsPerPage.value)
-  )
-})
+    start + Number(itemsPerPage.value),
+  );
+});
 
 const paginationStart = computed(() =>
   filteredStudents.value.length
-    ? (page.value - 1) *
-        Number(itemsPerPage.value) +
-      1
-    : 0
-)
+    ? (page.value - 1) * Number(itemsPerPage.value) + 1
+    : 0,
+);
 
 const paginationEnd = computed(() =>
   Math.min(
     page.value * Number(itemsPerPage.value),
-    filteredStudents.value.length
-  )
-)
+    filteredStudents.value.length,
+  ),
+);
 
-const selectedCount = computed(() =>
-  Object.values(selectedRows.value).filter(Boolean).length
-)
+const selectedCount = computed(
+  () => Object.values(selectedRows.value).filter(Boolean).length,
+);
 
 const hasActiveFilters = computed(() =>
   Boolean(
     globalFilter.value ||
-    selectedCourse.value !== 'all' ||
-    selectedYearLevel.value !== 'all' ||
-    selectedSection.value !== 'all'
-  )
-)
+    selectedCourse.value !== "all" ||
+    selectedYearLevel.value !== "all" ||
+    selectedSection.value !== "all",
+  ),
+);
 
-const isCurrentPageSelected = computed(() =>
-  paginatedStudents.value.length > 0 &&
-  paginatedStudents.value.every(isRowSelected)
-)
+const isCurrentPageSelected = computed(
+  () =>
+    paginatedStudents.value.length > 0 &&
+    paginatedStudents.value.every(isRowSelected),
+);
 
 const isCurrentPagePartiallySelected = computed(() => {
-  const selectedOnPage =
-    paginatedStudents.value.filter(isRowSelected).length
+  const selectedOnPage = paginatedStudents.value.filter(isRowSelected).length;
 
-  return (
-    selectedOnPage > 0 &&
-    selectedOnPage < paginatedStudents.value.length
-  )
-})
+  return selectedOnPage > 0 && selectedOnPage < paginatedStudents.value.length;
+});
 
-const getStudentKey = (student: any) =>
-  student?.documentId || student?.id
+const getStudentKey = (student: any) => student?.documentId || student?.id;
 
 const createInitials = (value: string) =>
-  String(value || '')
+  String(value || "")
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map(part => part.charAt(0).toUpperCase())
-    .join('')
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
 
 const resetCreateForm = () => {
-  createForm.student_id = ''
-  createForm.name = ''
-  createForm.course = null
-  createForm.year_level = ''
-  createForm.section = ''
-  createForm.username = ''
-  createForm.email = ''
-  createForm.password = ''
+  createForm.student_id = "";
+  createForm.name = "";
+  createForm.course = null;
+  createForm.year_level = "";
+  createForm.section = "";
+  createForm.username = "";
+  createForm.email = "";
+  createForm.password = "";
 
-  showCreatePassword.value = false
-}
+  showCreatePassword.value = false;
+};
 
 const resetEditForm = () => {
-  editForm.student_id = ''
-  editForm.name = ''
-  editForm.course = null
-  editForm.year_level = ''
-  editForm.section = ''
-  editForm.email = ''
-  editForm.assigned_teachers = []
+  editForm.student_id = "";
+  editForm.name = "";
+  editForm.course = null;
+  editForm.year_level = "";
+  editForm.section = "";
+  editForm.email = "";
+  editForm.assigned_teachers = [];
 
-  selectedId.value = null
-}
+  selectedId.value = null;
+};
 
 const openCreateModal = () => {
-  resetCreateForm()
-  createModal.value = true
-}
+  resetCreateForm();
+  createModal.value = true;
+};
 
 const openEditModal = (row: any) => {
   // The custom update endpoint expects the numeric Strapi ID.
-  selectedId.value = row.id
+  selectedId.value = row.id;
 
-  editForm.student_id = row.student_id || ''
-  editForm.name = row.name || ''
-  editForm.course = row.course?.id || null
-  editForm.year_level = row.year_level || ''
-  editForm.section = row.section || ''
-  editForm.email = row.user?.email || ''
+  editForm.student_id = row.student_id || "";
+  editForm.name = row.name || "";
+  editForm.course = row.course?.id || null;
+  editForm.year_level = row.year_level || "";
+  editForm.section = row.section || "";
+  editForm.email = row.user?.email || "";
 
   editForm.assigned_teachers =
     row.assigned_teachers?.map(
-      (teacher: any) =>
-        teacher.documentId || teacher.id
-    ) || []
+      (teacher: any) => teacher.documentId || teacher.id,
+    ) || [];
 
-  editModal.value = true
-}
+  editModal.value = true;
+};
 
 const clearFilters = () => {
-  globalFilter.value = ''
-  selectedCourse.value = 'all'
-  selectedYearLevel.value = 'all'
-  selectedSection.value = 'all'
-  page.value = 1
-}
+  globalFilter.value = "";
+  selectedCourse.value = "all";
+  selectedYearLevel.value = "all";
+  selectedSection.value = "all";
+  page.value = 1;
+};
 
 const toggleRowSelection = (row: any, value: boolean) => {
   selectedRows.value = {
     ...selectedRows.value,
-    [getStudentKey(row)]: value
-  }
-}
+    [getStudentKey(row)]: value,
+  };
+};
 
 const isRowSelected = (row: any) =>
-  Boolean(selectedRows.value[getStudentKey(row)])
+  Boolean(selectedRows.value[getStudentKey(row)]);
 
 const toggleCurrentPageSelection = (value: boolean) => {
   const next = {
-    ...selectedRows.value
-  }
+    ...selectedRows.value,
+  };
 
-  paginatedStudents.value.forEach(row => {
-    next[getStudentKey(row)] = value
-  })
+  paginatedStudents.value.forEach((row) => {
+    next[getStudentKey(row)] = value;
+  });
 
-  selectedRows.value = next
-}
+  selectedRows.value = next;
+};
 
 const getDropdownActions = (row: any): DropdownMenuItem[][] => [
   [
     {
-      type: 'label',
-      label: 'Actions'
+      type: "label",
+      label: "Actions",
     },
 
     {
-      type: 'separator'
+      type: "separator",
     },
 
     {
-      label: 'Edit Student',
-      icon: 'i-lucide-edit-3',
+      label: "Edit Student",
+      icon: "i-lucide-edit-3",
 
       onSelect() {
-        openEditModal(row)
-      }
+        openEditModal(row);
+      },
     },
 
     {
-      label: 'Delete Student',
-      icon: 'i-lucide-trash-2',
-      color: 'error',
+      label: "Delete Student",
+      icon: "i-lucide-trash-2",
+      color: "error",
 
       onSelect() {
-        requestDeleteOne(row)
-      }
-    }
-  ]
-]
+        requestDeleteOne(row);
+      },
+    },
+  ],
+];
 
 const removeTeacher = (id: string) => {
-  editForm.assigned_teachers =
-    editForm.assigned_teachers.filter(
-      teacherId => teacherId !== id
-    )
-}
+  editForm.assigned_teachers = editForm.assigned_teachers.filter(
+    (teacherId) => teacherId !== id,
+  );
+};
 
 const getCourses = async () => {
   try {
-    const res: any = await $api('/courses', {
+    const res: any = await $api("/courses", {
       query: {
-        'populate[department]': true,
-        'sort[0]': 'name:asc',
-        'pagination[pageSize]': 500
-      }
-    })
+        "populate[department]": true,
+        "sort[0]": "name:asc",
+        "pagination[pageSize]": 500,
+      },
+    });
 
-    courses.value = res.data || []
+    courses.value = res.data || [];
   } catch (error) {
-    console.error('Course loading error:', error)
-    courses.value = []
+    console.error("Course loading error:", error);
+    courses.value = [];
   }
-}
+};
 
 const getTeachers = async () => {
   try {
-    const res: any = await $api('/teachers', {
+    const res: any = await $api("/teachers", {
       query: {
-        'populate[department]': true,
-        'sort[0]': 'name:asc',
-        'pagination[pageSize]': 10000
-      }
-    })
+        "populate[department]": true,
+        "sort[0]": "name:asc",
+        "pagination[pageSize]": 10000,
+      },
+    });
 
-    teachers.value = res.data || []
+    teachers.value = res.data || [];
   } catch (error) {
-    console.error('Teacher loading error:', error)
-    teachers.value = []
+    console.error("Teacher loading error:", error);
+    teachers.value = [];
   }
-}
+};
 
 const getStudents = async () => {
-  loading.value = true
-  loadError.value = ''
+  loading.value = true;
+  loadError.value = "";
 
   try {
-    const res: any = await $api('/students', {
+    const res: any = await $api("/students", {
       query: {
-        'populate[user]': true,
-        'populate[assigned_teachers]': true,
-        'populate[course][populate][0]': 'department',
-        'sort[0]': 'name:asc',
-        'pagination[pageSize]': 10000
-      }
-    })
+        "populate[user]": true,
+        "populate[assigned_teachers]": true,
+        "populate[course][populate][0]": "department",
+        "sort[0]": "name:asc",
+        "pagination[pageSize]": 10000,
+      },
+    });
 
-    students.value = res.data || []
+    students.value = res.data || [];
 
-    const availableKeys = new Set(
-      students.value.map(getStudentKey)
-    )
+    const availableKeys = new Set(students.value.map(getStudentKey));
 
     selectedRows.value = Object.fromEntries(
       Object.entries(selectedRows.value).filter(([key]) =>
-        availableKeys.has(key)
-      )
-    )
+        availableKeys.has(key),
+      ),
+    );
 
     if (page.value > totalPages.value) {
-      page.value = totalPages.value
+      page.value = totalPages.value;
     }
   } catch (error: any) {
-    console.error('Student loading error:', error)
+    console.error("Student loading error:", error);
 
-    students.value = []
+    students.value = [];
 
     loadError.value =
       error?.data?.error?.message ||
       error?.data?.message ||
       error?.message ||
-      'Failed to load student records.'
+      "Failed to load student records.";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const validateCreateForm = () => {
   if (
@@ -1440,18 +1548,18 @@ const validateCreateForm = () => {
     !createForm.password
   ) {
     toast.add({
-      title: 'Incomplete information',
+      title: "Incomplete information",
       description:
-        'Complete all required fields before registering the student account.',
-      icon: 'i-lucide-circle-alert',
-      color: 'warning'
-    })
+        "Complete all required fields before registering the student account.",
+      icon: "i-lucide-circle-alert",
+      color: "warning",
+    });
 
-    return false
+    return false;
   }
 
-  return true
-}
+  return true;
+};
 
 const validateEditForm = () => {
   if (
@@ -1463,29 +1571,28 @@ const validateEditForm = () => {
     !editForm.email.trim()
   ) {
     toast.add({
-      title: 'Incomplete information',
-      description:
-        'Complete all required fields before saving the changes.',
-      icon: 'i-lucide-circle-alert',
-      color: 'warning'
-    })
+      title: "Incomplete information",
+      description: "Complete all required fields before saving the changes.",
+      icon: "i-lucide-circle-alert",
+      color: "warning",
+    });
 
-    return false
+    return false;
   }
 
-  return true
-}
+  return true;
+};
 
 const createStudent = async () => {
   if (!validateCreateForm()) {
-    return
+    return;
   }
 
-  loadingCreate.value = true
+  loadingCreate.value = true;
 
   try {
-    await $api('/students/register', {
-      method: 'POST',
+    await $api("/students/register", {
+      method: "POST",
 
       body: {
         student_id: createForm.student_id.trim(),
@@ -1495,199 +1602,212 @@ const createStudent = async () => {
         section: createForm.section.trim(),
         username: createForm.student_id.trim(),
         email: createForm.email.trim(),
-        password: createForm.password
-      }
-    })
+        password: createForm.password,
+      },
+    });
 
     toast.add({
-      title: 'Student registered',
-      description:
-        'The student account was created successfully.',
-      icon: 'i-lucide-circle-check',
-      color: 'success'
-    })
+      title: "Student registered",
+      description: "The student account was created successfully.",
+      icon: "i-lucide-circle-check",
+      color: "success",
+    });
 
-    createModal.value = false
-    resetCreateForm()
+    createModal.value = false;
+    resetCreateForm();
 
-    await getStudents()
+    await getStudents();
   } catch (error: any) {
-    console.error('Student creation error:', error)
+    console.error("Student creation error:", error);
 
     toast.add({
-      title: 'Unable to register student',
+      title: "Unable to register student",
       description:
         error?.data?.error?.message ||
         error?.data?.message ||
         error?.message ||
-        'Failed to create the student account.',
-      icon: 'i-lucide-triangle-alert',
-      color: 'error'
-    })
+        "Failed to create the student account.",
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   } finally {
-    loadingCreate.value = false
+    loadingCreate.value = false;
   }
-}
+};
 
 const updateStudent = async () => {
   if (!validateEditForm()) {
-    return
+    return;
   }
 
-  loadingUpdate.value = true
+  loadingUpdate.value = true;
 
   try {
-    await $api(
-      `/students/update-with-user/${selectedId.value}`,
-      {
-        method: 'PUT',
+    await $api(`/students/update-with-user/${selectedId.value}`, {
+      method: "PUT",
 
-        body: {
-          student_id: editForm.student_id.trim(),
-          name: editForm.name.trim(),
-          course: editForm.course,
-          year_level: editForm.year_level.trim(),
-          section: editForm.section.trim(),
-          email: editForm.email.trim(),
-          assigned_teachers: editForm.assigned_teachers
-        }
-      }
-    )
+      body: {
+        student_id: editForm.student_id.trim(),
+        name: editForm.name.trim(),
+        course: editForm.course,
+        year_level: editForm.year_level.trim(),
+        section: editForm.section.trim(),
+        email: editForm.email.trim(),
+        assigned_teachers: editForm.assigned_teachers,
+      },
+    });
 
     toast.add({
-      title: 'Student updated',
-      description:
-        'The student record was updated successfully.',
-      icon: 'i-lucide-circle-check',
-      color: 'success'
-    })
+      title: "Student updated",
+      description: "The student record was updated successfully.",
+      icon: "i-lucide-circle-check",
+      color: "success",
+    });
 
-    editModal.value = false
-    resetEditForm()
+    editModal.value = false;
+    resetEditForm();
 
-    await getStudents()
+    await getStudents();
   } catch (error: any) {
-    console.error('Student update error:', error)
+    console.error("Student update error:", error);
 
     toast.add({
-      title: 'Unable to update student',
+      title: "Unable to update student",
       description:
         error?.data?.error?.message ||
         error?.data?.message ||
         error?.message ||
-        'Failed to update the student record.',
-      icon: 'i-lucide-triangle-alert',
-      color: 'error'
-    })
+        "Failed to update the student record.",
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   } finally {
-    loadingUpdate.value = false
+    loadingUpdate.value = false;
   }
-}
+};
 
 const requestDeleteOne = (row: any) => {
-  deleteTarget.value = row
-  deleteTargetType.value = 'single'
-  deleteModal.value = true
-}
+  deleteTarget.value = row;
+  deleteTargetType.value = "single";
+  deleteModal.value = true;
+};
 
 const requestDeleteSelected = () => {
   if (!selectedCount.value) {
-    return
+    return;
   }
 
-  deleteTarget.value = null
-  deleteTargetType.value = 'multiple'
-  deleteModal.value = true
-}
+  deleteTarget.value = null;
+  deleteTargetType.value = "multiple";
+  deleteModal.value = true;
+};
 
 const closeDeleteModal = () => {
-  deleteModal.value = false
-  deleteTarget.value = null
-  deleteTargetType.value = 'single'
-}
+  deleteModal.value = false;
+  deleteTarget.value = null;
+  deleteTargetType.value = "single";
+};
 
 const deleteOne = async (row: any) => {
   // The custom delete route expects the numeric Strapi ID.
   await $api(`/students/delete-with-user/${row.id}`, {
-    method: 'DELETE'
-  })
+    method: "DELETE",
+  });
 
   const next = {
-    ...selectedRows.value
-  }
+    ...selectedRows.value,
+  };
 
-  delete next[getStudentKey(row)]
-  selectedRows.value = next
-}
+  delete next[getStudentKey(row)];
+  selectedRows.value = next;
+};
 
 const deleteSelected = async () => {
-  const selectedItems = students.value.filter(item =>
-    selectedRows.value[getStudentKey(item)]
-  )
+  const selectedItems = students.value.filter(
+    (item) => selectedRows.value[getStudentKey(item)],
+  );
 
   await Promise.all(
-    selectedItems.map(item =>
+    selectedItems.map((item) =>
       $api(`/students/delete-with-user/${item.id}`, {
-        method: 'DELETE'
-      })
-    )
-  )
+        method: "DELETE",
+      }),
+    ),
+  );
 
-  selectedRows.value = {}
-}
+  selectedRows.value = {};
+};
 
 const confirmDelete = async () => {
-  loadingDelete.value = true
+  loadingDelete.value = true;
 
   try {
-    if (deleteTargetType.value === 'multiple') {
-      await deleteSelected()
+    if (deleteTargetType.value === "multiple") {
+      await deleteSelected();
 
       toast.add({
-        title: 'Students deleted',
+        title: "Students deleted",
         description:
-          'The selected students and linked user accounts were deleted successfully.',
-        icon: 'i-lucide-circle-check',
-        color: 'success'
-      })
+          "The selected students and linked user accounts were deleted successfully.",
+        icon: "i-lucide-circle-check",
+        color: "success",
+      });
     } else if (deleteTarget.value) {
-      await deleteOne(deleteTarget.value)
+      await deleteOne(deleteTarget.value);
 
       toast.add({
-        title: 'Student deleted',
+        title: "Student deleted",
         description:
-          'The student and linked user account were deleted successfully.',
-        icon: 'i-lucide-circle-check',
-        color: 'success'
-      })
+          "The student and linked user account were deleted successfully.",
+        icon: "i-lucide-circle-check",
+        color: "success",
+      });
     }
 
-    closeDeleteModal()
-    await getStudents()
+    closeDeleteModal();
+    await getStudents();
   } catch (error: any) {
-    console.error('Student deletion error:', error)
+    console.error("Student deletion error:", error);
 
     toast.add({
-      title: 'Unable to delete student',
+      title: "Unable to delete student",
       description:
         error?.data?.error?.message ||
         error?.data?.message ||
         error?.message ||
-        'Failed to delete the selected student record.',
-      icon: 'i-lucide-triangle-alert',
-      color: 'error'
-    })
+        "Failed to delete the selected student record.",
+      icon: "i-lucide-triangle-alert",
+      color: "error",
+    });
   } finally {
-    loadingDelete.value = false
+    loadingDelete.value = false;
   }
-}
+};
 
 watch(
   () => createForm.student_id,
-  value => {
-    createForm.username = String(value || '').trim()
-  }
-)
+  (value) => {
+    createForm.username = String(value || "").trim();
+  },
+);
+
+watch(
+  () => createForm.year_level,
+  (newYearLevel, oldYearLevel) => {
+    if (oldYearLevel && newYearLevel !== oldYearLevel) {
+      createForm.section = "";
+    }
+  },
+);
+
+watch(
+  () => editForm.year_level,
+  (newYearLevel, oldYearLevel) => {
+    if (editModal.value && oldYearLevel && newYearLevel !== oldYearLevel) {
+      editForm.section = "";
+    }
+  },
+);
 
 watch(
   [
@@ -1695,29 +1815,25 @@ watch(
     selectedCourse,
     selectedYearLevel,
     selectedSection,
-    itemsPerPage
+    itemsPerPage,
   ],
   () => {
-    page.value = 1
-  }
-)
+    page.value = 1;
+  },
+);
 
 watch(
   () => totalPages.value,
-  value => {
+  (value) => {
     if (page.value > value) {
-      page.value = value
+      page.value = value;
     }
-  }
-)
+  },
+);
 
 onMounted(async () => {
-  await Promise.all([
-    getStudents(),
-    getTeachers(),
-    getCourses()
-  ])
-})
+  await Promise.all([getStudents(), getTeachers(), getCourses()]);
+});
 </script>
 
 <style scoped>

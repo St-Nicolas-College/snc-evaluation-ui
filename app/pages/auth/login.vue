@@ -305,13 +305,13 @@ const showPassword = ref(false);
 const rememberMe = ref(false);
 
 const currentYear = new Date().getFullYear();
-
+const config = useRuntimeConfig()
 // Version numbering
 // 1.0.0 — Initial completed system
 // 1.0.1 — Small bug fixes
 // 1.1.0 — New minor features/modules
 // 2.0.0 — Major system revision
-const appVersion = "1.0.0";
+const appVersion = config.public.appVersion;
 
 const schema = z.object({
   username: z.string().trim().min(1, "Username is required"),
