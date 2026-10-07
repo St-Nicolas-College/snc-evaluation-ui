@@ -1498,17 +1498,35 @@ const getStudents = async () => {
   loadError.value = "";
 
   try {
-    const res: any = await $api("/students", {
-      query: {
-        "populate[user]": true,
-        "populate[assigned_teachers]": true,
-        "populate[course][populate][0]": "department",
-        "sort[0]": "name:asc",
-        "pagination[pageSize]": 10000,
-      },
-    });
+    const allStudents: any[] = [];
+    const pageSize = 100;
+    let currentPage = 1;
+    let pageCount = 1;
 
-    students.value = res.data || [];
+    do {
+      const res: any = await $api("/students", {
+        query: {
+          "populate[user]": true,
+          "populate[assigned_teachers]": true,
+          "populate[course][populate][0]": "department",
+          "sort[0]": "name:asc",
+
+          "pagination[page]": currentPage,
+          "pagination[pageSize]": pageSize,
+          "pagination[withCount]": true,
+        },
+      });
+
+      const records = Array.isArray(res?.data) ? res.data : [];
+
+      allStudents.push(...records);
+
+      pageCount = Number(res?.meta?.pagination?.pageCount) || 1;
+
+      currentPage++;
+    } while (currentPage <= pageCount);
+
+    students.value = allStudents;
 
     const availableKeys = new Set(students.value.map(getStudentKey));
 
