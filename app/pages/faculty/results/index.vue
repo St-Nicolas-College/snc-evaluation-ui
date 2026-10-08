@@ -2240,39 +2240,53 @@ const getFacultyProfile = async () => {
 const getFacultyResults = async () => {
   if (!facultyProfile.value) {
     results.value = [];
-
     return;
   }
 
   const teacherId = facultyProfile.value.id;
 
-  const response = await $api(
-    "/evaluations",
+  const allResults: any[] = [];
 
-    {
+  let currentPage = 1;
+  let totalPages = 1;
+
+  do {
+    const response: any = await $api("/evaluations", {
       query: {
         "filters[teacher][id][$eq]": teacherId,
 
-        "filters[batch][evaluation_type][code][$in][0]": "student-faculty",
-        "filters[batch][evaluation_type][code][$in][1]": "dean-faculty",
-        "filters[batch][evaluation_type][code][$in][2]": "dean-to-faculty",
-
         "populate[teacher]": true,
-
         "populate[subject][populate][course]": true,
-
         "populate[evaluator_user]": true,
-
         "populate[batch][populate][evaluation_type]": true,
 
         "sort[0]": "createdAt:desc",
 
-        "pagination[pageSize]": 500,
+        "pagination[page]": currentPage,
+        "pagination[pageSize]": 100,
+        "pagination[withCount]": true,
       },
-    },
-  );
+    });
 
-  results.value = response.data || [];
+    const pageResults = Array.isArray(response?.data) ? response.data : [];
+
+    allResults.push(...pageResults);
+
+    totalPages = Number(response?.meta?.pagination?.pageCount || 1);
+
+    currentPage++;
+  } while (currentPage <= totalPages);
+
+  results.value = allResults.filter((result: any) => {
+    const code =
+      result?.batch?.evaluation_type?.code ||
+      result?.evaluation_type?.code ||
+      "";
+
+    return ["student-faculty", "dean-faculty", "dean-to-faculty"].includes(
+      code,
+    );
+  });
 };
 
 /* =========================================================
